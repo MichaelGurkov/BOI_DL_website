@@ -1,0 +1,120 @@
+---
+title: "Intro"
+---
+
+```{r set_up_python, echo=FALSE}
+#|echo: FALSE
+
+if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
+  
+  python_path = paste0("C:\\Users\\internet\\AppData\\Local",
+                       "\\Programs\\Python\\Python312\\python.exe")
+} else {
+  
+  python_path = paste0("C:\\Users\\Home\\AppData\\Local",
+                       "\\Programs\\Python\\Python312\\python.exe")
+}
+
+reticulate::use_python(python_path)
+
+```
+
+```{python import_libraries}
+
+import numpy as np
+
+import pandas as pd
+
+import os 
+
+import ISLP
+
+import matplotlib.pyplot as plt
+
+```
+
+```{python load_data}
+
+from ISLP import load_data
+
+Wage = load_data('Wage')
+
+Wage.columns
+
+```
+
+```{python plot_data}
+
+data_df = Wage[["wage","age"]].copy()
+
+plt.clf()
+
+# Scatter plot
+plt.scatter(data_df['age'], data_df['wage'], marker='.', s=10)
+plt.xlabel('Age')
+plt.ylabel('Wage')
+plt.title('Wage vs Age')
+plt.show()
+
+
+
+```
+
+
+
+# Polynomial regression
+
+```{python }
+
+from sklearn.preprocessing import PolynomialFeatures
+
+poly_transformer = PolynomialFeatures(degree=4, include_bias=False)
+
+from sklearn.linear_model import LinearRegression
+
+lin_reg = LinearRegression()
+
+```
+
+
+```{python }
+
+X = poly_transformer.fit_transform(Wage[["age"]].copy())
+
+y = Wage["wage"].copy()
+
+lin_reg.fit(X,y)
+
+fit_df = lin_reg.predict(X)
+
+data_df["fitted"] = fit_df
+
+
+
+```
+
+```{python pred_df}
+
+age_grid = np.linspace(age.min(),
+                       age.max(),
+                       100)
+age_df = pd.DataFrame({'age': age_grid})
+
+```
+
+```{python }
+
+plt.clf()
+plt.figure(figsize=(10, 6))
+plt.scatter(data_df['age'], data_df['wage'], marker='.', s=10, label='Wage')
+plt.scatter(data_df['age'], data_df['fitted'], marker='.', s=10, label='Fitted')
+
+# Adding labels and title
+plt.xlabel('Age')
+plt.ylabel('Value')
+plt.title('Wage and Fitted vs Age')
+plt.legend()
+plt.show()
+
+```
+
