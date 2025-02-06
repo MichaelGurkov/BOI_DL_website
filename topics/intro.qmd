@@ -20,43 +20,63 @@ reticulate::use_python(python_path)
 ```
 
 ```{python import_libraries}
+#| code-fold: true
+#| code-summary: "Show the code"
 
-import numpy as np
 
 import pandas as pd
 
-import os 
+import numpy as np
 
-import ISLP
+import os
 
+from patsy import dmatrix
+
+from sklearn.linear_model import LinearRegression
+
+import pygam
+
+from statsmodels.nonparametric.smoothers_lowess import lowess
+
+# Plot predictions
 import matplotlib.pyplot as plt
 
 ```
 
 ```{python load_data}
+#| code-fold: true
+#| code-summary: "Show the code"
 
-from ISLP import load_data
 
-Wage = load_data('Wage')
+raw_df = pd.read_csv(os.path.join(os.path.expanduser("~\\Documents\\BOI_DL_website"), "data\\Wage.csv"))
 
-Wage.columns
+y_vec = raw_df["wage"].copy()
+
+x_vec = raw_df[["age"]].copy()
 
 ```
 
-```{python plot_data}
 
-data_df = Wage[["wage","age"]].copy()
-
-plt.clf()
-
-# Scatter plot
-plt.scatter(data_df['age'], data_df['wage'], marker='.', s=10)
-plt.xlabel('Age')
-plt.ylabel('Wage')
-plt.title('Wage vs Age')
-plt.show()
+```{python auxiliary_functions}
+#| code-fold: true
+#| code-summary: "Show the code"
 
 
+def plot_predictions(pred_df, title):
+  pred_cols = [temp_name for temp_name in pred_df.columns.values if "pred" in temp_name]
+
+  plt.figure(figsize=(10, 6))
+  plt.scatter(pred_df["age"], pred_df["wage"], label="Actual Wage", alpha = 0.7)
+
+  for temp_name in pred_cols:
+    plt.scatter(pred_df["age"], pred_df[temp_name], label=temp_name, alpha = 0.7)
+#  plt.scatter(pred_df["age"], pred_df["wage_pred"], label="Predicted Wage", alpha = 0.7)
+  plt.xlabel("Age")
+  plt.ylabel("Wage")
+  plt.title(title)
+  plt.legend()
+  plt.grid(True)
+  plt.show()
 
 ```
 
@@ -64,57 +84,315 @@ plt.show()
 
 # Polynomial regression
 
-```{python }
+1. **Construct polynomial features:**  
+   * Using the `dmatrix` function, create a feature matrix that includes polynomial
+     terms up to the fourth degree: $\text{age}, \text{age}^2, \text{age}^3, \text{age}^4$
+   
+2. **Fit a linear regression model:**  
+   * Use `LinearRegression` from `sklearn` and set `fit_intercept=False` since the intercept
+     is already included in the design matrix.
+   * Fit the model to predict `y_vec` from the polynomial features.
 
-from sklearn.preprocessing import PolynomialFeatures
+3. **Make predictions:**  
+   * Use the trained model to generate predictions for `y_vec`.
 
-poly_transformer = PolynomialFeatures(degree=4, include_bias=False)
 
-from sklearn.linear_model import LinearRegression
+```{python poly_reg}
+#| code-fold: true
+#| code-summary: "Show the code"
 
-lin_reg = LinearRegression()
+
+poly_x_mat = dmatrix("age + I(age**2) + I(age**3) + I(age**4)", x_vec)
+
+lin_reg = LinearRegression(fit_intercept=False)
+
+lin_reg.fit(poly_x_mat.copy(), y_vec)
+
+poly_pred = lin_reg.predict(poly_x_mat.copy())
+
+```
+
+4. **Visualize the results (optional but recommended):**  
+
+```{python plot_poly_pred}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+plot_predictions(pd.DataFrame({"age": x_vec["age"], "wage": y_vec, "wage_pred": poly_pred}),
+                 "Polynomial Regression")
 
 ```
 
 
+
+# Step functions
+
+1. **Define step function intervals (bins):**  
+   * Use `np.percentile` to determine cutoff points (knots) that divide `age` into quartiles.  
+   * Use `pd.cut` to assign each `age` value to a bin.
+
+2. **Create a step function design matrix:**  
+   * Use the `dmatrix` function to encode the binned `age` values as categorical variables.
+
+3. **Fit a linear regression model:**  
+   * Use `LinearRegression` from `sklearn` and set `fit_intercept=False` since the
+     intercept is already included in the design matrix.
+   * Fit the model to predict `y_vec` based on the step function representation of `age`.
+
+4. **Make predictions:**  
+   * Use the trained model to generate predictions for `y_vec`.
+
+
+**Hints:**  
+  * Ensure that the step function bins do not have duplicate edges, which can be handled
+    using `duplicates='drop'` in `pd.cut`.  
+  * You can use `matplotlib.pyplot` or `seaborn` to visualize the stepwise fitted function.  
+  * Since this is a piecewise constant model, expect a regression curve with horizontal segments
+    rather than a smooth curve.
+
+
 ```{python }
+#| code-fold: true
+#| code-summary: "Show the code"
 
-X = poly_transformer.fit_transform(Wage[["age"]].copy())
 
-y = Wage["wage"].copy()
 
-lin_reg.fit(X,y)
+knots = np.percentile(x_vec["age"], [0, 15, 25, 50, 75,90, 100])
 
-fit_df = lin_reg.predict(X)
+x_vec_step = pd.cut(x_vec["age"], bins=knots, labels=False,
+                    include_lowest=True,duplicates='drop')
 
-data_df["fitted"] = fit_df
+step_x_mat = dmatrix("C(x_vec_step)", x_vec_step)
 
+lin_reg = LinearRegression(fit_intercept=False)
+
+lin_reg.fit(step_x_mat.copy(), y_vec)
+
+step_pred = lin_reg.predict(step_x_mat.copy())
+
+```
+
+5. **Visualize the results (optional but recommended):**  
+
+
+```{python plot_step}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+
+plot_predictions(pd.DataFrame({"age": x_vec["age"], "wage": y_vec, "wage_pred": step_pred}), "Step Regression")
+
+```
+
+
+
+# Piecewise polynomials
+
+1. **Define the knot location**:
+
+  Set a single knot at age = 50 to allow for a change in the polynomial relationship at this point.
+  
+2. **Create piecewise polynomial terms:**
+  
+  * Construct polynomial terms (age, age², age³) for the entire dataset.
+  * Define separate squared and cubic terms for values below and above the knot
+    to allow for discontinuity.
+  * Use np.maximum to ensure that terms are active only in their respective regions.
+  
+
+3. **Create a design matrix:**
+
+  Combine all polynomial terms into a matrix that serves as input for the regression model.
+  
+  
+4. **Fit a linear regression model:**  
+   * Use `LinearRegression` from `sklearn` and set `fit_intercept=False` since the intercept
+      is already included in the design matrix.
+   * Fit the model to predict `y_vec` based on the spline-transformed `age` values.
+   
+
+5. **Make predictions:**  
+    Use the trained model to generate predictions for `y_vec`.
+
+
+**Hints:**  
+  * B-splines create smooth, continuous fits by combining piecewise polynomial segments.  
+  * You can experiment with additional knots to see how the flexibility of the model changes.  
+  * Use `matplotlib.pyplot` or `seaborn` to visualize the fitted curve.
+
+
+```{python }
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+
+knot = 50
+
+# Manually create piecewise terms to enforce discontinuity at the knot
+x_less_knot = np.maximum(0, knot - x_vec)  # For x < knot
+x_greater_knot = np.maximum(0, x_vec - knot)  # For x >= knot
+
+# Combine the terms into a design matrix (manual spline basis)
+spline_x_mat = np.column_stack((x_vec, x_vec**2, x_vec**3, x_less_knot**2,
+                                x_greater_knot**2,x_less_knot**3, x_greater_knot**3))
+
+lin_reg = LinearRegression(fit_intercept=False)
+
+lin_reg.fit(spline_x_mat.copy(), y_vec)
+
+spline_pred = lin_reg.predict(spline_x_mat.copy())
+
+lin_reg = LinearRegression(fit_intercept=False)
+
+lin_reg.fit(spline_x_mat.copy(), y_vec)
+
+spline_pred = lin_reg.predict(spline_x_mat.copy())
+
+```
+
+6. **Visualize the results (optional but recommended):**  
+
+```{python plot_piecewise}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+plot_predictions(pd.DataFrame({"age": x_vec["age"], "wage": y_vec, "wage_pred": spline_pred}),
+"Piecewise Spline Regression")
+
+```
+
+# Splines
+
+1. **Construct spline basis matrices:**  
+   * Use the `dmatrix` function to create a **B-spline** basis with knots at `age = 25, 40, 60`
+      and a polynomial degree of 3.
+   * Use the `dmatrix` function to create a **natural spline** basis with the same knots.
+
+2. **Fit linear regression models:**  
+   * Use `LinearRegression` from `sklearn` and set `fit_intercept=False` since the intercept
+      is already included in the design matrix.
+   * Fit one model using the **B-spline basis** and another using the **natural spline basis**.
+
+3. **Make predictions:**  
+    Use each trained model to generate predictions for `y_vec`.
+
+
+**Hints:**  
+  * **B-splines** allow local flexibility, adjusting the curve within defined knots.  
+  * **Natural splines** impose additional constraints that make the curve behave more smoothly
+      at the boundaries.  
+  * Try adjusting the number and position of knots to see how the model changes.  
+  * Use `matplotlib.pyplot` or `seaborn` to visualize the fitted curves.
+
+```{python }
+#| code-fold: true
+#| code-summary: "Show the code"
+
+spline_x_mat = dmatrix("bs(age, knots = [25,40,60], degree=3)", x_vec)
+
+natural_spline_x_mat = dmatrix("cr(age, knots = [25,40,60])", x_vec)
+
+lin_reg = LinearRegression(fit_intercept=False)
+
+lin_reg.fit(spline_x_mat.copy(), y_vec)
+
+spline_pred = lin_reg.predict(spline_x_mat.copy())
+
+lin_reg = LinearRegression(fit_intercept=False)
+
+lin_reg.fit(natural_spline_x_mat.copy(), y_vec)
+
+natural_spline_pred = lin_reg.predict(natural_spline_x_mat.copy())
 
 
 ```
 
-```{python pred_df}
+4. **Visualize the results (optional but recommended):**  
 
-age_grid = np.linspace(age.min(),
-                       age.max(),
-                       100)
-age_df = pd.DataFrame({'age': age_grid})
+```{python }
+#| code-fold: true
+#| code-summary: "Show the code"
+
+plot_predictions(pd.DataFrame({"age": x_vec["age"], "wage": y_vec,
+                               "spline_pred": spline_pred,
+                               "natural_spline_pred": natural_spline_pred}),
+                               "Spline and Natural spline Regression")
 
 ```
 
-```{python }
+# General Additive Models
 
-plt.clf()
-plt.figure(figsize=(10, 6))
-plt.scatter(data_df['age'], data_df['wage'], marker='.', s=10, label='Wage')
-plt.scatter(data_df['age'], data_df['fitted'], marker='.', s=10, label='Fitted')
+```{python fit_gam}
+#| code-fold: true
+#| code-summary: "Show the code"
 
-# Adding labels and title
-plt.xlabel('Age')
-plt.ylabel('Value')
-plt.title('Wage and Fitted vs Age')
-plt.legend()
+from pygam import LinearGAM, s, f
+
+# Encode categorical variable 'education'
+raw_df['education_code'] = raw_df['education'].astype('category').cat.codes
+
+# Features and response
+X = raw_df[['year', 'age', 'education_code']].values
+
+y = raw_df['wage'].values
+
+# Fit the GAM model
+
+gam = LinearGAM(s(0, n_splines=8) + s(1, n_splines=8) + f(2));
+
+gam.fit(X, y);
+
+```
+
+
+
+```{python plot}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+# Generate smooth predictions for each term
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+# Plot the effect of year
+year_grid = np.linspace(raw_df['year'].min(), raw_df['year'].max(), 100)
+X_year = np.zeros((100, 3))
+X_year[:, 0] = year_grid
+axes[0].plot(year_grid, gam.partial_dependence(0, X=X_year), color='red');
+axes[0].set_title(r"$f_1(\mathrm{year})$");
+axes[0].set_xlabel("year");
+axes[0].set_ylabel("Effect");
+axes[0].set_ylim(-30, 30);
+
+# Plot the effect of age
+age_grid = np.linspace(raw_df['age'].min(), raw_df['age'].max(), 100)
+X_age = np.zeros((100, 3))
+X_age[:, 1] = age_grid
+axes[1].plot(age_grid, gam.partial_dependence(1, X=X_age), color='red');
+axes[1].set_title(r"$f_2(\mathrm{age})$");
+axes[1].set_xlabel("age");
+axes[1].set_ylabel("Effect");
+axes[1].set_ylim(-50, 40);
+
+# Plot the effect of education
+education_levels = np.sort(raw_df['education_code'].unique())
+X_edu = np.zeros((len(education_levels), 3))
+X_edu[:, 2] = education_levels
+axes[2].bar(
+    raw_df['education'].astype('category').cat.categories,
+    gam.partial_dependence(2, X=X_edu).flatten(),
+    color='red'
+);
+axes[2].set_title(r"$f_3(\mathrm{education})$");
+axes[2].set_xlabel("education");
+axes[2].set_ylabel("Effect");
+
+
+plt.tight_layout()
 plt.show()
+
 
 ```
 
