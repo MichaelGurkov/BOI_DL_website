@@ -26,5 +26,12 @@
     "title": "BOI_DL_website",
     "section": "",
     "text": "Introduction"
+  },
+  {
+    "objectID": "topics/logistic_regression.html",
+    "href": "topics/logistic_regression.html",
+    "title": "BOI_DL_website",
+    "section": "",
+    "text": "Define the model structure (such as number of inputs)\nInitialize the model parameters\nLoop:\n\n\nCalculate current loss (forward propagation)\nCalculate current gradient (backward propagation)\nUpdate parameters (gradient descent)"
   }
 ]

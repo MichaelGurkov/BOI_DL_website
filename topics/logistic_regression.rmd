@@ -1,0 +1,84 @@
+---
+title: "Logistic regression as Neural Network"
+---
+
+```{r set_up_python, echo=FALSE}
+#|echo: FALSE
+
+if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
+  
+  python_path = paste0("C:\\Users\\internet\\AppData\\Local",
+                       "\\Programs\\Python\\Python312\\python.exe")
+} else {
+  
+  python_path = paste0("C:\\Users\\Home\\AppData\\Local",
+                       "\\Programs\\Python\\Python312\\python.exe")
+}
+
+reticulate::use_python(python_path)
+
+```
+
+```{python import_libraries}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+import pandas as pd
+
+import numpy as np
+
+import os
+
+from patsy import dmatrix
+
+from sklearn.linear_model import LinearRegression
+
+import pygam
+
+from statsmodels.nonparametric.smoothers_lowess import lowess
+
+# Plot predictions
+import matplotlib.pyplot as plt
+
+```
+
+
+
+1. Define the model structure (such as number of inputs)
+2. Initialize the model parameters
+3. Loop:
+  - Calculate current loss (forward propagation)
+  - Calculate current gradient (backward propagation)
+  - Update parameters (gradient descent)
+
+
+# Initialize parameters
+
+
+```{python initialize_parameters}
+
+def initialize_model_parametres(number_of_params):
+  
+  w = np.zeros(number_of_params).reshape(1,number_of_params)
+  
+  b = np.zeros(1).reshape(1,1)
+  
+  return w,b
+
+w,b = initialize_model_parametres(10)
+
+```
+
+
+# Loop
+
+## Calculate cost
+
+```{python calculate_cost}
+
+def calculate_cost(w,b,X,y)
+
+
+```
+
