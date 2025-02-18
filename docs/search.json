@@ -30,8 +30,36 @@
   {
     "objectID": "topics/logistic_regression.html",
     "href": "topics/logistic_regression.html",
-    "title": "BOI_DL_website",
+    "title": "Logistic regression as Neural Network",
     "section": "",
-    "text": "Define the model structure (such as number of inputs)\nInitialize the model parameters\nLoop:\n\n\nCalculate current loss (forward propagation)\nCalculate current gradient (backward propagation)\nUpdate parameters (gradient descent)"
+    "text": "Show the code\n\nimport pandas as pd\n\nimport numpy as np\n\nimport os\n\nfrom sklearn.linear_model import LogisticRegression\n\nfrom sklearn.model_selection import train_test_split"
+  },
+  {
+    "objectID": "topics/logistic_regression.html#define-functions",
+    "href": "topics/logistic_regression.html#define-functions",
+    "title": "Logistic regression as Neural Network",
+    "section": "Define functions",
+    "text": "Define functions\n\n\nShow the code\ndef calculate_cost(w,b,X,y):\n\n  A = sigmoid(np.dot(w.T,X) + b)\n\n  cost = -(np.dot(y,np.log(A).T) + np.dot((1-y),np.log(1-A).T))\n\n  return cost\n\n\ndef improve_weights(w, b,X,y,learning_rate = 0.09):\n\n  grads = propagate(w,b,X,y)\n\n  dw = grads[\"dw\"]\n\n  db = grads[\"db\"]\n\n  w = w - learning_rate * dw\n\n  b = b - learning_rate * db\n\n  params = [w,b]\n\n  return params\n\n\n\n\nShow the code\ndef propagate(w,b,X,y):\n\n  m = X.shape[0]\n\n  A = sigmoid(np.dot(w.T,X) + b)\n\n  dz = A - y\n\n  dw = np.dot(X, dz.T) / m\n\n  db = np.sum(dz) / m\n\n  grads = {\"dw\": dw,\n            \"db\": db}\n\n  return grads\n\n\n\n\nShow the code\ndef neural_network_weights(X,y, num_rounds = 100, learning_rate = 0.09):\n\n  w,b = initialize_weights(X.shape[0])\n\n  for i in range(num_rounds):\n    w,b = improve_weights(w,b,X,y,learning_rate = learning_rate)\n    \n  return w,b"
+  },
+  {
+    "objectID": "topics/logistic_regression.html#backward-propagation-gradient-calculation",
+    "href": "topics/logistic_regression.html#backward-propagation-gradient-calculation",
+    "title": "Logistic regression as Neural Network",
+    "section": "Backward propagation (gradient calculation)",
+    "text": "Backward propagation (gradient calculation)\n\n\nShow the code\ndef propagate(w,b,X,y):\n\n  m = X.shape[0]\n\n  A = sigmoid(np.dot(w.T,X) + b)\n\n  dz = A - y\n\n  dw = np.dot(X, dz.T) / m\n\n  db = np.sum(dz) / m\n\n  grads = {\"dw\": dw,\n            \"db\": db}\n\n  return grads"
+  },
+  {
+    "objectID": "topics/logistic_regression.html#neural-network-implementation",
+    "href": "topics/logistic_regression.html#neural-network-implementation",
+    "title": "Logistic regression as Neural Network",
+    "section": "Neural network implementation",
+    "text": "Neural network implementation\n\n\nShow the code\ndef neural_network_weights(X,y, num_rounds = 100, learning_rate = 0.09):\n\n  w,b = initialize_weights(X.shape[0])\n\n  for i in range(num_rounds):\n    w,b = improve_weights(w,b,X,y,learning_rate = learning_rate)\n    \n  return w,b"
+  },
+  {
+    "objectID": "topics/logistic_regression.html#algorithm-backward-propagation-in-logistic-regression",
+    "href": "topics/logistic_regression.html#algorithm-backward-propagation-in-logistic-regression",
+    "title": "Logistic regression as Neural Network",
+    "section": "Algorithm: Backward Propagation in Logistic Regression",
+    "text": "Algorithm: Backward Propagation in Logistic Regression\n\n1. Define the Model Structure\n\nThe model consists of:\n\nWeights: A vector of parameters corresponding to input features, denoted as (\\(w\\)).\nBias: A scalar parameter, denoted as ( \\(b\\) ).\n\n\n\n\n2. Initialize Model Parameters\n\nCall initialize_weights(n_{\\text{features}}), which initializes:\n\n( \\(w\\) ) (weights) to small random values or zeros.\n( \\(b\\) ) (bias) to zero.\n\n\n\n\n3. Training Loop (Gradient Descent Iteration)\n\nRepeat for a given number of iterations (\\(\\text{num\\_rounds}\\)):\na. Compute Gradients (Backward Propagation)\n\nUse propagate(w, b, X, y):\n\nCompute predicted probabilities using the sigmoid function: \\[\nA = \\sigma(w^T X + b)\n\\] where: \\[\n\\sigma(z) = \\frac{1}{1 + e^{-z}}\n\\]\nCompute error (difference between predicted and actual values): \\[\ndz = A - y\n\\]\nCompute gradients (partial derivatives):\n\nGradient of weights: \\[\ndw = \\frac{1}{m} X dz^T\n\\]\nGradient of bias: \\[\ndb = \\frac{1}{m} \\sum dz\n\\]\n\nReturn (\\(dw\\)) and (\\(db\\)).\n\n\nb. Update Parameters (Gradient Descent)\n\nCall improve_weights(w, b, X, y, $\\text{learning_rate})$, which:\n\nRetrieves gradients from propagate(w, b, X, y).\nUpdates parameters using gradient descent:\n\nUpdate weights: \\(w = w - \\text{learning rate} \\times dw\\)\nUpdate bias: \\(b = b - \\text{learning rate} \\times db\\)\n\n\n\n\n\n\n4. Return Trained Parameters\n\nAfter completing the training loop, return (\\(w\\)) and (\\(b\\)), the optimized parameters."
   }
 ]
