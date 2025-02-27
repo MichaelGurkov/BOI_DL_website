@@ -1,0 +1,267 @@
+---
+title: "Single layer Neural Network"
+---
+
+```{r set_up_python, echo=FALSE}
+#|echo: FALSE
+
+if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
+  
+  python_path = paste0("C:\\Users\\internet\\AppData\\Local",
+                       "\\Programs\\Python\\Python312\\python.exe")
+} else {
+  
+  python_path = paste0("C:\\Users\\Home\\AppData\\Local",
+                       "\\Programs\\Python\\Python312\\python.exe")
+}
+
+reticulate::use_python(python_path)
+
+```
+
+```{python import_libraries}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+import pandas as pd
+
+import numpy as np
+
+import os
+
+
+```
+
+# **The Algorithm**
+
+1. **Define the Model Structure**  
+   - Weights (`w`) and bias (`b`).
+
+2. **Initialize Model Parameters**  
+   - Set initial values for `w` and `b`.
+
+3. **Training Loop (Gradient Descent Iteration)**  
+   - **Compute gradients (backward propagation)**.  
+   - Update parameters (gradient descent).  
+
+4. **Return Trained Parameters**  
+   - Output optimized `w` and `b`.  
+
+
+
+# Functions definition
+
+#### Auxiliary functions
+
+```{python auxilary_functions}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+def initialize_parameters(X,y, num_hidden_layer_neurons = 4):
+
+  scaling_constant = 0.01
+ 
+  num_features = X.shape[1]
+
+  num_output_layers = y.shape[0]
+
+  weights_hidden = np.random.randn(num_hidden_layer_neurons,num_features) * scaling_constant
+
+  weights_output = np.random.randn(num_hidden_layer_neurons, 1)* scaling_constant
+
+  bias_hidden = np.zeros((num_hidden_layer_neurons,1))
+
+  bias_output = np.zeros((1, 1))
+
+  parameters = {"weights_hidden": weights_hidden,"bias_hidden":bias_hidden,
+                "weights_output": weights_output,"bias_output":bias_output}
+
+  return parameters
+
+
+def forward_propagation(X, parameters):
+  
+  num_samples = X.shape[0]
+
+  num_features = X.shape[1]
+  
+  num_features = num_features
+
+  weights_hidden = parameters["weights_hidden"]
+  weights_output = parameters["weights_output"]
+
+  bias_hidden = parameters["bias_hidden"]
+  bias_output = parameters["bias_output"]
+
+  values_hidden = np.dot(weights_hidden, X.T) + bias_hidden # dims: (num_of_hidden_neurons,num_samples)
+
+  values_hidden_active = np.tanh(values_hidden) # dims: (num_of_hidden_neurons,num_samples)
+
+  values_output = np.dot(weights_output.T, values_hidden_active) + bias_output # dims: (num_samples)
+
+  values_output_active = np.tanh(values_output)
+
+  predictions = values_output_active
+  
+  current_network_values = {"values_hidden": values_hidden,
+                            "values_hidden_active": values_hidden_active,
+                            "values_output": values_output,
+                            "values_output_active": values_output_active}
+  
+  return predictions, current_network_values
+
+
+def backward_propagation(parameters, current_network_values, X, y):
+  weights_hidden = parameters["weights_hidden"]
+  weights_output = parameters["weights_output"]
+
+  bias_hidden = parameters["bias_hidden"]
+  bias_output = parameters["bias_output"]
+
+  values_hidden_active = current_network_values["values_hidden_active"]
+
+  values_output = current_network_values["values_output"]
+
+  values_output_active = current_network_values["values_output_active"]
+
+  num_samples = X.shape[0]
+
+  #####calculate gradients
+
+  d_values_output = values_output_active - y # dims: (num_samples,1)
+  
+  d_weights_output = (1 / num_samples) * np.dot(values_hidden_active, d_values_output.T) # dims: (num_of_hidden_neurons, 1)
+
+  d_bias_output = (1 / num_samples) * np.sum(d_values_output,axis = 1, keepdims=True)
+
+ 
+  d_values_hidden = np.dot(weights_output, d_values_output) *(1 - np.power(values_hidden_active, 2))
+
+  d_weights_hidden = (1 / num_samples) * np.dot(d_values_hidden, X)
+
+  d_bias_hidden = (1 / num_samples) * np.sum(d_values_hidden,axis = 1, keepdims=True) 
+
+  
+  grads = {"d_weights_hidden": d_weights_hidden, "d_bias_hidden": d_bias_hidden,
+           "d_weights_output": d_weights_output, "d_bias_output": d_bias_output}
+  
+  return grads
+  
+
+def update_parameters(parameters, grads, learning_rate = 1.2):
+
+  weights_hidden = parameters["weights_hidden"]
+  weights_output = parameters["weights_output"]
+
+  bias_hidden = parameters["bias_hidden"]
+  bias_output = parameters["bias_output"]
+
+  d_weights_hidden = grads["d_weights_hidden"]
+  d_bias_hidden = grads["d_bias_hidden"]
+
+  d_weights_output = grads["d_weights_output"]
+  d_bias_output = grads["d_bias_output"]
+
+  weights_hidden = weights_hidden - learning_rate * d_weights_hidden
+  bias_hidden = bias_hidden - learning_rate * d_bias_hidden
+
+  weights_output = weights_output - learning_rate * d_weights_output
+  bias_output = bias_output - learning_rate * d_bias_output
+
+  parameters = {"weights_hidden": weights_hidden,"bias_hidden":bias_hidden,
+                "weights_output": weights_output,"bias_output":bias_output}
+  
+  return parameters
+
+
+def predict(parameters, X, threshold = 0.5):
+  
+  predictions, current_network_values = forward_propagation(X, parameters)
+  
+  predictions = pd.Series(predictions.ravel())
+
+  predictions = predictions.apply(lambda x: 1 if x > threshold else 0)
+  
+  return predictions
+
+```
+
+
+
+#### Neural network implementation
+
+```{python neural_network_function}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+def train_neural_network(X,y,num_iterations = 100):
+  # Initialize the model's parameters
+  # Loop:
+  #  - Implement forward propagation to get the predictions
+  #  - Implement backward propagation to get the gradients
+  #  - Update parameters (gradient descent)
+
+  parameters = initialize_parameters(X,y)
+
+  for iteration in range(num_iterations):
+
+    predictions, current_network_values = forward_propagation(X, parameters)
+
+    grads = backward_propagation(parameters, current_network_values, X, y)
+
+    parameters = update_parameters(parameters, grads)
+
+  return parameters
+
+```
+
+
+
+
+# Application on planar data
+
+#### Import and preprocess data
+```{python load_data}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+raw_df = pd.read_csv(os.path.join(os.path.expanduser("~\\Documents\\BOI_DL_website"), "data\\planar_data.csv"))
+
+features = ["x_coord","y_coord"]
+
+target = "label"
+
+X = raw_df[features].copy()
+
+Y = raw_df[target].copy()
+
+
+```
+
+
+
+#### Training neural network
+
+```{python fit_model}
+
+nn_params = train_neural_network(X = X,y = Y,num_iterations = 10000)
+
+
+```
+
+#### Predictions on test set
+
+```{python predictions}
+
+from sklearn.metrics import accuracy_score
+
+nn_predictions = predict(trained_params, X)
+
+nn_score = accuracy_score(y_vec, nn_predictions)
+
+print(f"Neural network score is {np.round(nn_score,4)}")
+
+```
+
