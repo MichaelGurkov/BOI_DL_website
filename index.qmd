@@ -5,3 +5,5 @@ title: "BOI_DL_website"
 ## Topics
 
 -   [**Introduction**](topics/intro.qmd)
+
+-   [**Single (hidden) layer neural network**](topics/single_layer_nn.qmd)
