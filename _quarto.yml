@@ -1,6 +1,9 @@
 project:
   type: website
   output-dir: docs
+  render: 
+    - topics/optim_methods.qmd
+
 
 website:
   title: "BOI_DL_website"

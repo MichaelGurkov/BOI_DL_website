@@ -1,0 +1,55 @@
+---
+title: "Optimization methods"
+---
+
+```{r set_up_python, echo=FALSE}
+#|echo: FALSE
+
+if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
+  
+  python_path = paste0("C:\\Users\\internet\\AppData\\Local",
+                       "\\Programs\\Python\\Python312\\python.exe")
+} else {
+  
+  python_path = paste0("C:\\Users\\Home\\AppData\\Local",
+                       "\\Programs\\Python\\Python312\\python.exe")
+}
+
+reticulate::use_python(python_path)
+
+```
+
+```{python import_libraries}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+import pandas as pd
+
+import numpy as np
+
+import os
+
+from func_package.utils import greet
+
+# Plot predictions
+import matplotlib.pyplot as plt
+
+```
+
+# Gradient descent
+
+```{python}
+
+greet("Gradient descent")
+
+```
+
+
+# Stochastic gradient descent
+
+# Momentum
+
+# RMSProp
+
+# Adam
