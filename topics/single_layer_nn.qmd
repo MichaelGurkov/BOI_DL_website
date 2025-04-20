@@ -258,7 +258,6 @@ Y = raw_df[target].copy()
 ```
 
 
-
 #### Training neural network
 
 ```{python fit_model}
@@ -280,4 +279,141 @@ nn_score = accuracy_score(Y, y_pred)
 print(f"Neural network score is {np.round(nn_score,4)}")
 
 ```
+
+
+### Comparison with Logistic regression
+
+```{python log_reg}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+from sklearn.linear_model import LogisticRegression
+
+log_reg = LogisticRegression()
+
+log_reg.fit(X,Y)
+
+```
+
+
+#### Auxiliary plotting functions
+
+```{python auxiliary_plotting_functions}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+import numpy as np
+
+import matplotlib.pyplot as plt
+
+def generate_grid(x_min, x_max, y_min, y_max, step_size=0.02):
+    """
+    Generates a grid of points covering the given range with the specified step size.
+    
+    Parameters:
+    - x_min, x_max: float, range for x-axis.
+    - y_min, y_max: float, range for y-axis.
+    - step_size: float, resolution of the grid.
+    
+    Returns:
+    - XX, YY: Meshgrid arrays for plotting.
+    - grid_points: Flattened array of grid coordinates.
+    """
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, step_size),
+                         np.arange(y_min, y_max, step_size))
+    grid_points = np.c_[xx.ravel(), yy.ravel()]  # Flatten the grid
+    
+    return xx, yy, grid_points
+
+def plot_decision_boundary(xx, yy, pred_grid, X, y, title, cmap=plt.cm.RdBu):
+    """
+    Plots the decision boundary for a given prediction grid.
+    
+    Parameters:
+    - xx, yy: Meshgrid arrays for plotting.
+    - pred_grid: Prediction values reshaped to match xx and yy.
+    - X: Original dataset (features).
+    - y: Labels for the dataset.
+    - title: Title of the plot.
+    - cmap: Colormap for visualization.
+    """
+    plt.figure(figsize=(8, 6))
+    
+    # Plot the decision boundary
+    plt.contourf(xx, yy, pred_grid, alpha=0.6, cmap=cmap)
+    
+    # Scatter plot of actual data points
+    plt.scatter(X[:, 0], X[:, 1], c=y, edgecolor="k", cmap=cmap, s=40)
+    
+    plt.title(title)
+    plt.xlabel("Feature 1")
+    plt.ylabel("Feature 2")
+    plt.show()
+
+
+```
+
+
+```{python preparing grid}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+xx, yy, grid_points  = generate_grid(x_min = X["x_coord"].min(), x_max = X["x_coord"].max(),
+y_min = X["y_coord"].min(), y_max = X["y_coord"].max())
+
+
+nn_pred_grid = predict(nn_params, grid_points)
+
+nn_pred_grid = np.array(nn_pred_grid).reshape(xx.shape)
+
+log_reg_pred_grid = log_reg.predict(pd.DataFrame(grid_points, columns=X.columns))
+
+log_reg_pred_grid = np.array(log_reg_pred_grid).reshape(xx.shape)
+
+```
+
+This is how actual data looks like
+
+```{python plot_actual_data}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+plt.clf()
+
+plt.scatter(X["x_coord"], X["y_coord"], c=Y, s=40, cmap=plt.cm.Spectral);
+
+plt.title("Actual data")
+
+plt.show()
+
+```
+
+This is a classification by logistic regression
+
+
+
+```{python plot_log_reg_predictions}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+plot_decision_boundary(xx, yy, log_reg_pred_grid, X.to_numpy(),
+Y.to_numpy(),title="Logistic Regression Decision Boundary")
+
+
+```
+
+
+And this is a classification by neural network
+
+```{python plot_nn_predictions}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+plot_decision_boundary(xx, yy, nn_pred_grid, X.to_numpy(),
+Y.to_numpy(),title="Neural Network Decision Boundary")
+
+
+```
+
+
 
