@@ -85,16 +85,29 @@ def test_model():
   layer_dims = [2, 4, 1]
 
   # 3) Train with a few epochs
-  model(
-    X, Y, layer_dims,
-    optimizer="adam",
-    learning_rate=0.01,
-    num_epochs=2000,
-    batch_size=None,
-    print_cost=False,
-    print_every=200,
-    beta1=0.9, beta2=0.999, epsilon=1e-8
-  )
+  # parameters, costs = model(
+  #   X, Y, layer_dims,
+  #   optimizer="gd",         # full‑batch gradient descent
+  #   learning_rate=0.1,
+  #   num_epochs=1000,
+  #   batch_size=None,        # None means full batch
+  #   print_cost=False,
+  #   print_every=200
+  #   )
+  
+  parameters, costs = model(
+  X, Y, layer_dims,
+  optimizer="adam",
+  learning_rate=0.01,      # you can try 0.01 or even 0.1 here
+  num_epochs=2000,
+  batch_size=None,
+  print_cost=True,
+  print_every=200,
+  beta1=0.9,
+  beta2=0.999,
+  epsilon=1e-8
+  )  
+    
   # 4) Inspect training curve & final parameters
   print("Costs logged every 200 epochs:", costs)
   print("W1 shape:", parameters["W1"].shape)

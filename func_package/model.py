@@ -82,10 +82,10 @@ def model(X, Y, layer_dims,
       )
       epoch_cost += cost * (X_batch.shape[1] / m)
     
-    # Record / print cost
+    # Record / print cost%
     if epoch % print_every == 0:
       costs.append(epoch_cost)
-    if print_cost:
-      print(f"Cost after epoch {epoch}: {epoch_cost:.6f}")
+      if print_cost:
+        print(f"Cost after epoch {epoch}: {epoch_cost:.6f}")
   
   return parameters, costs

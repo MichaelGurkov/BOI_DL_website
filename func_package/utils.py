@@ -90,3 +90,35 @@ def compute_cost(AL, Y):
     # Derivative of cost w.r.t. AL
     dAL = - (np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
     return cost, dAL
+
+def predict_nn(X, parameters,
+            hidden_activation="relu",
+            output_activation="sigmoid",
+            threshold=0.5):
+    """
+    Make predictions with a trained L-layer neural network.
+
+    Arguments:
+    X                 -- input data, shape (n_x, m)
+    parameters        -- dict containing trained parameters W1…WL, b1…bL
+    hidden_activation -- activation used in hidden layers
+    output_activation -- activation used in output layer
+    threshold         -- cutoff for converting probabilities to binary labels
+
+    Returns:
+    preds -- predicted labels, shape (1, m)
+    """
+    # 1) unpack weights & biases
+    weights, biases = split_parameters(parameters)
+    
+    # 2) forward propagation
+    AL, _ = forward_propagation(
+        X, weights, biases,
+        hidden_activation=hidden_activation,
+        output_activation=output_activation
+    )
+    
+    # 3) convert probabilities to 0/1 predictions
+    preds = (AL > threshold).astype(int)
+    
+    return preds
