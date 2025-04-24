@@ -1,5 +1,9 @@
 import numpy as np
 
+from func_package.forward_propagation import forward_propagation
+
+from func_package.backward_propagation import backward_propagation
+
 def initialize_parameters(layer_dims, initialization="random"):
     """
     Initialize weights and biases for a multilayer neural network.

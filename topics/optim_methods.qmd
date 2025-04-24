@@ -76,7 +76,7 @@ plt.show()
 # Gradient descent
 
 
-```{python}
+```{python gd_model}
 
 layer_dims = [2, 4, 1]
 
@@ -86,7 +86,7 @@ gd_parameters, gd_costs = model(
     learning_rate=0.01,
     num_epochs=2000,
     batch_size=None,
-    print_cost=True,
+    print_cost=False,
     print_every=200
 )
 
@@ -104,8 +104,111 @@ accuracy_score(pred_gd.flatten(),y.flatten())
 
 # Stochastic gradient descent
 
+
+```{python sgd_model}
+
+sgd_parameters, sgd_costs = model(
+    X, y, layer_dims,
+    optimizer="gd",
+    learning_rate=0.01,
+    num_epochs=2000,
+    batch_size=32,
+    print_cost=False,
+    print_every=200
+)
+
+```
+
+```{python gd_predictions}
+
+pred_sgd = predict_nn(X, sgd_parameters)
+
+accuracy_score(pred_sgd.flatten(),y.flatten())
+
+```
+
+
+
 # Momentum
+
+```{python momentum_model}
+
+momentum_parameters, momentum_costs = model(
+    X, y, layer_dims,
+    optimizer="momentum",
+    learning_rate=0.01,
+    num_epochs=2000,
+    batch_size=None,
+    print_cost=False,
+    print_every=200,
+    beta = 0.9
+)
+
+```
+
+```{python momentum_predictions}
+
+pred_momentum = predict_nn(X, momentum_parameters)
+
+accuracy_score(pred_momentum.flatten(),y.flatten())
+
+```
+
 
 # RMSProp
 
+
+```{python rmsprop_model}
+
+rmsprop_parameters, rmsprop_costs = model(
+    X, y, layer_dims,
+    optimizer="rmsprop",
+    learning_rate=0.001,
+    num_epochs=2000,
+    batch_size=None,
+    print_cost=False,
+    print_every=200,
+    beta2 = 0.9,
+    epsilon = 1 * 10 ** (-8)
+)
+
+```
+
+```{python rmsprop_predictions}
+
+pred_rmsprop = predict_nn(X, rmsprop_parameters)
+
+accuracy_score(pred_rmsprop.flatten(),y.flatten())
+
+```
+
+
 # Adam
+
+
+```{python adam_model}
+
+adam_parameters, adam_costs = model(
+    X, y, layer_dims,
+    optimizer="adam",
+    learning_rate=0.001,
+    num_epochs=2000,
+    batch_size=None,
+    print_cost=False,
+    print_every=200,
+    beta1 = 0.9,
+    beta2 = 0.999,
+    epsilon = 1 * 10 ** (-8)
+)
+
+```
+
+```{python rmsprop_predictions}
+
+pred_adam = predict_nn(X, adam_parameters)
+
+accuracy_score(pred_adam.flatten(),y.flatten())
+
+```
+
+
