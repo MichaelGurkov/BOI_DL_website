@@ -3,4 +3,6 @@ title: "BOI_DL_website"
 ---
 
 ## Topics
+-   [**Introduction**](topics/intro.qmd)
+-   [**Single layer**](topics/single_layer_nn.qmd)
 -   [**Optimization method**](topics/optim_methods.qmd)

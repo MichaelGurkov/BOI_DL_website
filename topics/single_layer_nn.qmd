@@ -362,7 +362,7 @@ xx, yy, grid_points  = generate_grid(x_min = X["x_coord"].min(), x_max = X["x_co
 y_min = X["y_coord"].min(), y_max = X["y_coord"].max())
 
 
-nn_pred_grid = predict(nn_params, grid_points)
+nn_pred_grid = predict(nn_parameters, grid_points)
 
 nn_pred_grid = np.array(nn_pred_grid).reshape(xx.shape)
 
