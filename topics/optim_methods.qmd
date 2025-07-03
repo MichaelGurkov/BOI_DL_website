@@ -48,7 +48,9 @@ import matplotlib.pyplot as plt
 
 ```{python import_data}
 
-raw_data = pd.read_csv("data\\cluster_moons.csv")
+data_file_path = os.path.expanduser('~') + "\\Documents\\BOI_DL_website\\data\\cluster_moons.csv"
+
+raw_data = pd.read_csv(data_file_path)
 
 X = raw_data.iloc[:,0:2].copy()
 
@@ -62,11 +64,13 @@ y = y.to_numpy().reshape(1, -1).copy()
 
 ```{python plot_data}
 
-plt.scatter(X.iloc[:,0],X.iloc[:,1], c=y)
+
+plt.scatter(X[0, :], X[1, :], c=y.flatten())
 plt.xlabel('Feature 1')
 plt.ylabel('Feature 2')
 plt.title('Scatter Plot of Feature 1 and Feature 2')
 plt.show()
+
 
 
 ```
@@ -119,7 +123,7 @@ sgd_parameters, sgd_costs = model(
 
 ```
 
-```{python gd_predictions}
+```{python sgd_predictions}
 
 pred_sgd = predict_nn(X, sgd_parameters)
 
@@ -203,7 +207,7 @@ adam_parameters, adam_costs = model(
 
 ```
 
-```{python rmsprop_predictions}
+```{python adam_predictions}
 
 pred_adam = predict_nn(X, adam_parameters)
 

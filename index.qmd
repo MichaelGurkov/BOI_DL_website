@@ -3,4 +3,4 @@ title: "BOI_DL_website"
 ---
 
 ## Topics
--   [**Optimization methond**](topics/optim_methods.qmd)
+-   [**Optimization method**](topics/optim_methods.qmd)
