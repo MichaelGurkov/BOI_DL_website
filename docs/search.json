@@ -25,14 +25,21 @@
     "href": "index.html",
     "title": "BOI_DL_website",
     "section": "",
-    "text": "Introduction\nSingle layer\nOptimization method"
+    "text": "Introduction\nSingle layer\nOptimization method\nConvolution network"
   },
   {
     "objectID": "index.html#topics",
     "href": "index.html#topics",
     "title": "BOI_DL_website",
     "section": "",
-    "text": "Introduction\nSingle layer\nOptimization method"
+    "text": "Introduction\nSingle layer\nOptimization method\nConvolution network"
+  },
+  {
+    "objectID": "topics/convolution.html",
+    "href": "topics/convolution.html",
+    "title": "Convolution Neural Network",
+    "section": "",
+    "text": "Import libraries and data\n\n\nShow the code\n\nimport pandas as pd\n\nimport numpy as np\n\nimport os\n\nimport matplotlib.pyplot as plt\n\nfrom tensorflow.keras.utils import to_categorical\n\nfrom tensorflow.keras.models import Sequential\n\nfrom tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout\n\n\n\n\nShow the code\n\ntrain_set = pd.read_csv(os.path.join(os.path.expanduser(\"~\\\\Documents\\\\BOI_DL_website\"),\n\"data\\\\sign_mnist_train.csv\"))\n\ntest_set = pd.read_csv(os.path.join(os.path.expanduser(\"~\\\\Documents\\\\BOI_DL_website\"),\n\"data\\\\sign_mnist_test.csv\"))\n\n\n\n\nShow the code\n\ndef preprocess_data(df, img_height=28, img_width=28):\n  \n  processed_df = df / 255.0\n\n  processed_df = processed_df.values.reshape(-1, img_height, img_width, 1).copy()\n\n  return processed_df\n\n\ndef preprocess_labels(label_series, num_classes=24):\n    \"\"\"\n    Remaps labels to skip index 9 (J) and applies one-hot encoding.\n\n    Parameters:\n    - label_series: a pandas Series or 1D array of labels (originally 0–25, with 9 missing)\n    - num_classes: total number of actual classes (default 24)\n\n    Returns:\n    - One-hot encoded labels of shape (n_samples, num_classes)\n    \"\"\"\n    labels = np.array(label_series)\n\n    remapped_labels = np.array([l - 1 if l &gt; 9 else l for l in labels])\n\n    categorical_labels = to_categorical(remapped_labels, num_classes=num_classes)\n\n    return categorical_labels\n\n\n# Reverse the earlier remapping: add 1 to all labels ≥ 9\ndef reverse_remap(labels):\n    return [l + 1 if l &gt;= 9 else l for l in labels]\n\n\n\ndef show_predictions(x_data, y_true, y_pred, indices=None, n=6):\n    if indices is None:\n        indices = np.random.choice(len(x_data), n, replace=False)\n\n    plt.figure(figsize=(12, 6))\n    for i, idx in enumerate(indices):\n        plt.subplot(2, n // 2, i + 1)\n        plt.imshow(x_data[idx].reshape(28, 28), cmap='gray')\n        plt.title(f\"Pred: {y_pred[idx]}\\nTrue: {y_true[idx]}\")\n        plt.axis('off')\n    plt.tight_layout()\n    plt.show()\n\n\n\n\nPreprocess and define model\n\n\nShow the code\n\n\n# Separate labels\ny_train = preprocess_labels(train_set['label'])\n\ny_test = preprocess_labels(test_set['label'])\n\n# Remove labels from the pixel data\nx_train = preprocess_data(train_set.drop('label', axis=1))\n\nx_test = preprocess_data(test_set.drop('label', axis=1))\n\n\n\n\nShow the code\n\nmodel = Sequential([\n    Conv2D(32, (3, 3), activation='relu', padding='same', input_shape=(28, 28, 1)),\n    MaxPooling2D(pool_size=(2, 2)),\n\n    Conv2D(64, (3, 3), activation='relu', padding='same'),\n    MaxPooling2D(pool_size=(2, 2)),\n\n    Flatten(),\n    Dense(128, activation='relu'),\n    Dropout(0.3),\n    Dense(24, activation='softmax')  # 24 because of label remapping\n])\n\n\nmodel.compile(\n    optimizer='adam',\n    loss='categorical_crossentropy',\n    metrics=['accuracy']\n)\n\n\n\n\nFit model and evaluate\n\n\nShow the code\n\nhistory = model.fit(\n    x_train, y_train,\n    validation_data=(x_test, y_test),\n    epochs=5,\n    batch_size=128,\n    verbose = 0\n)\n\n\n\n\nShow the code\nloss, accuracy = model.evaluate(x_test, y_test)\n\n\nShow the code\nprint(f\"Test Accuracy: {accuracy:.4f}\")"
   },
   {
     "objectID": "topics/optim_methods.html",

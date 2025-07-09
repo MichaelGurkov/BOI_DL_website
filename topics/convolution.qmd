@@ -1,0 +1,195 @@
+---
+title: "Convolution Neural Network"
+---
+
+```{r set_up_python, echo=FALSE}
+#|echo: FALSE
+
+if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
+  
+  python_path = "C:\\Users\\internet\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"
+
+} else {
+  
+  python_path = "C:\\Users\\Home\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"
+}
+
+reticulate::use_python(python_path, required = TRUE)
+
+```
+
+# Import libraries and data
+
+```{python import_libraries}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+import pandas as pd
+
+import numpy as np
+
+import os
+
+import matplotlib.pyplot as plt
+
+from tensorflow.keras.utils import to_categorical
+
+from tensorflow.keras.models import Sequential
+
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+
+
+```
+
+```{python import_data}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+train_set = pd.read_csv(os.path.join(os.path.expanduser("~\\Documents\\BOI_DL_website"),
+"data\\sign_mnist_train.csv"))
+
+test_set = pd.read_csv(os.path.join(os.path.expanduser("~\\Documents\\BOI_DL_website"),
+"data\\sign_mnist_test.csv"))
+
+
+```
+
+```{python auxilary_functions}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+def preprocess_data(df, img_height=28, img_width=28):
+  
+  processed_df = df / 255.0
+
+  processed_df = processed_df.values.reshape(-1, img_height, img_width, 1).copy()
+
+  return processed_df
+
+
+def preprocess_labels(label_series, num_classes=24):
+    """
+    Remaps labels to skip index 9 (J) and applies one-hot encoding.
+
+    Parameters:
+    - label_series: a pandas Series or 1D array of labels (originally 0–25, with 9 missing)
+    - num_classes: total number of actual classes (default 24)
+
+    Returns:
+    - One-hot encoded labels of shape (n_samples, num_classes)
+    """
+    labels = np.array(label_series)
+
+    remapped_labels = np.array([l - 1 if l > 9 else l for l in labels])
+
+    categorical_labels = to_categorical(remapped_labels, num_classes=num_classes)
+
+    return categorical_labels
+
+
+# Reverse the earlier remapping: add 1 to all labels ≥ 9
+def reverse_remap(labels):
+    return [l + 1 if l >= 9 else l for l in labels]
+
+
+
+def show_predictions(x_data, y_true, y_pred, indices=None, n=6):
+    if indices is None:
+        indices = np.random.choice(len(x_data), n, replace=False)
+
+    plt.figure(figsize=(12, 6))
+    for i, idx in enumerate(indices):
+        plt.subplot(2, n // 2, i + 1)
+        plt.imshow(x_data[idx].reshape(28, 28), cmap='gray')
+        plt.title(f"Pred: {y_pred[idx]}\nTrue: {y_true[idx]}")
+        plt.axis('off')
+    plt.tight_layout()
+    plt.show()
+
+
+
+```
+
+# Preprocess and define model
+
+```{python preprocessing}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+
+# Separate labels
+y_train = preprocess_labels(train_set['label'])
+
+y_test = preprocess_labels(test_set['label'])
+
+# Remove labels from the pixel data
+x_train = preprocess_data(train_set.drop('label', axis=1))
+
+x_test = preprocess_data(test_set.drop('label', axis=1))
+
+```
+
+
+```{python define_model}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| output: false
+
+
+model = Sequential([
+    Conv2D(32, (3, 3), activation='relu', padding='same', input_shape=(28, 28, 1)),
+    MaxPooling2D(pool_size=(2, 2)),
+
+    Conv2D(64, (3, 3), activation='relu', padding='same'),
+    MaxPooling2D(pool_size=(2, 2)),
+
+    Flatten(),
+    Dense(128, activation='relu'),
+    Dropout(0.3),
+    Dense(24, activation='softmax')  # 24 because of label remapping
+])
+
+
+model.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+
+```
+
+# Fit model and evaluate
+
+```{python fit_model}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| output: false
+
+
+history = model.fit(
+    x_train, y_train,
+    validation_data=(x_test, y_test),
+    epochs=5,
+    batch_size=128,
+    verbose = 0
+)
+
+```
+
+```{python evaluation}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| output: false
+
+
+loss, accuracy = model.evaluate(x_test, y_test)
+
+print(f"Test Accuracy: {accuracy:.4f}")
+
+```
+

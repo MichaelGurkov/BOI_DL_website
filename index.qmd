@@ -6,3 +6,4 @@ title: "BOI_DL_website"
 -   [**Introduction**](topics/intro.qmd)
 -   [**Single layer**](topics/single_layer_nn.qmd)
 -   [**Optimization method**](topics/optim_methods.qmd)
+-   [**Convolution network**](topics/convolution.qmd)
