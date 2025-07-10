@@ -1,6 +1,13 @@
 ---
-title: "Convolution Neural Network"
+title: "Convolutional Neural Network (CNN) for Image Classification"
 ---
+
+Build, train, and evaluate a Convolutional Neural Network using the Sign Language MNIST dataset.
+
+
+# Import and Load Data
+- Import necessary libraries, including TensorFlow and Keras layers.
+- Load the training and test datasets from CSV files.
 
 ```{r set_up_python, echo=FALSE}
 #|echo: FALSE
@@ -17,8 +24,6 @@ if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
 reticulate::use_python(python_path, required = TRUE)
 
 ```
-
-# Import libraries and data
 
 ```{python import_libraries}
 #| code-fold: true
@@ -55,6 +60,11 @@ test_set = pd.read_csv(os.path.join(os.path.expanduser("~\\Documents\\BOI_DL_web
 
 
 ```
+
+# Preprocessing
+- Create a function to preprocess pixel values: normalize and reshape to `(28, 28, 1)`.
+- Create a function to preprocess labels: remap classes to account for the missing letter 'J' and one-hot encode them.
+- Apply the preprocessing functions to the training and test sets.
 
 ```{python auxilary_functions}
 #| code-fold: true
@@ -113,7 +123,6 @@ def show_predictions(x_data, y_true, y_pred, indices=None, n=6):
 
 ```
 
-# Preprocess and define model
 
 ```{python preprocessing}
 #| code-fold: true
@@ -133,6 +142,16 @@ x_test = preprocess_data(test_set.drop('label', axis=1))
 
 ```
 
+# Define CNN Model
+- Construct a `Sequential` model with:
+  - A `Conv2D` layer (32 filters, 3×3 kernel, ReLU, padding='same').
+  - A `MaxPooling2D` layer (2×2).
+  - Another `Conv2D` + `MaxPooling2D` block with 64 filters.
+  - A `Flatten` layer.
+  - A fully connected `Dense` layer with 128 units and ReLU activation.
+  - A `Dropout` layer with rate 0.3.
+  - A final `Dense` layer with 24 units and softmax activation.
+- Compile the model using the Adam optimizer and categorical cross-entropy loss.
 
 ```{python define_model}
 #| code-fold: true
@@ -163,7 +182,9 @@ model.compile(
 
 ```
 
-# Fit model and evaluate
+# Train the Model
+- Fit the model on the training data for 5 epochs with batch size 128.
+- Use the test data as validation during training.
 
 ```{python fit_model}
 #| code-fold: true
@@ -180,6 +201,10 @@ history = model.fit(
 )
 
 ```
+
+# Evaluate the Model
+- Evaluate the model on the test data.
+- Report test accuracy.
 
 ```{python evaluation}
 #| code-fold: true

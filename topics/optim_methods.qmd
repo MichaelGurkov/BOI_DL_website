@@ -1,6 +1,14 @@
 ---
-title: "Optimization methods"
+title: "Optimization Methods in Neural Networks"
 ---
+
+Implement and evaluate different optimization strategies for training a simple neural network
+
+
+# Data Preparation
+- Load the `cluster_moons.csv` dataset.
+- Extract input features `X` and target labels `y`.
+- Visualize the data with a scatter plot.
 
 ```{r set_up_python, echo=FALSE}
 #|echo: FALSE
@@ -45,8 +53,10 @@ import matplotlib.pyplot as plt
 
 ```
 
-
 ```{python import_data}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 
 data_file_path = os.path.expanduser('~') + "\\Documents\\BOI_DL_website\\data\\cluster_moons.csv"
 
@@ -63,6 +73,8 @@ y = y.to_numpy().reshape(1, -1).copy()
 ```
 
 ```{python plot_data}
+#| code-fold: true
+#| code-summary: "Show the code"
 
 
 plt.scatter(X[0, :], X[1, :], c=y.flatten())
@@ -77,10 +89,29 @@ plt.show()
 
 
 
-# Gradient descent
 
+
+
+
+
+
+
+
+
+
+# Gradient Descent
+
+- Train a neural network with one hidden layer using **batch gradient descent**.
+- Use the `model` function with `optimizer="gd"` and no mini-batching.
+- Predict on the training data and compute classification accuracy.
+
+
+## Model
 
 ```{python gd_model}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 
 layer_dims = [2, 4, 1]
 
@@ -96,20 +127,35 @@ gd_parameters, gd_costs = model(
 
 ```
 
+## Predictions
+
 ```{python gd_predictions}
+#| code-fold: true
+#| code-summary: "Show the code"
 
 pred_gd = predict_nn(X, gd_parameters)
 
-accuracy_score(pred_gd.flatten(),y.flatten())
+gd_score = accuracy_score(pred_gd.flatten(),y.flatten())
+
+print(f"GD accuracy score is {gd_score}")
 
 ```
 
 
 
-# Stochastic gradient descent
+# Stochastic Gradient Descent
 
+- Train the network using **stochastic gradient descent** with mini-batches (e.g., batch size = 32).
+- Use the `model` function with `optimizer="gd"` and `batch_size=32`.
+- Predict and compute accuracy.
+
+
+## Model
 
 ```{python sgd_model}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 
 sgd_parameters, sgd_costs = model(
     X, y, layer_dims,
@@ -123,11 +169,18 @@ sgd_parameters, sgd_costs = model(
 
 ```
 
+## Predictions
+
 ```{python sgd_predictions}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 
 pred_sgd = predict_nn(X, sgd_parameters)
 
-accuracy_score(pred_sgd.flatten(),y.flatten())
+sgd_score = accuracy_score(pred_sgd.flatten(),y.flatten())
+
+print(f"GD accuracy score is {sgd_score}")
 
 ```
 
@@ -135,7 +188,16 @@ accuracy_score(pred_sgd.flatten(),y.flatten())
 
 # Momentum
 
+- Train the model using **gradient descent with momentum**.
+- Use `optimizer="momentum"` and set `beta=0.9`.
+- Predict and compute accuracy.
+
+## Model
+
 ```{python momentum_model}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 
 momentum_parameters, momentum_costs = model(
     X, y, layer_dims,
@@ -150,19 +212,35 @@ momentum_parameters, momentum_costs = model(
 
 ```
 
+## Predictions
+
 ```{python momentum_predictions}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 
 pred_momentum = predict_nn(X, momentum_parameters)
 
-accuracy_score(pred_momentum.flatten(),y.flatten())
+momentum_score = accuracy_score(pred_momentum.flatten(),y.flatten())
+
+print(f"Momentum accuracy score is {momentum_score}")
 
 ```
 
 
 # RMSProp
 
+- Train the model using the **RMSProp** optimizer.
+- Use `optimizer="rmsprop"` with `learning_rate=0.001`, `beta2=0.9`, and `epsilon=1e-8`.
+- Predict and compute accuracy.
+
+
+## Model
 
 ```{python rmsprop_model}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 
 rmsprop_parameters, rmsprop_costs = model(
     X, y, layer_dims,
@@ -178,19 +256,35 @@ rmsprop_parameters, rmsprop_costs = model(
 
 ```
 
+## Predictions
+
 ```{python rmsprop_predictions}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 
 pred_rmsprop = predict_nn(X, rmsprop_parameters)
 
-accuracy_score(pred_rmsprop.flatten(),y.flatten())
+rmsprop_score = accuracy_score(pred_rmsprop.flatten(),y.flatten())
+
+print(f"RMSProp accuracy score is {rmsprop_score}")
 
 ```
 
 
 # Adam
 
+- Train the model using the **Adam** optimizer.
+- Use `optimizer="adam"` with `learning_rate=0.001`, `beta1=0.9`, `beta2=0.999`, and `epsilon=1e-8`.
+- Predict and compute accuracy.
+
+
+## Model
 
 ```{python adam_model}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 
 adam_parameters, adam_costs = model(
     X, y, layer_dims,
@@ -207,11 +301,18 @@ adam_parameters, adam_costs = model(
 
 ```
 
+## Predictions
+
 ```{python adam_predictions}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 
 pred_adam = predict_nn(X, adam_parameters)
 
-accuracy_score(pred_adam.flatten(),y.flatten())
+adam_score = accuracy_score(pred_adam.flatten(),y.flatten())
+
+print(f"Adam accuracy score is {adam_score}")
 
 ```
 

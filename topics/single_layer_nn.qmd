@@ -1,6 +1,8 @@
 ---
-title: "Single layer Neural Network"
+title: "Single layer Neural Network for Binary Classification"
 ---
+
+Implement a simple neural network from scratch and compare its performance to logistic regression on a 2D dataset.
 
 ```{r set_up_python, echo=FALSE}
 #|echo: FALSE
@@ -33,28 +35,19 @@ import os
 
 ```
 
-# **The Algorithm**
 
-1. **Define the Model Structure**  
-   - Weights (`w`) and bias (`b`).
-
-2. **Initialize Model Parameters**  
-   - Set initial values for `w` and `b`.
-
-3. **Training Loop (Gradient Descent Iteration)**  
-   - **Compute gradients (backward propagation)**.  
-   - Update parameters (gradient descent).  
-
-4. **Return Trained Parameters**  
-   - Output optimized `w` and `b`.  
-
-
-
-# Functions definition
+# Define the Algorithm
+- Specify model structure: input layer → hidden layer → output.
+- Initialize parameters `W1`, `b1`, `W2`, `b2`.
+- Define forward propagation using `tanh` and `sigmoid` activations.
+- Define backward propagation to compute gradients.
+- Implement parameter updates using gradient descent.
 
 ## Auxiliary functions
 
-### NN training functions
+### Implement Training Functions
+- Define helper functions for activation, parameter initialization, forward/backward propagation, and parameter update.
+- Create a wrapper function `train_neural_network` to run the training loop.
 
 ```{python nn_training_functions}
 #| code-fold: true
@@ -177,9 +170,6 @@ def update_parameters(parameters, grads, learning_rate=0.01):
 ```
 
 
-
-#### Neural network implementation
-
 ```{python neural_network_function}
 #| code-fold: true
 #| code-summary: "Show the code"
@@ -215,7 +205,8 @@ def train_neural_network(X,Y, num_iterations,num_hidden_layer_neurons = 4):
 
 
 
-### Auxilary functions
+### Implement Prediction Function
+- Create a `predict` function that runs forward propagation and thresholds outputs.
 
 ```{python auxiliary_functions}
 #| code-fold: true
@@ -238,7 +229,10 @@ def predict(nn_parameters, X, threshold = 0.5):
 
 # Application on planar data
 
-#### Import and preprocess data
+#### Load and Prepare Data
+- Load the `planar_data.csv` dataset.
+- Separate features `X` and target `Y`.
+
 ```{python load_data}
 #| code-fold: true
 #| code-summary: "Show the code"
@@ -258,7 +252,8 @@ Y = raw_df[target].copy()
 ```
 
 
-#### Training neural network
+#### Train the Neural Network
+- Train the network with `num_iterations=10000` and `num_hidden_layer_neurons=4`.
 
 ```{python fit_model}
 
@@ -266,8 +261,9 @@ nn_parameters = train_neural_network(X,Y, num_iterations=10000, num_hidden_layer
 
 ```
 
-#### Predictions on test set
-
+#### Evaluate the Model
+- Generate predictions on the training set.
+- Compute and print classification accuracy.
 ```{python predictions}
 
 from sklearn.metrics import accuracy_score
@@ -281,7 +277,9 @@ print(f"Neural network score is {np.round(nn_score,4)}")
 ```
 
 
-### Comparison with Logistic regression
+### Compare with Logistic Regression
+- Train a logistic regression model on the same data.
+- Generate decision boundary predictions for both models.
 
 ```{python log_reg}
 #| code-fold: true
@@ -296,8 +294,12 @@ log_reg.fit(X,Y)
 ```
 
 
-#### Auxiliary plotting functions
-
+### Visualize Results
+- Use helper functions to:
+  - Plot the actual data.
+  - Plot the decision boundary of logistic regression.
+  - Plot the decision boundary of the neural network.
+  
 ```{python auxiliary_plotting_functions}
 #| code-fold: true
 #| code-summary: "Show the code"

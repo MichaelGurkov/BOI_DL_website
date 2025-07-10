@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Convolution Neural Network – BOI_DL_website</title>
+<title>Convolutional Neural Network (CNN) for Image Classification – BOI_DL_website</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -142,9 +142,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#import-libraries-and-data" id="toc-import-libraries-and-data" class="nav-link active" data-scroll-target="#import-libraries-and-data">Import libraries and data</a></li>
-  <li><a href="#preprocess-and-define-model" id="toc-preprocess-and-define-model" class="nav-link" data-scroll-target="#preprocess-and-define-model">Preprocess and define model</a></li>
-  <li><a href="#fit-model-and-evaluate" id="toc-fit-model-and-evaluate" class="nav-link" data-scroll-target="#fit-model-and-evaluate">Fit model and evaluate</a></li>
+  <li><a href="#import-and-load-data" id="toc-import-and-load-data" class="nav-link active" data-scroll-target="#import-and-load-data">Import and Load Data</a></li>
+  <li><a href="#preprocessing" id="toc-preprocessing" class="nav-link" data-scroll-target="#preprocessing">Preprocessing</a></li>
+  <li><a href="#define-cnn-model" id="toc-define-cnn-model" class="nav-link" data-scroll-target="#define-cnn-model">Define CNN Model</a></li>
+  <li><a href="#train-the-model" id="toc-train-the-model" class="nav-link" data-scroll-target="#train-the-model">Train the Model</a></li>
+  <li><a href="#evaluate-the-model" id="toc-evaluate-the-model" class="nav-link" data-scroll-target="#evaluate-the-model">Evaluate the Model</a></li>
   </ul>
 </nav>
     </div>
@@ -153,7 +155,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Convolution Neural Network</h1>
+<h1 class="title">Convolutional Neural Network (CNN) for Image Classification</h1>
 </div>
 
 
@@ -170,8 +172,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="import-libraries-and-data" class="level1">
-<h1>Import libraries and data</h1>
+<p>Build, train, and evaluate a Convolutional Neural Network using the Sign Language MNIST dataset.</p>
+<section id="import-and-load-data" class="level1">
+<h1>Import and Load Data</h1>
+<ul>
+<li>Import necessary libraries, including TensorFlow and Keras layers.</li>
+<li>Load the training and test datasets from CSV files.</li>
+</ul>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -202,6 +209,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="st">"data</span><span class="ch">\\</span><span class="st">sign_mnist_test.csv"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+</section>
+<section id="preprocessing" class="level1">
+<h1>Preprocessing</h1>
+<ul>
+<li>Create a function to preprocess pixel values: normalize and reshape to <code>(28, 28, 1)</code>.</li>
+<li>Create a function to preprocess labels: remap classes to account for the missing letter ‘J’ and one-hot encode them.</li>
+<li>Apply the preprocessing functions to the training and test sets.</li>
+</ul>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -255,9 +270,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-</section>
-<section id="preprocess-and-define-model" class="level1">
-<h1>Preprocess and define model</h1>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -274,6 +286,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>x_test <span class="op">=</span> preprocess_data(test_set.drop(<span class="st">'label'</span>, axis<span class="op">=</span><span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+</section>
+<section id="define-cnn-model" class="level1">
+<h1>Define CNN Model</h1>
+<ul>
+<li>Construct a <code>Sequential</code> model with:
+<ul>
+<li>A <code>Conv2D</code> layer (32 filters, 3×3 kernel, ReLU, padding=‘same’).</li>
+<li>A <code>MaxPooling2D</code> layer (2×2).</li>
+<li>Another <code>Conv2D</code> + <code>MaxPooling2D</code> block with 64 filters.</li>
+<li>A <code>Flatten</code> layer.</li>
+<li>A fully connected <code>Dense</code> layer with 128 units and ReLU activation.</li>
+<li>A <code>Dropout</code> layer with rate 0.3.</li>
+<li>A final <code>Dense</code> layer with 24 units and softmax activation.</li>
+</ul></li>
+<li>Compile the model using the Adam optimizer and categorical cross-entropy loss.</li>
+</ul>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -300,8 +328,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 </section>
-<section id="fit-model-and-evaluate" class="level1">
-<h1>Fit model and evaluate</h1>
+<section id="train-the-model" class="level1">
+<h1>Train the Model</h1>
+<ul>
+<li>Fit the model on the training data for 5 epochs with batch size 128.</li>
+<li>Use the test data as validation during training.</li>
+</ul>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -315,6 +347,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+</section>
+<section id="evaluate-the-model" class="level1">
+<h1>Evaluate the Model</h1>
+<ul>
+<li>Evaluate the model on the test data.</li>
+<li>Report test accuracy.</li>
+</ul>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Single layer Neural Network – BOI_DL_website</title>
+<title>Single layer Neural Network for Binary Classification – BOI_DL_website</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -142,18 +142,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#the-algorithm" id="toc-the-algorithm" class="nav-link active" data-scroll-target="#the-algorithm"><strong>The Algorithm</strong></a></li>
-  <li><a href="#functions-definition" id="toc-functions-definition" class="nav-link" data-scroll-target="#functions-definition">Functions definition</a>
+  <li><a href="#define-the-algorithm" id="toc-define-the-algorithm" class="nav-link active" data-scroll-target="#define-the-algorithm">Define the Algorithm</a>
   <ul class="collapse">
   <li><a href="#auxiliary-functions" id="toc-auxiliary-functions" class="nav-link" data-scroll-target="#auxiliary-functions">Auxiliary functions</a>
   <ul class="collapse">
-  <li><a href="#nn-training-functions" id="toc-nn-training-functions" class="nav-link" data-scroll-target="#nn-training-functions">NN training functions</a></li>
-  <li><a href="#auxilary-functions" id="toc-auxilary-functions" class="nav-link" data-scroll-target="#auxilary-functions">Auxilary functions</a></li>
+  <li><a href="#implement-training-functions" id="toc-implement-training-functions" class="nav-link" data-scroll-target="#implement-training-functions">Implement Training Functions</a></li>
+  <li><a href="#implement-prediction-function" id="toc-implement-prediction-function" class="nav-link" data-scroll-target="#implement-prediction-function">Implement Prediction Function</a></li>
   </ul></li>
   </ul></li>
   <li><a href="#application-on-planar-data" id="toc-application-on-planar-data" class="nav-link" data-scroll-target="#application-on-planar-data">Application on planar data</a>
   <ul class="collapse">
-  <li><a href="#comparison-with-logistic-regression" id="toc-comparison-with-logistic-regression" class="nav-link" data-scroll-target="#comparison-with-logistic-regression">Comparison with Logistic regression</a></li>
+  <li><a href="#compare-with-logistic-regression" id="toc-compare-with-logistic-regression" class="nav-link" data-scroll-target="#compare-with-logistic-regression">Compare with Logistic Regression</a></li>
+  <li><a href="#visualize-results" id="toc-visualize-results" class="nav-link" data-scroll-target="#visualize-results">Visualize Results</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -163,7 +163,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Single layer Neural Network</h1>
+<h1 class="title">Single layer Neural Network for Binary Classification</h1>
 </div>
 
 
@@ -180,6 +180,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<p>Implement a simple neural network from scratch and compare its performance to logistic regression on a 2D dataset.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -191,35 +192,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<section id="the-algorithm" class="level1">
-<h1><strong>The Algorithm</strong></h1>
-<ol type="1">
-<li><strong>Define the Model Structure</strong>
+<section id="define-the-algorithm" class="level1">
+<h1>Define the Algorithm</h1>
 <ul>
-<li>Weights (<code>w</code>) and bias (<code>b</code>).</li>
-</ul></li>
-<li><strong>Initialize Model Parameters</strong>
-<ul>
-<li>Set initial values for <code>w</code> and <code>b</code>.</li>
-</ul></li>
-<li><strong>Training Loop (Gradient Descent Iteration)</strong>
-<ul>
-<li><strong>Compute gradients (backward propagation)</strong>.<br>
-</li>
-<li>Update parameters (gradient descent).</li>
-</ul></li>
-<li><strong>Return Trained Parameters</strong>
-<ul>
-<li>Output optimized <code>w</code> and <code>b</code>.</li>
-</ul></li>
-</ol>
-</section>
-<section id="functions-definition" class="level1">
-<h1>Functions definition</h1>
+<li>Specify model structure: input layer → hidden layer → output.</li>
+<li>Initialize parameters <code>W1</code>, <code>b1</code>, <code>W2</code>, <code>b2</code>.</li>
+<li>Define forward propagation using <code>tanh</code> and <code>sigmoid</code> activations.</li>
+<li>Define backward propagation to compute gradients.</li>
+<li>Implement parameter updates using gradient descent.</li>
+</ul>
 <section id="auxiliary-functions" class="level2">
 <h2 class="anchored" data-anchor-id="auxiliary-functions">Auxiliary functions</h2>
-<section id="nn-training-functions" class="level3">
-<h3 class="anchored" data-anchor-id="nn-training-functions">NN training functions</h3>
+<section id="implement-training-functions" class="level3">
+<h3 class="anchored" data-anchor-id="implement-training-functions">Implement Training Functions</h3>
+<ul>
+<li>Define helper functions for activation, parameter initialization, forward/backward propagation, and parameter update.</li>
+<li>Create a wrapper function <code>train_neural_network</code> to run the training loop.</li>
+</ul>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -338,8 +327,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> parameters</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<section id="neural-network-implementation" class="level4">
-<h4 class="anchored" data-anchor-id="neural-network-implementation">Neural network implementation</h4>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -370,9 +357,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 </section>
-</section>
-<section id="auxilary-functions" class="level3">
-<h3 class="anchored" data-anchor-id="auxilary-functions">Auxilary functions</h3>
+<section id="implement-prediction-function" class="level3">
+<h3 class="anchored" data-anchor-id="implement-prediction-function">Implement Prediction Function</h3>
+<ul>
+<li>Create a <code>predict</code> function that runs forward propagation and thresholds outputs.</li>
+</ul>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -394,8 +383,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="application-on-planar-data" class="level1">
 <h1>Application on planar data</h1>
-<section id="import-and-preprocess-data" class="level4">
-<h4 class="anchored" data-anchor-id="import-and-preprocess-data">Import and preprocess data</h4>
+<section id="load-and-prepare-data" class="level4">
+<h4 class="anchored" data-anchor-id="load-and-prepare-data">Load and Prepare Data</h4>
+<ul>
+<li>Load the <code>planar_data.csv</code> dataset.</li>
+<li>Separate features <code>X</code> and target <code>Y</code>.</li>
+</ul>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -412,15 +405,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 </section>
-<section id="training-neural-network" class="level4">
-<h4 class="anchored" data-anchor-id="training-neural-network">Training neural network</h4>
+<section id="train-the-neural-network" class="level4">
+<h4 class="anchored" data-anchor-id="train-the-neural-network">Train the Neural Network</h4>
+<ul>
+<li>Train the network with <code>num_iterations=10000</code> and <code>num_hidden_layer_neurons=4</code>.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>nn_parameters <span class="op">=</span> train_neural_network(X,Y, num_iterations<span class="op">=</span><span class="dv">10000</span>, num_hidden_layer_neurons<span class="op">=</span><span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="predictions-on-test-set" class="level4">
-<h4 class="anchored" data-anchor-id="predictions-on-test-set">Predictions on test set</h4>
+<section id="evaluate-the-model" class="level4">
+<h4 class="anchored" data-anchor-id="evaluate-the-model">Evaluate the Model</h4>
+<ul>
+<li>Generate predictions on the training set.</li>
+<li>Compute and print classification accuracy.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> accuracy_score</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -434,8 +434,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="comparison-with-logistic-regression" class="level3">
-<h3 class="anchored" data-anchor-id="comparison-with-logistic-regression">Comparison with Logistic regression</h3>
+<section id="compare-with-logistic-regression" class="level3">
+<h3 class="anchored" data-anchor-id="compare-with-logistic-regression">Compare with Logistic Regression</h3>
+<ul>
+<li>Train a logistic regression model on the same data.</li>
+<li>Generate decision boundary predictions for both models.</li>
+</ul>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -853,8 +857,17 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 </style><div id="sk-container-id-1" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>LogisticRegression()</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br>On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden=""><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox" checked=""><label for="sk-estimator-id-1" class="sk-toggleable__label fitted sk-toggleable__label-arrow fitted">&nbsp;&nbsp;LogisticRegression<a class="sk-estimator-doc-link fitted" rel="noreferrer" target="_blank" href="https://scikit-learn.org/1.5/modules/generated/sklearn.linear_model.LogisticRegression.html">?<span>Documentation for LogisticRegression</span></a><span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></label><div class="sk-toggleable__content fitted"><pre>LogisticRegression()</pre></div> </div></div></div></div>
 </div>
 </div>
-<section id="auxiliary-plotting-functions" class="level4">
-<h4 class="anchored" data-anchor-id="auxiliary-plotting-functions">Auxiliary plotting functions</h4>
+</section>
+<section id="visualize-results" class="level3">
+<h3 class="anchored" data-anchor-id="visualize-results">Visualize Results</h3>
+<ul>
+<li>Use helper functions to:
+<ul>
+<li>Plot the actual data.</li>
+<li>Plot the decision boundary of logistic regression.</li>
+<li>Plot the decision boundary of the neural network.</li>
+</ul></li>
+</ul>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -975,7 +988,6 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 </div>
 
 
-</section>
 </section>
 </section>
 
