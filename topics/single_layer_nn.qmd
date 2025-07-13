@@ -299,7 +299,7 @@ log_reg.fit(X,Y)
   - Plot the actual data.
   - Plot the decision boundary of logistic regression.
   - Plot the decision boundary of the neural network.
-  
+   
 ```{python auxiliary_plotting_functions}
 #| code-fold: true
 #| code-summary: "Show the code"

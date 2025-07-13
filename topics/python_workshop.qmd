@@ -1,0 +1,201 @@
+---
+title: "Python for Deep Learning"
+format: html
+page-layout: full
+---
+  
+  # 🧠 Python for Deep Learning – 3-Hour Workshop
+  
+This hands-on workshop introduces the essential Python skills needed for deep learning. You'll work directly in Google Colab and practice every concept along the way.
+
+---
+
+
+```{r set_up_python, echo=FALSE}
+#|echo: FALSE
+
+if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
+  
+  python_path = paste0("C:\\Users\\internet\\AppData\\Local",
+                       "\\Programs\\Python\\Python312\\python.exe")
+} else {
+  
+  python_path = paste0("C:\\Users\\Home\\AppData\\Local",
+                       "\\Programs\\Python\\Python312\\python.exe")
+}
+
+reticulate::use_python(python_path)
+
+```
+
+
+## 1. Introduction & Environment Setup
+
+We will use **Google Colab** as our development environment, which allows you to run Python in the browser, without installing anything locally.
+
+### Topics Covered
+- Why Python for Deep Learning
+- Navigating Google Colab
+- Uploading files manually and via Google Drive
+
+### Task
+Upload a CSV file to Colab and display its first few rows using `pandas`.
+
+---
+
+
+```{python import_libraries}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+import pandas as pd
+
+import numpy as np
+
+import os
+
+
+```
+
+
+## 2. Python Fundamentals
+
+Get familiar with Python’s basic building blocks: variables, lists, dictionaries, control flow, and functions.
+
+### Topics Covered
+- Data types: `int`, `float`, `bool`, `str`
+- Lists and dictionaries
+- `if`, `for`, and `while` statements
+- Writing and calling functions
+
+### Task
+Create a dictionary of students and their exam scores.  
+Write a function that:
+- Prints each student’s average score
+- Returns the name of the top student
+
+You’ll reuse this data structure in the next section to learn about NumPy.
+
+---
+
+```{python calculate_scores}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+def calculate_averages(scores_dict):
+  
+  scores_df = pd.DataFrame(data=scores_dict.values(), index=scores_dict.keys()).T
+  
+  averages_df = scores_df.mean(axis = 0).sort_values(ascending=False)
+
+  return averages_df
+
+
+student_scores = {
+    "Alice": [88, 92, 79],
+    "Bob":   [75, 83, 80],
+    "Carol": [90, 85, 95],
+    "Dave":  [72, 78, 70]
+}
+
+
+calculate_averages(student_scores)
+
+
+```
+
+
+
+## 3. Numerical Computing with NumPy
+
+Learn to work with arrays and vectors using NumPy, Python’s core numerical library.
+
+### Topics Covered
+- Creating and manipulating NumPy arrays
+- Indexing, slicing, shapes, reshaping
+- Element-wise operations and broadcasting
+- Matrix multiplication and axis-based operations
+
+### Task
+Use the student-score data from the previous task:
+- Convert it to a NumPy array
+- Compute average scores using matrix multiplication
+- Print each student’s average based on the computed result
+
+---
+
+```{python }
+
+student_names = list(student_scores.keys())
+grade_lists = list(student_scores.values())  # list of lists, one per student
+
+# Step 3: Convert to NumPy array and transpose
+# Original shape: (n_students, n_exams) → Transpose to (n_exams, n_students)
+grades_matrix = np.array(grade_lists).T
+
+# Step 4: Create a weight vector to compute averages (equal weights)
+n_exams = grades_matrix.shape[0]
+weights = np.ones((n_exams, 1)) / n_exams  # shape: (n_exams, 1)
+
+# Step 5: Matrix multiplication → result shape: (n_students, 1)
+averages = grades_matrix.T @ weights  # (n_students, n_exams) x (n_exams, 1)
+
+# Step 6: Display results
+for name, avg in zip(student_names, averages.flatten()):
+    print(f"{name}: {avg:.2f}")
+
+```
+
+
+
+## 4. Working with Data
+
+Most real-world deep learning tasks start with data in files. This section shows how to load and prepare it.
+
+### Topics Covered
+- Reading CSV files using `pandas`
+- Exploring the dataset (`.head()`, `.describe()`)
+- Extracting features and labels as NumPy arrays
+- Feature scaling with `StandardScaler`
+
+### Task
+Load a planar dataset with columns `x1`, `x2`, and `label`:
+- Show class distribution
+- Extract features (`X`) and labels (`y`)
+- Standardize features for use in a model
+
+---
+
+## 5. Logistic Regression vs Neural Network
+
+We'll train two models on the same planar data:
+  - A logistic regression (linear decision boundary)
+- A shallow neural network (non-linear decision boundary)
+
+### Topics Covered
+- Building models with `Sequential`
+- Adding layers with `Dense`
+- Compiling and training with `fit`
+- Comparing results across models
+
+### Task
+Using the prepared planar dataset:
+  - Train a logistic regression model (1 layer)
+- Train a neural network with one hidden layer
+- Compare accuracy of both on a test set
+
+---
+  
+  ## 6. Wrap-Up and Next Steps
+  
+  ### Topics Covered
+  - What you've learned so far
+- Recommended resources to go further
+
+### Task
+Create a Python function that prints what you learned today.  
+Store each section and a short summary in a dictionary, and iterate over it to print the output.
+
+---

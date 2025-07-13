@@ -117,5 +117,47 @@
     "title": "Optimization Methods in Neural Networks",
     "section": "Predictions",
     "text": "Predictions\n\n\nShow the code\npred_adam = predict_nn(X, adam_parameters)\n\nadam_score = accuracy_score(pred_adam.flatten(),y.flatten())\n\nprint(f\"Adam accuracy score is {adam_score}\")\n\n\nAdam accuracy score is 0.867"
+  },
+  {
+    "objectID": "topics/python_workshop.html",
+    "href": "topics/python_workshop.html",
+    "title": "Python for Deep Learning",
+    "section": "",
+    "text": "# 🧠 Python for Deep Learning – 3-Hour Workshop\nThis hands-on workshop introduces the essential Python skills needed for deep learning. You’ll work directly in Google Colab and practice every concept along the way."
+  },
+  {
+    "objectID": "topics/python_workshop.html#introduction-environment-setup",
+    "href": "topics/python_workshop.html#introduction-environment-setup",
+    "title": "Python for Deep Learning",
+    "section": "1. Introduction & Environment Setup",
+    "text": "1. Introduction & Environment Setup\nWe will use Google Colab as our development environment, which allows you to run Python in the browser, without installing anything locally.\n\nTopics Covered\n\nWhy Python for Deep Learning\nNavigating Google Colab\nUploading files manually and via Google Drive\n\n\n\nTask\nUpload a CSV file to Colab and display its first few rows using pandas."
+  },
+  {
+    "objectID": "topics/python_workshop.html#python-fundamentals",
+    "href": "topics/python_workshop.html#python-fundamentals",
+    "title": "Python for Deep Learning",
+    "section": "2. Python Fundamentals",
+    "text": "2. Python Fundamentals\nGet familiar with Python’s basic building blocks: variables, lists, dictionaries, control flow, and functions.\n\nTopics Covered\n\nData types: int, float, bool, str\nLists and dictionaries\nif, for, and while statements\nWriting and calling functions\n\n\n\nTask\nCreate a dictionary of students and their exam scores.\nWrite a function that: - Prints each student’s average score - Returns the name of the top student\nYou’ll reuse this data structure in the next section to learn about NumPy."
+  },
+  {
+    "objectID": "topics/python_workshop.html#numerical-computing-with-numpy",
+    "href": "topics/python_workshop.html#numerical-computing-with-numpy",
+    "title": "Python for Deep Learning",
+    "section": "3. Numerical Computing with NumPy",
+    "text": "3. Numerical Computing with NumPy\nLearn to work with arrays and vectors using NumPy, Python’s core numerical library.\n\nTopics Covered\n\nCreating and manipulating NumPy arrays\nIndexing, slicing, shapes, reshaping\nElement-wise operations and broadcasting\nMatrix multiplication and axis-based operations\n\n\n\nTask\nUse the student-score data from the previous task: - Convert it to a NumPy array - Compute average scores using matrix multiplication - Print each student’s average based on the computed result"
+  },
+  {
+    "objectID": "topics/python_workshop.html#working-with-data",
+    "href": "topics/python_workshop.html#working-with-data",
+    "title": "Python for Deep Learning",
+    "section": "4. Working with Data",
+    "text": "4. Working with Data\nMost real-world deep learning tasks start with data in files. This section shows how to load and prepare it.\n\nTopics Covered\n\nReading CSV files using pandas\nExploring the dataset (.head(), .describe())\nExtracting features and labels as NumPy arrays\nFeature scaling with StandardScaler\n\n\n\nTask\nLoad a planar dataset with columns x1, x2, and label: - Show class distribution - Extract features (X) and labels (y) - Standardize features for use in a model"
+  },
+  {
+    "objectID": "topics/python_workshop.html#logistic-regression-vs-neural-network",
+    "href": "topics/python_workshop.html#logistic-regression-vs-neural-network",
+    "title": "Python for Deep Learning",
+    "section": "5. Logistic Regression vs Neural Network",
+    "text": "5. Logistic Regression vs Neural Network\nWe’ll train two models on the same planar data: - A logistic regression (linear decision boundary) - A shallow neural network (non-linear decision boundary)\n\nTopics Covered\n\nBuilding models with Sequential\nAdding layers with Dense\nCompiling and training with fit\nComparing results across models\n\n\n\nTask\nUsing the prepared planar dataset: - Train a logistic regression model (1 layer) - Train a neural network with one hidden layer - Compare accuracy of both on a test set\n\n## 6. Wrap-Up and Next Steps\n### Topics Covered - What you’ve learned so far - Recommended resources to go further\n\n\nTask\nCreate a Python function that prints what you learned today.\nStore each section and a short summary in a dictionary, and iterate over it to print the output."
   }
 ]
