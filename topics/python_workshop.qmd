@@ -3,86 +3,80 @@ title: "Python for Deep Learning"
 format: html
 page-layout: full
 ---
-  
-  # 🧠 Python for Deep Learning – 3-Hour Workshop
-  
-This hands-on workshop introduces the essential Python skills needed for deep learning. You'll work directly in Google Colab and practice every concept along the way.
+
+
+# 🧠 Python for Deep Learning – 3-Hour Workshop
+
+This hands-on workshop introduces the essential Python skills needed for deep learning. You'll run Python code directly in your environment (e.g., RStudio with reticulate or Jupyter), and practice every concept along the way.
 
 ---
-
 
 ```{r set_up_python, echo=FALSE}
 #|echo: FALSE
 
 if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
   
-  python_path = paste0("C:\\Users\\internet\\AppData\\Local",
-                       "\\Programs\\Python\\Python312\\python.exe")
+  python_path = "C:\\Users\\internet\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"
+
 } else {
   
-  python_path = paste0("C:\\Users\\Home\\AppData\\Local",
-                       "\\Programs\\Python\\Python312\\python.exe")
+  python_path = "C:\\Users\\Home\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"
 }
 
-reticulate::use_python(python_path)
-
+reticulate::use_python(python_path, required = TRUE)
 ```
-
 
 ## 1. Introduction & Environment Setup
 
-We will use **Google Colab** as our development environment, which allows you to run Python in the browser, without installing anything locally.
+We will use a local Python environment via `reticulate`, which allows running Python code directly inside this Quarto document.
 
 ### Topics Covered
-- Why Python for Deep Learning
-- Navigating Google Colab
-- Uploading files manually and via Google Drive
+
+* Why Python for Deep Learning
+* Setting up your local Python environment
+* Reading local files using pandas
 
 ### Task
-Upload a CSV file to Colab and display its first few rows using `pandas`.
+
+Read a CSV file from your computer using `pandas` and display its first few rows.
 
 ---
-
 
 ```{python import_libraries}
 #| code-fold: true
 #| code-summary: "Show the code"
 
-
 import pandas as pd
-
 import numpy as np
-
 import os
-
-
 ```
-
 
 ## 2. Python Fundamentals
 
 Get familiar with Python’s basic building blocks: variables, lists, dictionaries, control flow, and functions.
 
 ### Topics Covered
-- Data types: `int`, `float`, `bool`, `str`
-- Lists and dictionaries
-- `if`, `for`, and `while` statements
-- Writing and calling functions
+
+* Data types: `int`, `float`, `bool`, `str`
+* Lists and dictionaries
+* `if`, `for`, and `while` statements
+* Writing and calling functions
 
 ### Task
-Create a dictionary of students and their exam scores.  
-Write a function that:
-- Prints each student’s average score
-- Returns the name of the top student
 
-You’ll reuse this data structure in the next section to learn about NumPy.
+Create a dictionary of students and their exam scores.
+Write a function that:
+
+* Prints each student’s average score
+* Returns the name of the top student
+
+You’ll use this data structure in the next section to explore NumPy arrays.
 
 ---
 
 ```{python calculate_scores}
 #| code-fold: true
 #| code-summary: "Show the code"
-
 
 def calculate_averages(scores_dict):
   
@@ -92,7 +86,6 @@ def calculate_averages(scores_dict):
 
   return averages_df
 
-
 student_scores = {
     "Alice": [88, 92, 79],
     "Bob":   [75, 83, 80],
@@ -100,29 +93,27 @@ student_scores = {
     "Dave":  [72, 78, 70]
 }
 
-
 calculate_averages(student_scores)
-
-
 ```
-
-
 
 ## 3. Numerical Computing with NumPy
 
 Learn to work with arrays and vectors using NumPy, Python’s core numerical library.
 
 ### Topics Covered
-- Creating and manipulating NumPy arrays
-- Indexing, slicing, shapes, reshaping
-- Element-wise operations and broadcasting
-- Matrix multiplication and axis-based operations
+
+* Creating and manipulating NumPy arrays
+* Indexing, slicing, shapes, reshaping
+* Element-wise operations and broadcasting
+* Matrix multiplication and axis-based operations
 
 ### Task
+
 Use the student-score data from the previous task:
-- Convert it to a NumPy array
-- Compute average scores using matrix multiplication
-- Print each student’s average based on the computed result
+
+* Convert it to a NumPy array
+* Compute average scores using matrix multiplication
+* Print each student’s average based on the computed result
 
 ---
 
@@ -145,57 +136,119 @@ averages = grades_matrix.T @ weights  # (n_students, n_exams) x (n_exams, 1)
 # Step 6: Display results
 for name, avg in zip(student_names, averages.flatten()):
     print(f"{name}: {avg:.2f}")
-
 ```
-
-
 
 ## 4. Working with Data
 
 Most real-world deep learning tasks start with data in files. This section shows how to load and prepare it.
 
 ### Topics Covered
-- Reading CSV files using `pandas`
-- Exploring the dataset (`.head()`, `.describe()`)
-- Extracting features and labels as NumPy arrays
-- Feature scaling with `StandardScaler`
+
+* Load the `planar_data.csv` dataset
+* Separate features `X` and target `Y`
+
+```{python load_planar_data}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+raw_df = pd.read_csv(os.path.join(os.path.expanduser("~\\Documents\\BOI_DL_website"), "data\\planar_data.csv"))
+
+features = ["x_coord","y_coord"]
+target = "label"
+
+X = raw_df[features].copy()
+Y = raw_df[target].copy()
+```
 
 ### Task
-Load a planar dataset with columns `x1`, `x2`, and `label`:
-- Show class distribution
-- Extract features (`X`) and labels (`y`)
-- Standardize features for use in a model
+
+Load a planar dataset with columns `x_coord`, `y_coord`, and `label`:
+
+* Show class distribution
+* Extract features (`X`) and labels (`Y`)
+* Use them to train and evaluate models
 
 ---
 
-## 5. Logistic Regression vs Neural Network
+## 5. Neural Network (compared to Logistic Regression)
 
 We'll train two models on the same planar data:
-  - A logistic regression (linear decision boundary)
-- A shallow neural network (non-linear decision boundary)
+  
+  * A logistic regression (linear decision boundary)
+* A shallow neural network (non-linear decision boundary)
 
 ### Topics Covered
-- Building models with `Sequential`
-- Adding layers with `Dense`
-- Compiling and training with `fit`
-- Comparing results across models
+
+* Building models with `Sequential`
+* Adding layers with `Dense`
+* Compiling and training with `fit`
+* Comparing results across models
 
 ### Task
+
 Using the prepared planar dataset:
-  - Train a logistic regression model (1 layer)
-- Train a neural network with one hidden layer
-- Compare accuracy of both on a test set
+  
+  * Train a logistic regression model (1 layer)
+* Train a neural network with one hidden layer
+* Compare their training accuracy
 
 ---
   
-  ## 6. Wrap-Up and Next Steps
-  
-  ### Topics Covered
-  - What you've learned so far
-- Recommended resources to go further
+```{python import_dl_libraries}
+#| code-fold: true
+#| code-summary: "Show the code"
 
-### Task
-Create a Python function that prints what you learned today.  
-Store each section and a short summary in a dictionary, and iterate over it to print the output.
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.optimizers import Adam
+```
 
----
+
+```{python fit_nn_model}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+nn_model = Sequential([
+  Dense(10, activation='relu', input_shape=(2,)),
+  Dense(1, activation='sigmoid')
+])
+
+nn_model.compile(optimizer=Adam(),
+                 loss='binary_crossentropy',
+                 metrics=['accuracy'])
+
+nn_model.fit(X, Y, epochs=100, batch_size=32, verbose=0)
+
+nn_acc = nn_model.evaluate(X, Y, verbose=0)[1]
+
+```
+
+
+```{python fit_log_reg_model}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+log_reg_model = Sequential([
+  Dense(1, activation='sigmoid', input_shape=(2,))
+])
+
+log_reg_model.compile(optimizer=Adam(),
+                      loss='binary_crossentropy',
+                      metrics=['accuracy'])
+
+log_reg_model.fit(X, Y, epochs=100, batch_size=32, verbose=0)
+
+log_acc = log_reg_model.evaluate(X, Y, verbose=0)[1]
+
+```
+
+
+```{python compare_models}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+print(f"Neural Network Accuracy: {nn_acc:.4f} vs Logistic Regression Accuracy: {log_acc:.4f}")
+
+```
+

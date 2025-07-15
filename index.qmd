@@ -2,6 +2,9 @@
 title: "BOI_DL_website"
 ---
 
+# Python workshop
+-   [**Python workshop**](topics/python_workshop.qmd)
+
 ## Topics
 -   [**Introduction**](topics/intro.qmd)
 -   [**Single layer**](topics/single_layer_nn.qmd)
