@@ -5,7 +5,7 @@ page-layout: full
 ---
 
 
-# 🧠 Python for Deep Learning – 3-Hour Workshop
+# 🧠 Python for Deep Learning Workshop
 
 This hands-on workshop introduces the essential Python skills needed for deep learning. You'll run Python code directly in your environment (e.g., RStudio with reticulate or Jupyter), and practice every concept along the way.
 
@@ -57,198 +57,562 @@ Get familiar with Python’s basic building blocks: variables, lists, dictionari
 
 ### Topics Covered
 
-* Data types: `int`, `float`, `bool`, `str`
+
 * Lists and dictionaries
 * `if`, `for`, and `while` statements
 * Writing and calling functions
 
-### Task
 
-Create a dictionary of students and their exam scores.
-Write a function that:
+### 2.1 Lists and dictionaries
 
-* Prints each student’s average score
-* Returns the name of the top student
+**Concept:**  
+- **Lists** are ordered collections. Each item has a position called an *index* (starting from `0`).  
+  - You can get a single element using `list[index]` (e.g., `scores[0]` → first element).  
+  - You can get a *slice* using `list[start:stop]`, which returns elements from `start` up to but **not including** `stop`.  
+- **Dictionaries** store key–value pairs. You look up a value by its key (like a label).  
+  - You can add new keys or update existing ones using `dict[key] = value`.  
+  - Keys must be unique; values can be any data type.
 
-You’ll use this data structure in the next section to explore NumPy arrays.
 
----
 
-```{python calculate_scores}
-#| code-fold: true
-#| code-summary: "Show the code"
+```{python }
 
-def calculate_averages(scores_dict):
-  
-  scores_df = pd.DataFrame(data=scores_dict.values(), index=scores_dict.keys()).T
-  
-  averages_df = scores_df.mean(axis = 0).sort_values(ascending=False)
+# A list of exam scores for Alice
+scores_alice = [88, 92, 79]
 
-  return averages_df
+# Indexing: position 0 is the first score
+print("First score:", scores_alice[0])
 
+# Slicing: [:2] means start at index 0, stop before index 2 → positions 0 and 1
+print("First two scores:", scores_alice[:2])
+
+# A dictionary mapping student names to their list of scores
 student_scores = {
     "Alice": [88, 92, 79],
     "Bob":   [75, 83, 80],
     "Carol": [90, 85, 95],
-    "Dave":  [72, 78, 70]
+    "Dave":  [72, 78, 70],
 }
 
-calculate_averages(student_scores)
+# Lookup: use the key (student's name) to get the list of scores
+print("Carol's scores:", student_scores["Carol"])
+
+# Add a new student by assigning to a new key
+student_scores["Eve"] = [85, 88, 91]
+
+# Update an existing student's scores (overwrites the old list)
+student_scores["Bob"] = [78, 84, 82]
+
+# Get all keys (student names) and values (lists of scores)
+print("Students:", list(student_scores.keys()))
+print("Sample scores:", list(student_scores.values())[:2])  # [:2] → first two values
+
+
 ```
 
-## 3. Numerical Computing with NumPy
 
-Learn to work with arrays and vectors using NumPy, Python’s core numerical library.
+### 2.2 Control flow
 
-### Topics Covered
+**Concept:**  
+- `if / elif / else` lets the program choose actions based on conditions.  
+- `for` loops iterate over items in a collection, letting you process each element in turn. 
 
-* Creating and manipulating NumPy arrays
-* Indexing, slicing, shapes, reshaping
-* Element-wise operations and broadcasting
-* Matrix multiplication and axis-based operations
+We'll use the `student_scores` dictionary from the previous section.
 
-### Task
-
-Use the student-score data from the previous task:
-
-* Convert it to a NumPy array
-* Compute average scores using matrix multiplication
-* Print each student’s average based on the computed result
-
----
 
 ```{python }
 
-student_names = list(student_scores.keys())
-grade_lists = list(student_scores.values())  # list of lists, one per student
+# Example 1: if / elif / else
+x = 87
+if x >= 90:
+    grade = "A"
+elif x >= 80:
+    grade = "B"
+else:
+    grade = "C or below"
+print("Grade bucket:", grade)
 
-# Step 3: Convert to NumPy array and transpose
-# Original shape: (n_students, n_exams) → Transpose to (n_exams, n_students)
-grades_matrix = np.array(grade_lists).T
+# Example 2: for loop over a student's scores
+# Reusing the student_scores dictionary from earlier
+scores_alice = student_scores["Alice"]  # a list of Alice's scores
+total = 0
+for s in scores_alice:
+    total = total + s
+average = total / len(scores_alice)
+print("Alice's average score:", average)
 
-# Step 4: Create a weight vector to compute averages (equal weights)
-n_exams = grades_matrix.shape[0]
-weights = np.ones((n_exams, 1)) / n_exams  # shape: (n_exams, 1)
 
-# Step 5: Matrix multiplication → result shape: (n_students, 1)
-averages = grades_matrix.T @ weights  # (n_students, n_exams) x (n_exams, 1)
-
-# Step 6: Display results
-for name, avg in zip(student_names, averages.flatten()):
-    print(f"{name}: {avg:.2f}")
 ```
+
+### 2.3 Functions
+
+**Concept:**  
+- A function is a reusable block of code that takes **inputs** (parameters) and can **return** an output.  
+- Use `def function_name(parameters):` to define it.  
+- Use `return` to send a result back to the caller.  
+- You can reuse loops and calculations inside a function so you don’t repeat the same code.
+
+```{python }
+
+def average_score(scores):
+    """
+    Calculate the average from a list of scores.
+    """
+    total = 0
+    for s in scores:
+        total = total + s
+    return total / len(scores)
+
+# Example: Calculate averages for all students
+for name in student_scores:  # loops over keys (student names)
+    avg = average_score(student_scores[name])
+    print(f"{name}: {avg:.2f}")
+
+
+```
+
+
+
+## 3. Numerical Computing with NumPy
+
+**Concept:**  
+NumPy arrays are like lists but optimized for fast mathematical operations.  
+- **1D array** → like a row of numbers.  
+- **2D array** → like a table (rows × columns).  
+- `.shape` tells you the size of the array.
+
+
+```{python }
+
+# 1D array: vector of exam scores
+scores_1d = np.array([88, 92, 79])
+print("1D array:", scores_1d)
+print("Shape:", scores_1d.shape)  # (3,) → 3 elements in 1 dimension
+
+# 2D array: scores for two students across three exams
+scores_2d = np.array([
+    [88, 92, 79],  # student 1
+    [75, 83, 80]   # student 2
+])
+print("\n2D array:\n", scores_2d)
+print("Shape:", scores_2d.shape)  # (2, 3) → 2 rows, 3 columns
+
+# Now convert student_scores dictionary values into a 2D array
+grades_matrix = np.array(list(student_scores.values()))
+print("\nGrades matrix:\n", grades_matrix)
+print("Shape:", grades_matrix.shape)  # rows = students, columns = exams
+
+
+```
+
+
+### 3.1 Indexing and slicing
+
+**Concept:**  
+- Indexing works like Python lists: `array[row_index, col_index]` (0-based).  
+- Slicing lets you select a range: `start:stop` returns elements from `start` up to (but not including) `stop`.  
+- You can slice rows, columns, or both.
+
+
+```{python }
+
+# Example array for reference
+print("Grades matrix:\n", grades_matrix)
+
+# Get the score of the first student in the first exam
+print("\nFirst student's first exam score:", grades_matrix[0, 0])
+
+# Get all exam scores for the second student (row index 1)
+print("Second student's scores:", grades_matrix[1, :])
+
+# Get all scores for the third exam (column index 2)
+print("Scores in third exam:", grades_matrix[:, 2])
+
+# Slice: first two students' scores
+print("First two students' scores:\n", grades_matrix[0:2, :])
+
+# Slice: first two exams for all students
+print("First two exams for all students:\n", grades_matrix[:, 0:2])
+
+
+```
+
+
+### 3.2 Element-wise operations and broadcasting
+
+**Concept:**  
+- **Element-wise operations** apply a calculation to each element of an array.  
+- **Broadcasting** lets NumPy apply operations between arrays of different shapes by "stretching" one to match the other (without copying data).  
+- This is much faster and cleaner than using Python loops.
+
+
+```{python }
+
+# Add 5 points to every score (element-wise addition)
+print("Original:\n", grades_matrix)
+print("\n+5 to every score:\n", grades_matrix + 5)
+
+# Multiply all scores by 1.1 to simulate a 10% bonus
+print("\n10% bonus:\n", grades_matrix * 1.1)
+
+# Broadcasting: subtract the minimum score in each column (exam) from that column
+min_scores_per_exam = grades_matrix.min(axis=0)  # shape: (n_exams,)
+print("\nMinimum scores per exam:", min_scores_per_exam)
+
+adjusted = grades_matrix - min_scores_per_exam  # broadcasting happens here
+print("\nScores adjusted by exam minimum:\n", adjusted)
+
+
+```
+
+
+### 3.3 Matrix multiplication and axis-based operations
+
+**Concept:**  
+- **Matrix multiplication** (`np.dot`) combines rows and columns, often used in deep learning layers to combine inputs with weights.  
+- **Axis-based operations** let you apply functions (mean, sum, etc.) across rows or columns:
+
+  - `axis=0` → operate down columns (across rows)
+  
+  - `axis=1` → operate across columns (per row)
+
+**Extra notes:**
+- **`np.ones(shape)`** creates an array of ones with the given shape.  
+  - Here we use it for **equal weights** when averaging scores: each exam gets the same weight.  
+- **`.flatten()`** converts a multi-dimensional array into a 1D array.  
+  - After matrix multiplication, the result might be shape `(n_students, 1)`; flattening makes it easier to print and work with.
+
+
+![](images/matrix_flatten.png){fig-align="center" width="80%" fig-cap="Matrix multiplication producing a column vector, then flattening to a 1D array. Here, each row of the grades matrix is multiplied by the weights vector to produce a single average score per student."}
+
+
+```{python}
+
+# Example: equal-weight average across exams (axis=1 → per student)
+avg_scores_axis = grades_matrix.mean(axis=1)
+print("Average score per student (axis=1):", [f"{x:.2f}" for x in avg_scores_axis])
+
+# Example: average score per exam (axis=0 → per exam)
+avg_scores_exam = grades_matrix.mean(axis=0)
+print("Average score per exam (axis=0):", [f"{x:.2f}" for x in avg_scores_exam])
+
+# Using matrix multiplication to compute averages
+n_exams = grades_matrix.shape[1]
+weights = np.ones((n_exams, 1)) / n_exams  # shape: (n_exams, 1)
+averages_via_dot = np.dot(grades_matrix, weights).flatten()
+print("\nAverages via matrix multiplication:",
+      [f"{x:.2f}" for x in averages_via_dot])
+
+# Weighted sum example: suppose exams have weights 0.5, 0.3, 0.2
+exam_weights = np.array([0.5, 0.3, 0.2]).reshape(-1, 1)  # shape: (n_exams, 1)
+weighted_scores = np.dot(grades_matrix, exam_weights).flatten()
+print("\nWeighted average per student:",
+      [f"{x:.2f}" for x in weighted_scores])
+
+
+
+```
+
+
+### 3.4 From NumPy Arrays to pandas DataFrames
+
+**Concept:**  
+- A **NumPy array** is efficient for numerical operations but has no column or row labels — you must remember indexes yourself.  
+- A **pandas DataFrame** wraps a NumPy array with **labels** (row and column names), allowing:
+
+  - Easier indexing by name (`df["Math"]`) instead of position.
+  - Mixed data types in one table (numbers, text, dates).
+  - Built-in data inspection methods (`.head()`, `.info()`, `.describe()`).
+
+**Key point:** Deep learning libraries often use NumPy arrays internally, but pandas is more convenient for data cleaning and exploration.
+
+
+```{python}
+
+# Our NumPy grades_matrix (from Section 3)
+print("NumPy array:\n", grades_matrix)
+print("Shape:", grades_matrix.shape)
+
+# Convert to DataFrame with labels
+exam_names = ["Exam 1", "Exam 2", "Exam 3"]
+student_names = list(student_scores.keys())
+grades_df = pd.DataFrame(grades_matrix, index=student_names, columns=exam_names)
+
+print("\nDataFrame:\n", grades_df)
+
+# Accessing data
+print("\nScore of Carol in Exam 2 (by labels):", grades_df.loc["Carol", "Exam 2"])
+print("Score of Carol in Exam 2 (by position):", grades_matrix[2, 1])
+
+# Quick stats for each exam
+print("\nExam averages:\n", grades_df.mean().round(2))
+
+
+```
+
 
 ## 4. Working with Data
 
-Most real-world deep learning tasks start with data in files. This section shows how to load and prepare it.
+**Concept:**  
+In real projects, we often load datasets from CSV or Excel files.  
+Pandas DataFrames are perfect for this stage because they:
 
-### Topics Covered
+1. Read files directly into a labeled table.
+2. Make it easy to explore and summarize the data.
+3. Allow quick selection of features (`X`) and target labels (`y`) for model training.
 
-* Load the `planar_data.csv` dataset
-* Separate features `X` and target `Y`
+We’ll load a **planar dataset** with two numeric features (`x_coord`, `y_coord`) and a binary label (`label`).
 
-```{python load_planar_data}
-#| code-fold: true
-#| code-summary: "Show the code"
 
-raw_df = pd.read_csv(os.path.join(os.path.expanduser("~\\Documents\\BOI_DL_website"), "data\\planar_data.csv"))
 
-features = ["x_coord","y_coord"]
+```{python}
+#| echo: false
+
+# Path to your dataset (adjust if needed)
+data_path_here = os.path.join(
+    os.path.expanduser("~/Documents/BOI_DL_website/data"),
+    "planar_data.csv"
+)
+
+
+```
+
+
+
+```{python}
+
+
+# Load into DataFrame
+raw_df = pd.read_csv(data_path_here)
+
+# Inspect
+print("Shape:", raw_df.shape)
+print("\nFirst 5 rows:\n", raw_df.head())
+
+# Separate features and target
+features = ["x_coord", "y_coord"]
 target = "label"
 
 X = raw_df[features].copy()
-Y = raw_df[target].copy()
+y = raw_df[target].copy()
+
+print("\nFeatures sample:\n", X.head())
+print("\nLabels sample:\n", y.head())
+
+
 ```
 
-### Task
 
-Load a planar dataset with columns `x_coord`, `y_coord`, and `label`:
+### 4.1 Visualizing the dataset
 
-* Show class distribution
-* Extract features (`X`) and labels (`Y`)
-* Use them to train and evaluate models
+**Concept:**  
+A scatter plot lets us see how the two features (`x_coord`, `y_coord`) relate to the class label.  
+If classes are not linearly separable, a simple logistic regression will likely underperform compared to a neural network.
 
----
 
-## 5. Neural Network (compared to Logistic Regression)
+```{python}
 
-We'll train two models on the same planar data:
-  
-  * A logistic regression (linear decision boundary)
-* A shallow neural network (non-linear decision boundary)
+import matplotlib.pyplot as plt
 
-### Topics Covered
+plt.figure(figsize=(6, 5))
 
-* Building models with `Sequential`
-* Adding layers with `Dense`
-* Compiling and training with `fit`
-* Comparing results across models
+# Bright, high-contrast colors
+colors = {0: "orange", 1: "teal"}
 
-### Task
+# Scatter plot
+for label_value in sorted(y.unique()):
+    subset = X[y == label_value]
+    plt.scatter(
+        subset["x_coord"], subset["y_coord"],
+        c=colors[label_value],
+        edgecolor="k",
+        s=50,
+        label=f"Class {label_value}"
+    )
 
-Using the prepared planar dataset:
-  
-  * Train a logistic regression model (1 layer)
-* Train a neural network with one hidden layer
-* Compare their training accuracy
+plt.xlabel("x_coord")
+plt.ylabel("y_coord")
+plt.title("Planar Dataset by Label")
+plt.legend(title="Label")
+plt.show()
 
----
-  
-```{python import_dl_libraries}
-#| code-fold: true
-#| code-summary: "Show the code"
 
-import tensorflow as tf
+
+```
+
+
+
+## 5. Logistic Regression vs Neural Network
+
+**Concept:**  
+We’ll train two models on the planar dataset:
+
+1. **Logistic Regression** — a single-layer model that produces a linear decision boundary.
+2. **Shallow Neural Network** — one hidden layer that can model non-linear boundaries.
+
+This comparison shows why neural networks can outperform linear models on complex patterns.
+
+
+```{python}
+#| message: false
+#| warning: false
+
+
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
-```
 
-
-```{python fit_nn_model}
-#| code-fold: true
-#| code-summary: "Show the code"
-
-nn_model = Sequential([
-  Dense(10, activation='relu', input_shape=(2,)),
-  Dense(1, activation='sigmoid')
-])
-
-nn_model.compile(optimizer=Adam(),
-                 loss='binary_crossentropy',
-                 metrics=['accuracy'])
-
-nn_model.fit(X, Y, epochs=100, batch_size=32, verbose=0)
-
-nn_acc = nn_model.evaluate(X, Y, verbose=0)[1]
-
-```
-
-
-```{python fit_log_reg_model}
-#| code-fold: true
-#| code-summary: "Show the code"
-
+# Logistic Regression model: single Dense layer
 log_reg_model = Sequential([
-  Dense(1, activation='sigmoid', input_shape=(2,))
+    Dense(1, activation='sigmoid', input_shape=(2,))
 ])
-
 log_reg_model.compile(optimizer=Adam(),
                       loss='binary_crossentropy',
                       metrics=['accuracy'])
+log_reg_history = log_reg_model.fit(X, y, epochs=100, batch_size=32, verbose=0)
+log_acc = log_reg_model.evaluate(X, y, verbose=0)[1]
 
-log_reg_model.fit(X, Y, epochs=100, batch_size=32, verbose=0)
 
-log_acc = log_reg_model.evaluate(X, Y, verbose=0)[1]
+print(f"Logistic Regression Accuracy: {log_acc:.2f} \n ")
+
+
 
 ```
 
 
-```{python compare_models}
-#| code-fold: true
-#| code-summary: "Show the code"
+```{python}
+#| message: false
+#| warning: false
 
-print(f"Neural Network Accuracy: {nn_acc:.4f} vs Logistic Regression Accuracy: {log_acc:.4f}")
+
+
+# Neural Network model: one hidden layer
+nn_model = Sequential([
+    Dense(10, activation='relu', input_shape=(2,)),
+    Dense(1, activation='sigmoid')
+])
+nn_model.compile(optimizer=Adam(),
+                 loss='binary_crossentropy',
+                 metrics=['accuracy'])
+nn_history = nn_model.fit(X, y, epochs=100, batch_size=32, verbose=0)
+nn_acc = nn_model.evaluate(X, y, verbose=0)[1]
+
+print(f"Neural Network Accuracy:     {nn_acc:.2f}")
+
+```
+
+
+```{python}
+
+import matplotlib.pyplot as plt
+
+# Extract loss values
+log_loss = log_reg_history.history['loss']
+nn_loss = nn_history.history['loss']
+
+# Extract accuracy values
+log_acc_hist = log_reg_history.history['accuracy']
+nn_acc_hist = nn_history.history['accuracy']
+
+epochs_range = range(1, len(log_loss) + 1)
+
+plt.figure(figsize=(12, 5))
+
+# Loss plot
+plt.subplot(1, 2, 1)
+plt.plot(epochs_range, log_loss, label='Logistic Regression', color='orange')
+plt.plot(epochs_range, nn_loss, label='Neural Network', color='teal')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.title('Training Loss')
+plt.legend()
+
+# Accuracy plot
+plt.subplot(1, 2, 2)
+plt.plot(epochs_range, log_acc_hist, label='Logistic Regression', color='orange')
+plt.plot(epochs_range, nn_acc_hist, label='Neural Network', color='teal')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.title('Training Accuracy')
+plt.legend()
+
+plt.tight_layout()
+plt.show()
+
+
+```
+
+
+### 5.1 Visualizing the Decision Boundary
+
+To better understand how each model separates the two classes, we will define an **auxiliary plotting function** called `plot_decision_boundary`.  
+
+This function will:
+1. Create a **grid** over the feature space.
+2. Use the model to **predict the class** for each point in the grid.
+3. Display the predicted regions as a **colored background**.
+4. Overlay the **actual data points** on top.
+
+After defining this function, we will call it for both the logistic regression and neural network models to visually compare their decision boundaries.
+
+
+```{python plot_decision_boundary}
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+def plot_decision_boundary(model, X, y, title):
+    # Create a mesh grid over the feature space
+    x_min, x_max = X["x_coord"].min() - 1, X["x_coord"].max() + 1
+    y_min, y_max = X["y_coord"].min() - 1, X["y_coord"].max() + 1
+    xx, yy = np.meshgrid(
+        np.linspace(x_min, x_max, 300),
+        np.linspace(y_min, y_max, 300)
+    )
+    
+    # Predict over the grid
+    grid_points = np.c_[xx.ravel(), yy.ravel()]
+    Z = model.predict(grid_points, verbose=0)
+    Z = (Z > 0.5).astype(int).reshape(xx.shape)
+
+    # Plot contour and points
+    plt.contourf(xx, yy, Z, cmap=plt.cm.Oranges, alpha=0.3)
+    
+    colors = {0: "orange", 1: "teal"}
+    for label_value in sorted(y.unique()):
+        subset = X[y == label_value]
+        plt.scatter(
+            subset["x_coord"], subset["y_coord"],
+            c=colors[label_value],
+            edgecolor="k",
+            s=50,
+            label=f"Class {label_value}"
+        )
+    plt.xlabel("x_coord")
+    plt.ylabel("y_coord")
+    plt.title(title)
+    plt.legend()
+
+
+
+
+```
+
+
+
+```{python}
+
+# Plot for both models side by side
+plt.figure(figsize=(12, 5))
+
+plt.subplot(1, 2, 1)
+plot_decision_boundary(log_reg_model, X, y, "Logistic Regression Decision Boundary")
+
+plt.subplot(1, 2, 2)
+plot_decision_boundary(nn_model, X, y, "Neural Network Decision Boundary")
+
+plt.tight_layout()
+plt.show()
 
 ```
 
