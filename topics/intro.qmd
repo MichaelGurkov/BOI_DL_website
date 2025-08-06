@@ -1,5 +1,5 @@
 ---
-title: "Intro"
+title: "Moving beyond linearity"
 ---
 
 ```{r set_up_python, echo=FALSE}
@@ -325,6 +325,18 @@ plot_predictions(pd.DataFrame({"age": x_vec["age"], "wage": y_vec,
 
 # General Additive Models
 
+
+1. **Prepare features**  
+   * Keep `year` and `age` as numeric.  
+   * Encode `education` as a categorical variable.  
+
+2. **Specify the model**  
+   * Use smooth terms `s()` for `year` and `age`.  
+   * Use `f()` for the categorical factor `education`.
+
+3. **Fit the model**  
+   * Fit a `LinearGAM` to the training data.  
+
 ```{python fit_gam}
 #| code-fold: true
 #| code-summary: "Show the code"
@@ -348,6 +360,11 @@ gam.fit(X, y);
 ```
 
 
+4. **Visualize the results**  
+   * Plot partial dependence for each term:  
+     - smooth curve for `year`  
+     - smooth curve for `age`  
+     - bar chart for `education`
 
 ```{python plot}
 #| code-fold: true

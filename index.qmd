@@ -6,7 +6,7 @@ title: "BOI_DL_website"
 -   [**Python workshop**](topics/python_workshop.qmd)
 
 ## Topics
--   [**Introduction**](topics/intro.qmd)
+-   [**Moving beyond linearity**](topics/intro.qmd)
 -   [**Single layer**](topics/single_layer_nn.qmd)
 -   [**Optimization method**](topics/optim_methods.qmd)
 -   [**Convolution network**](topics/convolution.qmd)
