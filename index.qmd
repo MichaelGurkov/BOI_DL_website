@@ -3,10 +3,12 @@ title: "BOI_DL_website"
 ---
 
 # Python workshop
--   [**Python workshop**](topics/python_workshop.qmd)
+- [**Python workshop**](topics/python_workshop.qmd)
 
 ## Topics
--   [**Moving beyond linearity**](topics/intro.qmd)
--   [**Single layer**](topics/single_layer_nn.qmd)
--   [**Optimization method**](topics/optim_methods.qmd)
--   [**Convolution network**](topics/convolution.qmd)
+- [**Moving beyond linearity**](topics/intro.qmd)
+- **Single layer**
+    - [**Single layer – classification**](topics/single_layer_nn.qmd)
+    - [**Single layer – regression**](topics/single_layer_nn_regression.qmd)
+- [**Optimization method**](topics/optim_methods.qmd)
+- [**Convolution network**](topics/convolution.qmd)

@@ -283,7 +283,7 @@ print("\nScores adjusted by exam minimum:\n", adjusted)
   - After matrix multiplication, the result might be shape `(n_students, 1)`; flattening makes it easier to print and work with.
 
 
-![](images/matrix_flatten.png){fig-align="center" width="80%" fig-cap="Matrix multiplication producing a column vector, then flattening to a 1D array. Here, each row of the grades matrix is multiplied by the weights vector to produce a single average score per student."}
+!["Matrix multiplication producing a column vector, then flattening to a 1D array. Here, each row of the grades matrix is multiplied by the weights vector to produce a single average score per student."](images/matrix_flatten.png){fig-align="center" width="80%"}
 
 
 ```{python}
