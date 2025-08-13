@@ -46,158 +46,127 @@ import os
 ## Auxiliary functions
 
 ### Implement Training Functions
+
 - Define helper functions for activation, parameter initialization, forward/backward propagation, and parameter update.
-- Create a wrapper function `train_neural_network` to run the training loop.
+
 
 ```{python nn_training_functions}
 #| code-fold: true
 #| code-summary: "Show the code"
 
-def activate(Z, activation_function = "tanh"):
-  
-  if activation_function == "tanh":
-    
-    A = np.tanh(Z)
-  
-  elif activation_function == "sigmoid":
-    
-    A = 1 / (1 + np.exp(-Z))
-    
-  return(A)
+import numpy as np
 
 
-def initialize_parameters(X_adj,num_hidden_layer_neurons, scale_const = 0.01):
-  np.random.seed(1)
+def activate(Z, activation_function="tanh"):
+    """
+    Apply an activation function elementwise.
+    """
+    if activation_function == "tanh":
+        return np.tanh(Z)  # squashes values to [-1, 1]
+    elif activation_function == "sigmoid":
+        return 1.0 / (1.0 + np.exp(-Z))  # squashes values to [0, 1]
+    else:
+        raise ValueError("activation_function must be 'tanh' or 'sigmoid'.")
 
-  n_features = X_adj.shape[1]  # Number of input features
 
-  W1 = np.random.randn(num_hidden_layer_neurons, n_features) * scale_const
+def initialize_parameters(X, num_hidden_layer_neurons, scale_const=0.01, seed=1):
+    """
+    Initialize weights and biases for a single hidden-layer network.
+    """
+    np.random.seed(seed)
 
-  b1 = np.zeros((num_hidden_layer_neurons,1))
+    n_features = X.shape[1]  # number of input features
 
-  W2 = np.random.randn(1,num_hidden_layer_neurons) * scale_const
+    # Small random weights help avoid saturation of activations at start
+    W1 = np.random.randn(num_hidden_layer_neurons, n_features) * scale_const
+    b1 = np.zeros((num_hidden_layer_neurons, 1))
+    W2 = np.random.randn(1, num_hidden_layer_neurons) * scale_const
+    b2 = np.zeros((1, 1))
 
-  b2 = np.zeros((1,1))
+    return {"W1": W1, "b1": b1, "W2": W2, "b2": b2}
 
-  parameters = {"W1": W1, "b1": b1, "W2":W2, "b2":b2}
 
-  return parameters
+def forward_propagation(parameters, X_adj):
+    """
+    Perform one forward pass.
+    """
+    W1, b1, W2, b2 = parameters["W1"], parameters["b1"], parameters["W2"], parameters["b2"]
 
-def forward_propagation(parameters,X_adj):
-  
-  W1 = parameters["W1"]
-  
-  b1 = parameters["b1"]
+    Z1 = np.dot(W1, X_adj) + b1  # linear transform: hidden layer
+    A1 = activate(Z1, "tanh")    # non-linear activation for hidden layer
+    Z2 = np.dot(W2, A1) + b2     # linear transform: output layer
+    A2 = activate(Z2, "sigmoid") # probability output for binary classification
 
-  W2 = parameters["W2"]
+    return {"Z1": Z1, "A1": A1, "Z2": Z2, "A2": A2}
 
-  b2 = parameters["b2"]
-
-  Z1 = np.dot(W1,X_adj) + b1
-
-  A1 = activate(Z1)
-
-  Z2 = np.dot(W2,A1) + b2
-
-  A2 = activate(Z2,activation_function="sigmoid")
-
-  forward_propagation_values = {"Z1":Z1, "A1":A1, "Z2":Z2, "A2":A2}
-
-  return forward_propagation_values
 
 def backward_propagation(parameters, forward_propagation_values, X_adj, Y_adj):
+    """
+    Compute gradients for parameters using backpropagation.
+    """
+    N = X_adj.shape[1]  # number of samples
 
-  p = X_adj.shape[1]
+    W2 = parameters["W2"]
+    A1, A2 = forward_propagation_values["A1"], forward_propagation_values["A2"]
 
-  W1 = parameters["W1"]
+    dZ2 = A2 - Y_adj                      # derivative of loss w.r.t. Z2 (sigmoid+BCE Loss)
+    dW2 = np.dot(dZ2, A1.T) / N           # gradient for W2
+    db2 = np.sum(dZ2, axis=1, keepdims=True) / N  # gradient for b2
 
-  W2 = parameters["W2"]
+    dZ1 = np.dot(W2.T, dZ2) * (1 - A1**2) # backprop through tanh: derivative is 1 - A1^2
+    dW1 = np.dot(dZ1, X_adj.T) / N        # gradient for W1
+    db1 = np.sum(dZ1, axis=1, keepdims=True) / N  # gradient for b1
 
-  A1 = forward_propagation_values["A1"]
-
-  A2 = forward_propagation_values["A2"]
-
-  dZ2 = A2 - Y_adj
-
-  dW2 = np.dot(dZ2, A1.T) / p
-
-  db2 = np.sum(dZ2, axis=1, keepdims=True) / p
-
-  dZ1 = np.dot(W2.T, dZ2) * (1 - np.power(A1, 2))
-
-  dW1 = np.dot(dZ1,X_adj.T) / p
-
-  db1 = np.sum(dZ1, axis=1, keepdims=True) / p
-
-  grads = {"dW1":dW1, "db1":db1, "dW2":dW2, "db2":db2}
-
-  return grads
+    return {"dW1": dW1, "db1": db1, "dW2": dW2, "db2": db2}
 
 
 def update_parameters(parameters, grads, learning_rate=0.01):
-  
-  W1 = parameters["W1"]
+    """
+    Update parameters using gradient descent.
+    """
+    # subtract learning_rate * gradient for each parameter
+    W1 = parameters["W1"] - learning_rate * grads["dW1"]
+    b1 = parameters["b1"] - learning_rate * grads["db1"]
+    W2 = parameters["W2"] - learning_rate * grads["dW2"]
+    b2 = parameters["b2"] - learning_rate * grads["db2"]
 
-  b1 = parameters["b1"]
+    return {"W1": W1, "b1": b1, "W2": W2, "b2": b2}
 
-  W2 = parameters["W2"]
-
-  b2 = parameters["b2"]
-
-  
-  dW1 = grads["dW1"]
-
-  db1 = grads["db1"]
-
-  dW2 = grads["dW2"]
-
-  db2 = grads["db2"]
-
-  
-  W1 = W1 - learning_rate * dW1
-
-  b1 = b1 - learning_rate * db1
-
-  W2 = W2 - learning_rate * dW2
-
-  b2 = b2 - learning_rate * db2
-
-  
-  parameters = {"W1": W1, "b1": b1, "W2":W2, "b2":b2}
-
-  return parameters
 
 ```
+
+
+- Create a wrapper function `train_neural_network` to run the training loop.
 
 
 ```{python neural_network_function}
 #| code-fold: true
 #| code-summary: "Show the code"
 
-def train_neural_network(X,Y, num_iterations,num_hidden_layer_neurons = 4):
-    
-    # Initialize the model's parameters
-    # Loop:
-    #  - Implement forward propagation to get the predictions
-    #  - Implement backward propagation to get the gradients
-    #  - Update parameters (gradient descent)
+def train_neural_network(X, Y, num_iterations, num_hidden_layer_neurons=4):
+    """
+    Trains a simple 1-hidden-layer neural network using gradient descent.
+    """
+    # Transpose X so columns are examples, reshape Y to row vector
+    X_adj = X.T.copy()                         
+    Y_adj = Y.values.reshape(1, -1).copy()     
+
+    # Initialize weights and biases
+    parameters = initialize_parameters(X, num_hidden_layer_neurons=num_hidden_layer_neurons)
+
+    for iteration in range(num_iterations):
+        # Forward pass
+        forward_values = forward_propagation(parameters, X_adj.copy())
+
+        # Backward pass
+        grads = backward_propagation(parameters, forward_values, X_adj.copy(), Y_adj.copy())
+
+        # Parameter update
+        parameters = update_parameters(parameters, grads)
+
+    return parameters
 
 
-  X_adj = X.T.copy()
-
-  Y_adj = Y.values.reshape(1,-1).copy()
-
-  parameters = initialize_parameters(X, num_hidden_layer_neurons=num_hidden_layer_neurons)
-
-  for interation in range(num_iterations):
-    
-    forward_propagation_values = forward_propagation(parameters,X_adj.copy())
-
-    grads = backward_propagation(parameters, forward_propagation_values, X_adj.copy(), Y_adj.copy())
-
-    parameters = update_parameters(parameters, grads)
-
-  return parameters
 
 ```
 
@@ -212,17 +181,24 @@ def train_neural_network(X,Y, num_iterations,num_hidden_layer_neurons = 4):
 #| code-fold: true
 #| code-summary: "Show the code"
 
-def predict(nn_parameters, X, threshold = 0.5):
+def predict(nn_parameters, X, threshold=0.5):
+    """
+    Generates binary predictions from a trained neural network.
+    """
+    # Transpose X so columns are examples
+    X_adj = X.T.copy()
 
-  X_adj = X.T.copy()
+    # Forward pass to get output layer activations
+    forward_values = forward_propagation(nn_parameters, X_adj.copy())
 
-  forward_propagation_values = forward_propagation(nn_parameters, X_adj.copy())
+    # Output probabilities from sigmoid
+    y_pred = forward_values["A2"]
 
-  y_pred = forward_propagation_values["A2"]
+    # Apply threshold to get class labels {0,1}
+    y_pred = y_pred > threshold
 
-  y_pred = y_pred > threshold
+    return y_pred.astype(int).ravel()  # flatten to 1D array
 
-  return y_pred.astype(int).ravel()
 
 ```
 
@@ -419,3 +395,65 @@ Y.to_numpy(),title="Neural Network Decision Boundary")
 
 
 
+# Appendix
+
+## Derivation: Sigmoid + Binary Cross-Entropy
+
+We can show that using a sigmoid activation in the output layer with binary cross-entropy (BCE) loss leads to a very simple gradient formula.
+
+**Goal**
+$$
+\frac{\partial L}{\partial z} = a - y
+$$
+
+**Setup** For a single example with label $y \in \{0,1\}$:
+$$
+z = W^{[2]} a^{[1]} + b^{[2]}, \qquad a = \sigma(z) = \frac{1}{1+e^{-z}}
+$$
+The BCE loss for this example is:
+$$
+\ell(a,y) = -\big[y \log a + (1-y)\log(1-a)\big]
+$$
+For a batch of $N$ examples:
+$$
+L = \frac{1}{N}\sum_{i=1}^N \ell\!\big(a^{(i)}, y^{(i)}\big)
+$$
+
+**Step 1 (loss wrt $a$)**
+$$
+\frac{\partial \ell}{\partial a}
+= -\!\left(\frac{y}{a} - \frac{1-y}{1-a}\right)
+= \frac{a - y}{a(1-a)}
+$$
+
+**Step 2 (sigmoid derivative)**
+$$
+\frac{\partial a}{\partial z} = a(1-a)
+$$
+
+**Step 3 (chain rule)**
+$$
+\frac{\partial \ell}{\partial z}
+= \frac{\partial \ell}{\partial a}\cdot\frac{\partial a}{\partial z}
+= \frac{a - y}{a(1-a)} \cdot a(1-a)
+= a - y
+$$
+
+**Batch form**
+$$
+\frac{\partial L}{\partial Z} = \frac{1}{N}(A - Y)
+$$
+
+**Code correspondence**
+
+
+```{python}
+#| eval: false
+
+dZ2 = A2 - Y_adj
+
+dW2 = np.dot(dZ2, A1.T) / N
+
+db2 = np.sum(dZ2, axis=1, keepdims=True) / N
+
+```
