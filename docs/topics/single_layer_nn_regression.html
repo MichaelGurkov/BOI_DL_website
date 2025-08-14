@@ -183,10 +183,6 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#compare-with-linear-regression" id="toc-compare-with-linear-regression" class="nav-link" data-scroll-target="#compare-with-linear-regression">Compare with Linear Regression</a></li>
   </ul></li>
-  <li><a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a>
-  <ul class="collapse">
-  <li><a href="#derivation-mean-squared-error-mse-with-linear-output" id="toc-derivation-mean-squared-error-mse-with-linear-output" class="nav-link" data-scroll-target="#derivation-mean-squared-error-mse-with-linear-output">Derivation: Mean Squared Error (MSE) with Linear Output</a></li>
-  </ul></li>
   </ul>
 </nav>
     </div>
@@ -1077,39 +1073,39 @@ document.querySelectorAll('.fa-regular.fa-copy').forEach(function(element) {
 <pre><code>Linear regression — MSE: 95704.5986, MAE: 217.0640, R^2: 0.5279</code></pre>
 </div>
 </div>
-</section>
-</section>
-<section id="appendix" class="level1">
-<h1>Appendix</h1>
-<section id="derivation-mean-squared-error-mse-with-linear-output" class="level2">
-<h2 class="anchored" data-anchor-id="derivation-mean-squared-error-mse-with-linear-output">Derivation: Mean Squared Error (MSE) with Linear Output</h2>
-<p>With a linear output <span class="math inline">\(A^{[2]} = Z^{[2]}\)</span> and labels <span class="math inline">\(Y\)</span>,</p>
-<p><span class="math display">\[
-L = \frac{1}{2N}\,\lVert A^{[2]} - Y \rVert_F^{2}
-\]</span></p>
-<p>Then <span class="math display">\[
-\frac{\partial L}{\partial Z^{[2]}} = \frac{1}{N}\,(A^{[2]} - Y)
-\]</span></p>
-<p>Gradients: <span class="math display">\[
-dW^{[2]} = \frac{1}{N}\,(A^{[2]} - Y)\,A^{[1]T}, \qquad
-db^{[2]} = \frac{1}{N}\sum_{i=1}^N (A^{[2]} - Y)_{:,i}
-\]</span></p>
-<p>For a hidden tanh layer: <span class="math display">\[
-dZ^{[1]} = W^{[2]T}\,(A^{[2]} - Y)\,\odot\,\big(1 - A^{[1]}\odot A^{[1]}\big)
-\]</span></p>
-<p><span class="math display">\[
-dW^{[1]} = \frac{1}{N}\, dZ^{[1]} X^T, \qquad
-db^{[1]} = \frac{1}{N}\sum_{i=1}^N dZ^{[1]}_{:,i}
-\]</span></p>
-<p><strong>Code correspondence</strong></p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>dZ2 <span class="op">=</span> A2 <span class="op">-</span> Y_adj</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>dW2 <span class="op">=</span> np.dot(dZ2, A1.T) <span class="op">/</span> N</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>db2 <span class="op">=</span> np.<span class="bu">sum</span>(dZ2, axis<span class="op">=</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>) <span class="op">/</span> N</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>dZ1 <span class="op">=</span> np.dot(W2.T, dZ2) <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> A1<span class="op">**</span><span class="dv">2</span>)</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>dW1 <span class="op">=</span> np.dot(dZ1, X_adj.T) <span class="op">/</span> N</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>db1 <span class="op">=</span> np.<span class="bu">sum</span>(dZ1, axis<span class="op">=</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>) <span class="op">/</span> N</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+<!-- # Appendix -->
+<!-- ## Derivation: Mean Squared Error (MSE) with Linear Output -->
+<!-- With a linear output $A^{[2]} = Z^{[2]}$ and labels $Y$, -->
+<!-- $$ -->
+<!-- L = \frac{1}{2N}\,\lVert A^{[2]} - Y \rVert_F^{2} -->
+<!-- $$ -->
+<!-- Then -->
+<!-- $$ -->
+<!-- \frac{\partial L}{\partial Z^{[2]}} = \frac{1}{N}\,(A^{[2]} - Y) -->
+<!-- $$ -->
+<!-- Gradients: -->
+<!-- $$ -->
+<!-- dW^{[2]} = \frac{1}{N}\,(A^{[2]} - Y)\,A^{[1]T}, \qquad -->
+<!-- db^{[2]} = \frac{1}{N}\sum_{i=1}^N (A^{[2]} - Y)_{:,i} -->
+<!-- $$ -->
+<!-- For a hidden tanh layer: -->
+<!-- $$ -->
+<!-- dZ^{[1]} = W^{[2]T}\,(A^{[2]} - Y)\,\odot\,\big(1 - A^{[1]}\odot A^{[1]}\big) -->
+<!-- $$ -->
+<!-- $$ -->
+<!-- dW^{[1]} = \frac{1}{N}\, dZ^{[1]} X^T, \qquad -->
+<!-- db^{[1]} = \frac{1}{N}\sum_{i=1}^N dZ^{[1]}_{:,i} -->
+<!-- $$ -->
+<!-- **Code correspondence** -->
+<!-- ```{python} -->
+<!-- #| eval: false -->
+<!-- dZ2 = A2 - Y_adj -->
+<!-- dW2 = np.dot(dZ2, A1.T) / N -->
+<!-- db2 = np.sum(dZ2, axis=1, keepdims=True) / N -->
+<!-- dZ1 = np.dot(W2.T, dZ2) * (1 - A1**2) -->
+<!-- dW1 = np.dot(dZ1, X_adj.T) / N -->
+<!-- db1 = np.sum(dZ1, axis=1, keepdims=True) / N -->
+<!-- ``` -->
 
 
 </section>

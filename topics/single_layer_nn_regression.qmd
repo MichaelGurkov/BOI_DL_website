@@ -351,45 +351,45 @@ print(f"Linear regression — MSE: {lin_mse:.4f}, MAE: {lin_mae:.4f}, R^2: {lin_
 
 
 
-# Appendix
+<!-- # Appendix -->
 
-## Derivation: Mean Squared Error (MSE) with Linear Output
+<!-- ## Derivation: Mean Squared Error (MSE) with Linear Output -->
 
-With a linear output $A^{[2]} = Z^{[2]}$ and labels $Y$,
+<!-- With a linear output $A^{[2]} = Z^{[2]}$ and labels $Y$, -->
 
-$$
-L = \frac{1}{2N}\,\lVert A^{[2]} - Y \rVert_F^{2}
-$$
+<!-- $$ -->
+<!-- L = \frac{1}{2N}\,\lVert A^{[2]} - Y \rVert_F^{2} -->
+<!-- $$ -->
 
-Then
-$$
-\frac{\partial L}{\partial Z^{[2]}} = \frac{1}{N}\,(A^{[2]} - Y)
-$$
+<!-- Then -->
+<!-- $$ -->
+<!-- \frac{\partial L}{\partial Z^{[2]}} = \frac{1}{N}\,(A^{[2]} - Y) -->
+<!-- $$ -->
 
-Gradients:
-$$
-dW^{[2]} = \frac{1}{N}\,(A^{[2]} - Y)\,A^{[1]T}, \qquad
-db^{[2]} = \frac{1}{N}\sum_{i=1}^N (A^{[2]} - Y)_{:,i}
-$$
+<!-- Gradients: -->
+<!-- $$ -->
+<!-- dW^{[2]} = \frac{1}{N}\,(A^{[2]} - Y)\,A^{[1]T}, \qquad -->
+<!-- db^{[2]} = \frac{1}{N}\sum_{i=1}^N (A^{[2]} - Y)_{:,i} -->
+<!-- $$ -->
 
-For a hidden tanh layer:
-$$
-dZ^{[1]} = W^{[2]T}\,(A^{[2]} - Y)\,\odot\,\big(1 - A^{[1]}\odot A^{[1]}\big)
-$$
+<!-- For a hidden tanh layer: -->
+<!-- $$ -->
+<!-- dZ^{[1]} = W^{[2]T}\,(A^{[2]} - Y)\,\odot\,\big(1 - A^{[1]}\odot A^{[1]}\big) -->
+<!-- $$ -->
 
-$$
-dW^{[1]} = \frac{1}{N}\, dZ^{[1]} X^T, \qquad
-db^{[1]} = \frac{1}{N}\sum_{i=1}^N dZ^{[1]}_{:,i}
-$$
+<!-- $$ -->
+<!-- dW^{[1]} = \frac{1}{N}\, dZ^{[1]} X^T, \qquad -->
+<!-- db^{[1]} = \frac{1}{N}\sum_{i=1}^N dZ^{[1]}_{:,i} -->
+<!-- $$ -->
 
-**Code correspondence**
+<!-- **Code correspondence** -->
 
-```{python}
-#| eval: false
-dZ2 = A2 - Y_adj
-dW2 = np.dot(dZ2, A1.T) / N
-db2 = np.sum(dZ2, axis=1, keepdims=True) / N
-dZ1 = np.dot(W2.T, dZ2) * (1 - A1**2)
-dW1 = np.dot(dZ1, X_adj.T) / N
-db1 = np.sum(dZ1, axis=1, keepdims=True) / N
-```
+<!-- ```{python} -->
+<!-- #| eval: false -->
+<!-- dZ2 = A2 - Y_adj -->
+<!-- dW2 = np.dot(dZ2, A1.T) / N -->
+<!-- db2 = np.sum(dZ2, axis=1, keepdims=True) / N -->
+<!-- dZ1 = np.dot(W2.T, dZ2) * (1 - A1**2) -->
+<!-- dW1 = np.dot(dZ1, X_adj.T) / N -->
+<!-- db1 = np.sum(dZ1, axis=1, keepdims=True) / N -->
+<!-- ``` -->
