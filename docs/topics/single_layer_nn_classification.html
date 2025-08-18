@@ -187,6 +187,13 @@ window.Quarto = {
   <li><a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a>
   <ul class="collapse">
   <li><a href="#derivation-sigmoid-binary-cross-entropy" id="toc-derivation-sigmoid-binary-cross-entropy" class="nav-link" data-scroll-target="#derivation-sigmoid-binary-cross-entropy">Derivation: Sigmoid + Binary Cross-Entropy</a></li>
+  <li><a href="#neural-network-architecture-playbook" id="toc-neural-network-architecture-playbook" class="nav-link" data-scroll-target="#neural-network-architecture-playbook">Neural Network Architecture Playbook</a>
+  <ul class="collapse">
+  <li><a href="#step-1-build-a-small-trainable-baseline" id="toc-step-1-build-a-small-trainable-baseline" class="nav-link" data-scroll-target="#step-1-build-a-small-trainable-baseline">Step 1 — Build a small, trainable baseline</a></li>
+  <li><a href="#step-2-diagnose-with-learning-curves" id="toc-step-2-diagnose-with-learning-curves" class="nav-link" data-scroll-target="#step-2-diagnose-with-learning-curves">Step 2 — Diagnose with learning curves</a></li>
+  <li><a href="#step-3-grow-capacity-deliberately" id="toc-step-3-grow-capacity-deliberately" class="nav-link" data-scroll-target="#step-3-grow-capacity-deliberately">Step 3 — Grow capacity deliberately</a></li>
+  <li><a href="#step-4-tune-by-systematic-search" id="toc-step-4-tune-by-systematic-search" class="nav-link" data-scroll-target="#step-4-tune-by-systematic-search">Step 4 — Tune by systematic search</a></li>
+  </ul></li>
   </ul></li>
   </ul>
 </nav>
@@ -1060,8 +1067,61 @@ L = \frac{1}{N}\sum_{i=1}^N \ell\!\big(a^{(i)}, y^{(i)}\big)
 <span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>db2 <span class="op">=</span> np.<span class="bu">sum</span>(dZ2, axis<span class="op">=</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>) <span class="op">/</span> N</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="neural-network-architecture-playbook" class="level2">
+<h2 class="anchored" data-anchor-id="neural-network-architecture-playbook">Neural Network Architecture Playbook</h2>
+<p><strong>Definitions</strong> - <strong>Depth</strong>: The number of hidden layers stacked between input and output.<br>
+- <strong>Width</strong>: The number of neurons in each hidden layer.</p>
+<p><em>(Let <code>d</code> be the number of input features.)</em></p>
+<section id="step-1-build-a-small-trainable-baseline" class="level3">
+<h3 class="anchored" data-anchor-id="step-1-build-a-small-trainable-baseline">Step 1 — Build a small, trainable baseline</h3>
+<ul>
+<li>Start with <strong>1–3 hidden layers</strong>.<br>
+</li>
+<li>Set hidden layer sizes as multiples of <code>d</code> (e.g., <code>d</code>, <code>2d</code>, <code>4d</code>).<br>
+</li>
+<li>Add dropout (0–0.5) and weight decay (AdamW) for regularization.<br>
+</li>
+<li>Always keep a validation split and monitor training/validation curves.</li>
+</ul>
+</section>
+<section id="step-2-diagnose-with-learning-curves" class="level3">
+<h3 class="anchored" data-anchor-id="step-2-diagnose-with-learning-curves">Step 2 — Diagnose with learning curves</h3>
+<ul>
+<li><strong>Underfitting (high train &amp; val error):</strong> widen hidden layers first, then add more layers if needed.<br>
+</li>
+<li><strong>Overfitting (low train, high val):</strong> add data/augmentation; increase dropout or weight decay; use early stopping; simplify by reducing neurons or layers.<br>
+</li>
+<li><strong>Optimization issues (unstable or diverging):</strong> lower the learning rate; adjust batch size; use better initialization; consider normalization.</li>
+</ul>
+</section>
+<section id="step-3-grow-capacity-deliberately" class="level3">
+<h3 class="anchored" data-anchor-id="step-3-grow-capacity-deliberately">Step 3 — Grow capacity deliberately</h3>
+<ul>
+<li>Increase width modestly before adding depth.<br>
+</li>
+<li>If you deepen the network, add residual connections or normalization to stabilize training.<br>
+</li>
+<li>Increase epochs only once the model trains stably.</li>
+</ul>
+</section>
+<section id="step-4-tune-by-systematic-search" class="level3">
+<h3 class="anchored" data-anchor-id="step-4-tune-by-systematic-search">Step 4 — Tune by systematic search</h3>
+<ul>
+<li>Use <strong>Random Search</strong> or <strong>Hyperband</strong> over:
+<ul>
+<li><strong>Layers:</strong> {1, 2, 3, 4, 6}<br>
+</li>
+<li><strong>Widths:</strong> {<code>d</code>, <code>2d</code>, <code>4d</code>, <code>8d</code>}<br>
+</li>
+<li><strong>Dropout:</strong> [0, 0.5]<br>
+</li>
+<li><strong>Weight decay:</strong> small grid (e.g., 1e-6 … 1e-3)</li>
+</ul></li>
+</ul>
 
 
+</section>
 </section>
 </section>
 

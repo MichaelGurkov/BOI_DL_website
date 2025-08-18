@@ -8,7 +8,7 @@ title: "BOI_DL_website"
 ## Topics
 - [**Moving beyond linearity**](topics/intro.qmd)
 - **Single layer**
-    - [**Single layer – classification**](topics/single_layer_nn.qmd)
+    - [**Single layer – classification**](topics/single_layer_nn_classification.qmd)
     - [**Single layer – regression**](topics/single_layer_nn_regression.qmd)
 - **Multi layer**
     - [**Multi layer – credit scoring use case**](topics/multi_layer_credit_score.qmd)

@@ -445,6 +445,7 @@ Y.to_numpy(),title="Neural Network Decision Boundary")
 
 # Appendix
 
+
 ## Derivation: Sigmoid + Binary Cross-Entropy
 
 We can show that using a sigmoid activation in the output layer with binary cross-entropy (BCE) loss leads to a very simple gradient formula.
@@ -505,3 +506,39 @@ dW2 = np.dot(dZ2, A1.T) / N
 db2 = np.sum(dZ2, axis=1, keepdims=True) / N
 
 ```
+
+
+## Neural Network Architecture Playbook
+
+**Definitions**
+- **Depth**: The number of hidden layers stacked between input and output.  
+- **Width**: The number of neurons in each hidden layer.
+
+*(Let `d` be the number of input features.)*
+
+### Step 1 — Build a small, trainable baseline
+- Start with **1–3 hidden layers**.  
+- Set hidden layer sizes as multiples of `d` (e.g., `d`, `2d`, `4d`).  
+- Add dropout (0–0.5) and weight decay (AdamW) for regularization.  
+- Always keep a validation split and monitor training/validation curves.
+
+### Step 2 — Diagnose with learning curves
+- **Underfitting (high train & val error):** widen hidden layers first, then add more layers if needed.  
+- **Overfitting (low train, high val):** add data/augmentation; increase dropout or weight decay; use early stopping; simplify by reducing neurons or layers.  
+- **Optimization issues (unstable or diverging):** lower the learning rate; adjust batch size; use better initialization; consider normalization.
+
+### Step 3 — Grow capacity deliberately
+- Increase width modestly before adding depth.  
+- If you deepen the network, add residual connections or normalization to stabilize training.  
+- Increase epochs only once the model trains stably.
+
+### Step 4 — Tune by systematic search
+- Use **Random Search** or **Hyperband** over:
+  - **Layers:** {1, 2, 3, 4, 6}  
+  - **Widths:** {`d`, `2d`, `4d`, `8d`}  
+  - **Dropout:** [0, 0.5]  
+  - **Weight decay:** small grid (e.g., 1e-6 … 1e-3)  
+
+
+
+
