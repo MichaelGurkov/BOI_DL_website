@@ -148,10 +148,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#data-target" id="toc-data-target" class="nav-link" data-scroll-target="#data-target">Data &amp; target</a></li>
   </ul></li>
   <li><a href="#data-preprocessing" id="toc-data-preprocessing" class="nav-link" data-scroll-target="#data-preprocessing">Data preprocessing</a></li>
-  <li><a href="#model-architecture-training-setup" id="toc-model-architecture-training-setup" class="nav-link" data-scroll-target="#model-architecture-training-setup">Model architecture &amp; training setup</a>
-  <ul class="collapse">
-  <li><a href="#what-does-batch-size-32-mean" id="toc-what-does-batch-size-32-mean" class="nav-link" data-scroll-target="#what-does-batch-size-32-mean">What does “batch size = 32” mean?</a></li>
-  </ul></li>
+  <li><a href="#model-architecture-training-setup" id="toc-model-architecture-training-setup" class="nav-link" data-scroll-target="#model-architecture-training-setup">Model architecture &amp; training setup</a></li>
   <li><a href="#model-evaluation" id="toc-model-evaluation" class="nav-link" data-scroll-target="#model-evaluation">Model evaluation</a></li>
   <li><a href="#training-history" id="toc-training-history" class="nav-link" data-scroll-target="#training-history">Training history</a></li>
   </ul>
@@ -182,7 +179,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="overview" class="level2">
 <h2 class="anchored" data-anchor-id="overview">Overview</h2>
 <p>In this tutorial we’ll build and evaluate a <strong>multi-layer neural network</strong> (MLP) to predict <strong>credit default risk</strong> (<code>SeriousDlqin2yrs</code>, binary 0/1).<br>
-We will: - Split the data with stratification to keep the class balance. - Standardize numeric features (important for MLP stability). - Define a small MLP using ReLU hidden layers and a sigmoid output. - Train with <strong>binary cross-entropy</strong> and report <strong>accuracy, AUC, precision, recall, and F1</strong>. - Discuss practical knobs: epochs, batch size, and early stopping.</p>
+We will:</p>
+<ul>
+<li>Split the data with stratification to keep the class balance.</li>
+<li>Standardize numeric features (important for MLP stability).</li>
+<li>Define a small MLP using ReLU hidden layers and a sigmoid output.</li>
+<li>Train with <strong>binary cross-entropy</strong> and report <strong>accuracy, AUC, precision, recall, and F1</strong>.</li>
+<li>Discuss practical knobs: epochs, batch size, and early stopping.</li>
+</ul>
 <section id="why-this-architecture" class="level3">
 <h3 class="anchored" data-anchor-id="why-this-architecture">Why this architecture?</h3>
 <ul>
@@ -298,8 +302,6 @@ We will: - Split the data with stratification to keep the class balance. - Stand
 <li><strong>Metrics:</strong> accuracy + <strong>AUC, precision, recall, F1</strong> for a fuller picture on imbalanced data.</li>
 <li><strong>Training:</strong> 25 epochs, batch size 32.</li>
 </ul>
-<section id="what-does-batch-size-32-mean" class="level3">
-<h3 class="anchored" data-anchor-id="what-does-batch-size-32-mean">What does “batch size = 32” mean?</h3>
 <p>Instead of updating weights after every single example (which would be noisy and slow) or after the entire dataset (which would be memory-heavy and inefficient), we train in <strong>mini-batches</strong>:</p>
 <ul>
 <li>Each epoch, the training data is split into groups of 32 samples (mini-batches).<br>
@@ -308,10 +310,6 @@ We will: - Split the data with stratification to keep the class balance. - Stand
 </li>
 <li>This balances <strong>stability</strong> (less noisy than 1-sample updates) with <strong>efficiency</strong> (faster than full-dataset updates).</li>
 </ul>
-<p>Batch size <code>32</code> is a widely used practical default because:<br>
-- It fits easily in memory on most machines.<br>
-- It provides enough averaging to stabilize gradients.<br>
-- Empirically, it often yields good convergence speed.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="images/credit_nn.png" class="img-fluid figure-img" style="width:70.0%"></p>
@@ -355,7 +353,6 @@ We will: - Split the data with stratification to keep the class balance. - Stand
 </details>
 </div>
 </section>
-</section>
 <section id="model-evaluation" class="level2">
 <h2 class="anchored" data-anchor-id="model-evaluation">Model evaluation</h2>
 <p>After training, we test the model on the <strong>held-out test set</strong>.<br>
@@ -377,7 +374,7 @@ auc       : 0.82
 f1        : 0.13
 loss      : 0.20
 precision : 0.57
-recall    : 0.18</code></pre>
+recall    : 0.17</code></pre>
 </div>
 </div>
 </section>
@@ -412,7 +409,7 @@ recall    : 0.18</code></pre>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="credit_score_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="576"></p>
+<p><img src="multi_layer_credit_score_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="576"></p>
 </figure>
 </div>
 </div>
@@ -431,7 +428,7 @@ recall    : 0.18</code></pre>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="credit_score_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid figure-img" width="576"></p>
+<p><img src="multi_layer_credit_score_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid figure-img" width="576"></p>
 </figure>
 </div>
 </div>

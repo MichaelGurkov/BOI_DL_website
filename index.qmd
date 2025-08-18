@@ -10,5 +10,8 @@ title: "BOI_DL_website"
 - **Single layer**
     - [**Single layer – classification**](topics/single_layer_nn.qmd)
     - [**Single layer – regression**](topics/single_layer_nn_regression.qmd)
-- [**Optimization method**](topics/optim_methods.qmd)
+- **Multi layer**
+    - [**Multi layer – credit scoring use case**](topics/multi_layer_credit_score.qmd)
+    - [**Optimization method**](topics/optim_methods.qmd)
+
 - [**Convolution network**](topics/convolution.qmd)

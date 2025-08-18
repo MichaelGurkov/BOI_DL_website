@@ -23,6 +23,7 @@ reticulate::use_python(python_path, required = TRUE)
 
 In this tutorial we’ll build and evaluate a **multi-layer neural network** (MLP) to predict **credit default risk** (`SeriousDlqin2yrs`, binary 0/1).  
 We will:
+
 - Split the data with stratification to keep the class balance.
 - Standardize numeric features (important for MLP stability).
 - Define a small MLP using ReLU hidden layers and a sigmoid output.
@@ -138,18 +139,12 @@ We’ll build a small **MLP (multi-layer perceptron)**:
 - **Metrics:** accuracy + **AUC, precision, recall, F1** for a fuller picture on imbalanced data.
 - **Training:** 25 epochs, batch size 32.  
 
-### What does “batch size = 32” mean?
-
 Instead of updating weights after every single example (which would be noisy and slow) or after the entire dataset (which would be memory-heavy and inefficient), we train in **mini-batches**:
 
 - Each epoch, the training data is split into groups of 32 samples (mini-batches).  
 - For each mini-batch, the model computes predictions, calculates loss, and performs a weight update.  
 - This balances **stability** (less noisy than 1-sample updates) with **efficiency** (faster than full-dataset updates).  
 
-Batch size `32` is a widely used practical default because:  
-- It fits easily in memory on most machines.  
-- It provides enough averaging to stabilize gradients.  
-- Empirically, it often yields good convergence speed.
 
 ![The multi-layer neural network used in this tutorial. It takes 10 standardized input features, passes them through two hidden layers (60 and 5 neurons with ReLU activations), and produces a single sigmoid output that represents the probability of default.](images/credit_nn.png){fig-align="center" width="70%"}
 
