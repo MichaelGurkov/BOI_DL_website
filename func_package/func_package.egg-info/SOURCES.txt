@@ -1,0 +1,13 @@
+pyproject.toml
+./_init_.py
+./backward_propagation.py
+./forward_propagation.py
+./model.py
+./optimization.py
+./plotting.py
+./tests.py
+./utils.py
+func_package.egg-info/PKG-INFO
+func_package.egg-info/SOURCES.txt
+func_package.egg-info/dependency_links.txt
+func_package.egg-info/top_level.txt

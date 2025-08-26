@@ -218,3 +218,70 @@ print(f"Test Accuracy: {accuracy:.4f}")
 
 ```
 
+# Visualizing Model Decisions with Grad-CAM
+
+Convolutional Neural Networks are sometimes criticized for being “black boxes,” since it is not always clear what parts of an image the network relies on to make its prediction. To address this, visualization techniques such as Gradient-weighted Class Activation Mapping (Grad-CAM) help us interpret and explain the model’s decisions.
+
+Grad-CAM lets us see which parts of the image most influenced the model’s prediction by creating a heatmap of the regions the network “looked at” (based on gradients in the final convolutional layer). Here we first apply it to a single test image, and then to several misclassified examples to check whether the model is focusing on the relevant parts of the finger gesture.
+
+
+```{python }
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+# --- Grad-CAM: single example + misclassified overview -----------------------
+# Assumes: 
+#   - `model` is a trained CNN
+#   - `x_test` is a NumPy array / tensor of test images with the model's expected shape
+#   - `y_test` is one-hot labels (already remapped to 0..23, as in your pipeline)
+#   - The last conv layer is named "conv2d_1" (adjust if your model differs)
+
+from func_package.plotting import (
+    plot_gradcam,           # returns a dict with heatmap, overlay, pred_index, etc.
+    misclassified_indices,  # returns indices where model's argmax != true label
+    plot_gradcam_grid       # draws a grid of Grad-CAM overlays for given indices
+)
+
+# ---- Single example ----------------------------------------------------------
+# Compute and plot Grad-CAM for one test image (idx=0 by default).
+# Internally, this evaluates gradients of the predicted logit w.r.t. the chosen conv layer
+# to produce a heatmap highlighting influential spatial regions.
+out = plot_gradcam(
+    model, 
+    x_test, 
+    idx=0, 
+    last_conv_layer_name="conv2d_1"
+)
+
+# Report the predicted class index (already remapped to 0..23 to match your label scheme).
+print("Pred (remapped 0..23):", out["pred_index"])
+
+
+
+
+```
+
+
+```{python }
+#| code-fold: true
+#| code-summary: "Show the code"
+
+# ---- Misclassified overview --------------------------------------------------
+# Find which test samples are misclassified. `y_test` is one-hot, so this function
+# compares argmax(model(x_i)) with argmax(y_i) and returns their indices.
+bad = misclassified_indices(model, x_test, y_test)   # y_test is one-hot (remapped)
+
+
+# Visualize the first 3 misclassifications as a Grad-CAM grid. This helps spot
+# recurring failure modes (e.g., focusing on background rather than finger shape).
+# Tip: If you want the “hardest” mistakes, sort/choose by model confidence before slicing.
+plot_gradcam_grid(
+    model, 
+    x_test, 
+    indices=bad[:3], 
+    last_conv_layer_name="conv2d_1"
+)
+
+```
+
