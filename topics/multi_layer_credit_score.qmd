@@ -251,3 +251,72 @@ plt.show()
 
 ```
 
+
+
+## Appendix: Metrics & Formulas
+
+This page reports **binary classification** metrics computed on a held-out test set.  
+Let **TP**, **FP**, **TN**, **FN** be counts from the confusion matrix at a threshold $t$ (often $t=0.5$).  
+Let $y_{i} \in \{0,1\}$ be the true label and $\hat{p}_i \in [0,1]$ the model’s predicted probability for the positive class.
+
+### Binary Cross-Entropy (Log Loss)
+Measures the quality of probabilistic predictions (lower is better):
+$$
+\text{BCE} = -\frac{1}{n}\sum_{i=1}^{n}\Big[y_i \log(\hat{p}_i) + (1-y_i)\log\big(1-\hat{p}_i\big)\Big].
+$$
+
+  - Proper scoring rule: encourages calibrated probabilities.
+  
+  - Used as the **training loss** for the sigmoid output.
+
+### Accuracy
+Share of correct predictions at threshold \(t\):
+$$
+\text{Accuracy} = \frac{TP + TN}{TP + FP + TN + FN}.
+$$
+  
+  - Can be misleading under class imbalance.
+
+### Precision (Positive Predictive Value)
+“How many predicted positives are truly positive?”  
+$$
+\text{Precision} = \frac{TP}{TP + FP}.
+$$
+
+### Recall (Sensitivity, TPR)
+“How many actual positives did we catch?”  
+$$
+\text{Recall} = \frac{TP}{TP + FN}.
+$$
+
+### F1 Score
+Harmonic mean of precision and recall:
+$$
+\text{F1} = \frac{2 \cdot \text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}
+= \frac{2TP}{2TP + FP + FN}.
+$$
+
+  - Balances miss rate (FN) vs. false alarms (FP).  
+  
+  - Generalization: $F_\beta$ weights recall $\beta$ times more than precision:
+
+$$
+F_\beta = (1+\beta^2)\,\frac{\text{Precision}\cdot\text{Recall}}{(\beta^2\cdot\text{Precision})+\text{Recall}}.
+$$
+
+### AUC (ROC-AUC)
+Threshold-free measure of ranking quality (higher is better).  
+  - **ROC curve**: 
+  plot $\text{TPR}=\frac{TP}{TP+FN}$ vs. $\text{FPR}=\frac{FP}{FP+TN}$ as $t$ varies.  
+  
+  - **AUC** is the area under the ROC curve and equals the probability a random positive is ranked above a random negative:
+$$
+\text{AUC} = \Pr\big(\hat{p}^+ > \hat{p}^-\big).
+$$
+
+### Practical Notes
+  - **Threshold choice** (\(t\)) trades precision vs. recall; tune \(t\) to business costs or by maximizing a metric (e.g., F1) on validation data.
+  
+  - **Imbalanced data**: rely less on accuracy; prefer **AUC**, **PR curves**, **F1**, and class-specific error analysis.
+  
+  - **Calibration**: well-calibrated $\hat{p}$ improves decision-making when costs vary

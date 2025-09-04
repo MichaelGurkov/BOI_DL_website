@@ -101,6 +101,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -151,6 +180,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#model-architecture-training-setup" id="toc-model-architecture-training-setup" class="nav-link" data-scroll-target="#model-architecture-training-setup">Model architecture &amp; training setup</a></li>
   <li><a href="#model-evaluation" id="toc-model-evaluation" class="nav-link" data-scroll-target="#model-evaluation">Model evaluation</a></li>
   <li><a href="#training-history" id="toc-training-history" class="nav-link" data-scroll-target="#training-history">Training history</a></li>
+  <li><a href="#appendix-metrics-formulas" id="toc-appendix-metrics-formulas" class="nav-link" data-scroll-target="#appendix-metrics-formulas">Appendix: Metrics &amp; Formulas</a>
+  <ul class="collapse">
+  <li><a href="#binary-cross-entropy-log-loss" id="toc-binary-cross-entropy-log-loss" class="nav-link" data-scroll-target="#binary-cross-entropy-log-loss">Binary Cross-Entropy (Log Loss)</a></li>
+  <li><a href="#accuracy" id="toc-accuracy" class="nav-link" data-scroll-target="#accuracy">Accuracy</a></li>
+  <li><a href="#precision-positive-predictive-value" id="toc-precision-positive-predictive-value" class="nav-link" data-scroll-target="#precision-positive-predictive-value">Precision (Positive Predictive Value)</a></li>
+  <li><a href="#recall-sensitivity-tpr" id="toc-recall-sensitivity-tpr" class="nav-link" data-scroll-target="#recall-sensitivity-tpr">Recall (Sensitivity, TPR)</a></li>
+  <li><a href="#f1-score" id="toc-f1-score" class="nav-link" data-scroll-target="#f1-score">F1 Score</a></li>
+  <li><a href="#auc-roc-auc" id="toc-auc-roc-auc" class="nav-link" data-scroll-target="#auc-roc-auc">AUC (ROC-AUC)</a></li>
+  <li><a href="#practical-notes" id="toc-practical-notes" class="nav-link" data-scroll-target="#practical-notes">Practical Notes</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -370,11 +409,11 @@ Presenting them in a clean, rounded format makes the results easier to interpret
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>accuracy  : 0.93
-auc       : 0.50
+auc       : 0.82
 f1        : 0.13
-loss      : 0.25
-precision : 0.00
-recall    : 0.00</code></pre>
+loss      : 0.20
+precision : 0.56
+recall    : 0.16</code></pre>
 </div>
 </div>
 </section>
@@ -433,8 +472,79 @@ recall    : 0.00</code></pre>
 </div>
 </div>
 </div>
+</section>
+<section id="appendix-metrics-formulas" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-metrics-formulas">Appendix: Metrics &amp; Formulas</h2>
+<p>This page reports <strong>binary classification</strong> metrics computed on a held-out test set.<br>
+Let <strong>TP</strong>, <strong>FP</strong>, <strong>TN</strong>, <strong>FN</strong> be counts from the confusion matrix at a threshold <span class="math inline">\(t\)</span> (often <span class="math inline">\(t=0.5\)</span>).<br>
+Let <span class="math inline">\(y_{i} \in \{0,1\}\)</span> be the true label and <span class="math inline">\(\hat{p}_i \in [0,1]\)</span> the model’s predicted probability for the positive class.</p>
+<section id="binary-cross-entropy-log-loss" class="level3">
+<h3 class="anchored" data-anchor-id="binary-cross-entropy-log-loss">Binary Cross-Entropy (Log Loss)</h3>
+<p>Measures the quality of probabilistic predictions (lower is better): <span class="math display">\[
+\text{BCE} = -\frac{1}{n}\sum_{i=1}^{n}\Big[y_i \log(\hat{p}_i) + (1-y_i)\log\big(1-\hat{p}_i\big)\Big].
+\]</span></p>
+<ul>
+<li><p>Proper scoring rule: encourages calibrated probabilities.</p></li>
+<li><p>Used as the <strong>training loss</strong> for the sigmoid output.</p></li>
+</ul>
+</section>
+<section id="accuracy" class="level3">
+<h3 class="anchored" data-anchor-id="accuracy">Accuracy</h3>
+<p>Share of correct predictions at threshold (t): <span class="math display">\[
+\text{Accuracy} = \frac{TP + TN}{TP + FP + TN + FN}.
+\]</span></p>
+<ul>
+<li>Can be misleading under class imbalance.</li>
+</ul>
+</section>
+<section id="precision-positive-predictive-value" class="level3">
+<h3 class="anchored" data-anchor-id="precision-positive-predictive-value">Precision (Positive Predictive Value)</h3>
+<p>“How many predicted positives are truly positive?”<br>
+<span class="math display">\[
+\text{Precision} = \frac{TP}{TP + FP}.
+\]</span></p>
+</section>
+<section id="recall-sensitivity-tpr" class="level3">
+<h3 class="anchored" data-anchor-id="recall-sensitivity-tpr">Recall (Sensitivity, TPR)</h3>
+<p>“How many actual positives did we catch?”<br>
+<span class="math display">\[
+\text{Recall} = \frac{TP}{TP + FN}.
+\]</span></p>
+</section>
+<section id="f1-score" class="level3">
+<h3 class="anchored" data-anchor-id="f1-score">F1 Score</h3>
+<p>Harmonic mean of precision and recall: <span class="math display">\[
+\text{F1} = \frac{2 \cdot \text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}
+= \frac{2TP}{2TP + FP + FN}.
+\]</span></p>
+<ul>
+<li><p>Balances miss rate (FN) vs.&nbsp;false alarms (FP).</p></li>
+<li><p>Generalization: <span class="math inline">\(F_\beta\)</span> weights recall <span class="math inline">\(\beta\)</span> times more than precision:</p></li>
+</ul>
+<p><span class="math display">\[
+F_\beta = (1+\beta^2)\,\frac{\text{Precision}\cdot\text{Recall}}{(\beta^2\cdot\text{Precision})+\text{Recall}}.
+\]</span></p>
+</section>
+<section id="auc-roc-auc" class="level3">
+<h3 class="anchored" data-anchor-id="auc-roc-auc">AUC (ROC-AUC)</h3>
+<p>Threshold-free measure of ranking quality (higher is better).<br>
+- <strong>ROC curve</strong>: plot <span class="math inline">\(\text{TPR}=\frac{TP}{TP+FN}\)</span> vs.&nbsp;<span class="math inline">\(\text{FPR}=\frac{FP}{FP+TN}\)</span> as <span class="math inline">\(t\)</span> varies.</p>
+<ul>
+<li><strong>AUC</strong> is the area under the ROC curve and equals the probability a random positive is ranked above a random negative: <span class="math display">\[
+\text{AUC} = \Pr\big(\hat{p}^+ &gt; \hat{p}^-\big).
+\]</span></li>
+</ul>
+</section>
+<section id="practical-notes" class="level3">
+<h3 class="anchored" data-anchor-id="practical-notes">Practical Notes</h3>
+<ul>
+<li><p><strong>Threshold choice</strong> ((t)) trades precision vs.&nbsp;recall; tune (t) to business costs or by maximizing a metric (e.g., F1) on validation data.</p></li>
+<li><p><strong>Imbalanced data</strong>: rely less on accuracy; prefer <strong>AUC</strong>, <strong>PR curves</strong>, <strong>F1</strong>, and class-specific error analysis.</p></li>
+<li><p><strong>Calibration</strong>: well-calibrated <span class="math inline">\(\hat{p}\)</span> improves decision-making when costs vary</p></li>
+</ul>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
