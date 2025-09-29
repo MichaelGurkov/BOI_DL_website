@@ -88,11 +88,16 @@ plt.show()
 ```
 
 
+```{python parameters_set}
 
 
+params = {}
 
+params["num_epochs"] = 2000
 
+params["num_prints"] = 100
 
+```
 
 
 
@@ -119,10 +124,10 @@ gd_parameters, gd_costs = model(
     X, y, layer_dims,
     optimizer="gd",
     learning_rate=0.01,
-    num_epochs=2000,
+    num_epochs=params["num_epochs"],
     batch_size=None,
     print_cost=False,
-    print_every=200
+    print_every=params["num_prints"]
 )
 
 ```
@@ -161,10 +166,10 @@ sgd_parameters, sgd_costs = model(
     X, y, layer_dims,
     optimizer="gd",
     learning_rate=0.01,
-    num_epochs=2000,
+    num_epochs=params["num_epochs"],
     batch_size=32,
     print_cost=False,
-    print_every=200
+    print_every=params["num_prints"]
 )
 
 ```
@@ -203,10 +208,10 @@ momentum_parameters, momentum_costs = model(
     X, y, layer_dims,
     optimizer="momentum",
     learning_rate=0.01,
-    num_epochs=2000,
+    num_epochs=params["num_epochs"],
     batch_size=None,
     print_cost=False,
-    print_every=200,
+    print_every=params["num_prints"],
     beta = 0.9
 )
 
@@ -246,10 +251,10 @@ rmsprop_parameters, rmsprop_costs = model(
     X, y, layer_dims,
     optimizer="rmsprop",
     learning_rate=0.001,
-    num_epochs=2000,
+    num_epochs=params["num_epochs"],
     batch_size=None,
     print_cost=False,
-    print_every=200,
+    print_every=params["num_prints"],
     beta2 = 0.9,
     epsilon = 1 * 10 ** (-8)
 )
@@ -290,10 +295,10 @@ adam_parameters, adam_costs = model(
     X, y, layer_dims,
     optimizer="adam",
     learning_rate=0.001,
-    num_epochs=2000,
+    num_epochs=params["num_epochs"],
     batch_size=None,
     print_cost=False,
-    print_every=200,
+    print_every=params["num_prints"],
     beta1 = 0.9,
     beta2 = 0.999,
     epsilon = 1 * 10 ** (-8)
@@ -313,6 +318,42 @@ pred_adam = predict_nn(X, adam_parameters)
 adam_score = accuracy_score(pred_adam.flatten(),y.flatten())
 
 print(f"Adam accuracy score is {adam_score}")
+
+```
+
+
+# Learning curve comparison
+
+
+```{python plot_learning_curve}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+cost_names = ['gd_costs', 'sgd_costs', 'momentum_costs', 'rmsprop_costs', 'adam_costs']
+
+costs_dict = {}
+
+for name in cost_names:
+    val = globals().get(name, None)
+    if val is not None:
+        arr = np.asarray(val, dtype=float).reshape(-1)  # ensure 1D float array
+        costs_dict[name] = arr
+
+
+plt.figure(figsize=(8, 5))
+
+for name, arr in costs_dict.items():
+    epochs = np.arange(1, len(arr) + 1) * params["num_prints"]
+    plt.plot(epochs, arr, label=name, linewidth=1.6)
+
+plt.xlabel("Epoch")
+plt.ylabel("Cost (loss)")
+plt.title("Learning Curves for Optimization Methods")
+plt.grid(True, alpha=0.3)
+plt.legend()
+plt.tight_layout()
+plt.show()
 
 ```
 
