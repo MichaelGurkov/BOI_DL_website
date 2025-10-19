@@ -2,20 +2,16 @@ project:
   type: website
   output-dir: docs
 
-
 website:
   title: "BOI_DL_website"
   navbar:
     left:
-      - href: index.qmd
-        text: Home
-
+      - text: Home
+        href: index.qmd
+ 
 format:
   html:
     theme: cosmo
     css: styles.css
     toc: true
     html-math-method: mathjax
-
-
-

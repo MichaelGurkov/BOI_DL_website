@@ -116,14 +116,14 @@
     "href": "index.html",
     "title": "BOI_DL_website",
     "section": "",
-    "text": "Python workshop\n\n\n\n\nMoving beyond linearity\nSingle layer\n\nSingle layer – classification\nSingle layer – regression\n\nMulti layer\n\nMulti layer – credit scoring use case\nOptimization method\n\nConvolution network"
+    "text": "Moving beyond linearity\nSingle layer\n\nSingle layer – classification\nSingle layer – regression\n\nMulti layer\n\nMulti layer – credit scoring use case\nOptimization method\n\nConvolution network"
   },
   {
     "objectID": "index.html#topics",
     "href": "index.html#topics",
     "title": "BOI_DL_website",
-    "section": "",
-    "text": "Moving beyond linearity\nSingle layer\n\nSingle layer – classification\nSingle layer – regression\n\nMulti layer\n\nMulti layer – credit scoring use case\nOptimization method\n\nConvolution network"
+    "section": "Topics",
+    "text": "Topics\n\nMoving beyond linearity\n\n\nConvolution network"
   },
   {
     "objectID": "topics/intro.html",
