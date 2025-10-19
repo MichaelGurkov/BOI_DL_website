@@ -1,7 +1,19 @@
 ---
+page-layout: full
 ---
 
-[![](images/python_workshop.png){width=200}](topics/python_workshop.qmd)
-[![](images/single_icon.png){width=200}]()
-[![](images/multi_icon.png){width=200}]()
+<div class="icon-grid center">
 
+<a class="icon-card" href="topics/python_workshop/python_workshop_main.qmd">
+  <img src="images/python_workshop.png" alt="Python Workshop">
+</a>
+
+<a class="icon-card" href="topics/single_layer/regression.qmd">
+  <img src="images/single_icon.png" alt="Single Layer Neural Networks">
+</a>
+
+<a class="icon-card" href="topics/multi_layer/optim_methods.qmd">
+  <img src="images/multi_icon.png" alt="Multi Layer Neural Networks">
+</a>
+
+</div>
