@@ -4,9 +4,14 @@ page-layout: full
 
 <div class="icon-grid center">
 
-<a class="icon-card" href="topics/python_workshop/python_workshop_main.qmd">
+<a class="icon-card" href="topics/python_workshop/python_workshop.qmd">
   <img src="images/python_workshop.png" alt="Python Workshop">
 </a>
+
+<a class="icon-card" href="topics/intro.qmd">
+  <img src="images/intro.png" alt="Intro">
+</a>
+
 
 <a class="icon-card" href="topics/single_layer/regression.qmd">
   <img src="images/single_icon.png" alt="Single Layer Neural Networks">

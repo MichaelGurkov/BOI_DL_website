@@ -22,9 +22,9 @@ website:
     title: "Multi Layer Neural Networks"
     style: docked
     contents:
-      - href: topics/multi_layer/optim_methods.qmd.qmd
+      - href: topics/multi_layer/optim_methods.qmd
         text: Optimization methods
-      - href: topics/multi_layer/optim_methods.qmd.qmd
+      - href: topics/multi_layer/optim_methods.qmd
         text: Regression
 
 format:

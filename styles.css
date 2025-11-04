@@ -17,7 +17,7 @@
 
 .icon-card img {
   display: block;
-  width: 180px;              /* adjust icon size (try 130–170px as needed) */
+  width: 220px;              /* adjust icon size (try 130–170px as needed) */
   height: auto;
   border-radius: 10px;       /* optional rounded corners */
   margin: 0 auto;

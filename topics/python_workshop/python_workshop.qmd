@@ -7,7 +7,7 @@ page-layout: full
 
 # 🧠 Python for Deep Learning Workshop
 
-This hands-on workshop introduces the essential Python skills needed for deep learning. You'll run Python code directly in your environment (e.g., RStudio with reticulate or Jupyter), and practice every concept along the way.
+This hands-on workshop introduces the essential Python skills needed for deep learning. You'll run Python code in Google Colab.
 
 ---
 
@@ -26,19 +26,6 @@ if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
 reticulate::use_python(python_path, required = TRUE)
 ```
 
-## 1. Introduction & Environment Setup
-
-We will use a local Python environment via `reticulate`, which allows running Python code directly inside this Quarto document.
-
-### Topics Covered
-
-* Why Python for Deep Learning
-* Setting up your local Python environment
-* Reading local files using pandas
-
-### Task
-
-Read a CSV file from your computer using `pandas` and display its first few rows.
 
 ---
 
