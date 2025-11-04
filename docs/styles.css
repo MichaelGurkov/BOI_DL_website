@@ -1,0 +1,31 @@
+/* --- Icon row on home page (desktop layout) --- */
+.icon-grid {
+  display: flex;
+  flex-direction: row;       /* arrange icons in a row */
+  justify-content: center;   /* center horizontally */
+  align-items: center;       /* align vertically */
+  gap: 3rem;                 /* spacing between icons */
+  margin: 5rem auto;         /* center block with top/bottom margin */
+}
+
+.icon-card {
+  display: inline-block;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+
+.icon-card img {
+  display: block;
+  width: 220px;              /* adjust icon size (try 130–170px as needed) */
+  height: auto;
+  border-radius: 10px;       /* optional rounded corners */
+  margin: 0 auto;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.icon-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  filter: saturate(1.05);
+}
