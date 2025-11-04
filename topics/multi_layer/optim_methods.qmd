@@ -1,0 +1,360 @@
+---
+title: "Optimization Methods in Neural Networks"
+---
+
+Implement and evaluate different optimization strategies for training a simple neural network
+
+
+# Data Preparation
+- Load the `cluster_moons.csv` dataset.
+- Extract input features `X` and target labels `y`.
+- Visualize the data with a scatter plot.
+
+```{r set_up_python, echo=FALSE}
+#|echo: FALSE
+
+if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
+  
+  python_path = paste0("C:\\Users\\internet\\AppData\\Local",
+                       "\\Programs\\Python\\Python312\\python.exe")
+} else {
+  
+  python_path = paste0("C:\\Users\\Home\\AppData\\Local",
+                       "\\Programs\\Python\\Python312\\python.exe")
+}
+
+reticulate::use_python(python_path)
+
+```
+
+```{python import_libraries}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+import pandas as pd
+
+import numpy as np
+
+import os
+
+
+from func_package.tests import (test_forward_propagation,
+test_backward_propagation, test_model)
+
+from func_package.model import model
+
+from func_package.utils import predict_nn
+
+from sklearn.metrics import accuracy_score
+
+# Plot predictions
+import matplotlib.pyplot as plt
+
+```
+
+```{python import_data}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+data_file_path = os.path.expanduser('~') + "\\Documents\\BOI_DL_website\\data\\cluster_moons.csv"
+
+raw_data = pd.read_csv(data_file_path)
+
+X = raw_data.iloc[:,0:2].copy()
+
+X = X.to_numpy().T.copy()
+
+y = raw_data.iloc[:,2].copy()
+
+y = y.to_numpy().reshape(1, -1).copy()
+
+```
+
+```{python plot_data}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+plt.scatter(X[0, :], X[1, :], c=y.flatten())
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.title('Scatter Plot of Feature 1 and Feature 2')
+plt.show()
+
+
+
+```
+
+
+```{python parameters_set}
+
+
+params = {}
+
+params["num_epochs"] = 2000
+
+params["num_prints"] = 100
+
+```
+
+
+
+
+
+
+# Gradient Descent
+
+- Train a neural network with one hidden layer using **batch gradient descent**.
+- Use the `model` function with `optimizer="gd"` and no mini-batching.
+- Predict on the training data and compute classification accuracy.
+
+
+## Model
+
+```{python gd_model}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+layer_dims = [2, 4, 1]
+
+gd_parameters, gd_costs = model(
+    X, y, layer_dims,
+    optimizer="gd",
+    learning_rate=0.01,
+    num_epochs=params["num_epochs"],
+    batch_size=None,
+    print_cost=False,
+    print_every=params["num_prints"]
+)
+
+```
+
+## Predictions
+
+```{python gd_predictions}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+pred_gd = predict_nn(X, gd_parameters)
+
+gd_score = accuracy_score(pred_gd.flatten(),y.flatten())
+
+print(f"GD accuracy score is {gd_score}")
+
+```
+
+
+
+# Stochastic Gradient Descent
+
+- Train the network using **stochastic gradient descent** with mini-batches (e.g., batch size = 32).
+- Use the `model` function with `optimizer="gd"` and `batch_size=32`.
+- Predict and compute accuracy.
+
+
+## Model
+
+```{python sgd_model}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+sgd_parameters, sgd_costs = model(
+    X, y, layer_dims,
+    optimizer="gd",
+    learning_rate=0.01,
+    num_epochs=params["num_epochs"],
+    batch_size=32,
+    print_cost=False,
+    print_every=params["num_prints"]
+)
+
+```
+
+## Predictions
+
+```{python sgd_predictions}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+pred_sgd = predict_nn(X, sgd_parameters)
+
+sgd_score = accuracy_score(pred_sgd.flatten(),y.flatten())
+
+print(f"GD accuracy score is {sgd_score}")
+
+```
+
+
+
+# Momentum
+
+- Train the model using **gradient descent with momentum**.
+- Use `optimizer="momentum"` and set `beta=0.9`.
+- Predict and compute accuracy.
+
+## Model
+
+```{python momentum_model}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+momentum_parameters, momentum_costs = model(
+    X, y, layer_dims,
+    optimizer="momentum",
+    learning_rate=0.01,
+    num_epochs=params["num_epochs"],
+    batch_size=None,
+    print_cost=False,
+    print_every=params["num_prints"],
+    beta = 0.9
+)
+
+```
+
+## Predictions
+
+```{python momentum_predictions}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+pred_momentum = predict_nn(X, momentum_parameters)
+
+momentum_score = accuracy_score(pred_momentum.flatten(),y.flatten())
+
+print(f"Momentum accuracy score is {momentum_score}")
+
+```
+
+
+# RMSProp
+
+- Train the model using the **RMSProp** optimizer.
+- Use `optimizer="rmsprop"` with `learning_rate=0.001`, `beta2=0.9`, and `epsilon=1e-8`.
+- Predict and compute accuracy.
+
+
+## Model
+
+```{python rmsprop_model}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+rmsprop_parameters, rmsprop_costs = model(
+    X, y, layer_dims,
+    optimizer="rmsprop",
+    learning_rate=0.001,
+    num_epochs=params["num_epochs"],
+    batch_size=None,
+    print_cost=False,
+    print_every=params["num_prints"],
+    beta2 = 0.9,
+    epsilon = 1 * 10 ** (-8)
+)
+
+```
+
+## Predictions
+
+```{python rmsprop_predictions}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+pred_rmsprop = predict_nn(X, rmsprop_parameters)
+
+rmsprop_score = accuracy_score(pred_rmsprop.flatten(),y.flatten())
+
+print(f"RMSProp accuracy score is {rmsprop_score}")
+
+```
+
+
+# Adam
+
+- Train the model using the **Adam** optimizer.
+- Use `optimizer="adam"` with `learning_rate=0.001`, `beta1=0.9`, `beta2=0.999`, and `epsilon=1e-8`.
+- Predict and compute accuracy.
+
+
+## Model
+
+```{python adam_model}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+adam_parameters, adam_costs = model(
+    X, y, layer_dims,
+    optimizer="adam",
+    learning_rate=0.001,
+    num_epochs=params["num_epochs"],
+    batch_size=None,
+    print_cost=False,
+    print_every=params["num_prints"],
+    beta1 = 0.9,
+    beta2 = 0.999,
+    epsilon = 1 * 10 ** (-8)
+)
+
+```
+
+## Predictions
+
+```{python adam_predictions}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+pred_adam = predict_nn(X, adam_parameters)
+
+adam_score = accuracy_score(pred_adam.flatten(),y.flatten())
+
+print(f"Adam accuracy score is {adam_score}")
+
+```
+
+
+# Learning curve comparison
+
+
+```{python plot_learning_curve}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+cost_names = ['gd_costs', 'sgd_costs', 'momentum_costs', 'rmsprop_costs', 'adam_costs']
+
+costs_dict = {}
+
+for name in cost_names:
+    val = globals().get(name, None)
+    if val is not None:
+        arr = np.asarray(val, dtype=float).reshape(-1)  # ensure 1D float array
+        costs_dict[name] = arr
+
+
+plt.figure(figsize=(8, 5))
+
+for name, arr in costs_dict.items():
+    epochs = np.arange(1, len(arr) + 1) * params["num_prints"]
+    plt.plot(epochs, arr, label=name, linewidth=1.6)
+
+plt.xlabel("Epoch")
+plt.ylabel("Cost (loss)")
+plt.title("Learning Curves for Optimization Methods")
+plt.grid(True, alpha=0.3)
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+```
+
+

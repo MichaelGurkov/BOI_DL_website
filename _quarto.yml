@@ -2,20 +2,33 @@ project:
   type: website
   output-dir: docs
 
-
 website:
-  title: "BOI_DL_website"
+  search: true
   navbar:
     left:
       - href: index.qmd
         text: Home
+
+  sidebar:
+  - id: single_layer
+    title: "Single Layer Neural Networks"
+    style: docked
+    contents:
+      - href: topics/single_layer/classification.qmd
+        text: Classification
+      - href: topics/single_layer/regression.qmd
+        text: Regression
+  - id: multi_layer
+    title: "Multi Layer Neural Networks"
+    style: docked
+    contents:
+      - href: topics/multi_layer/optim_methods.qmd
+        text: Optimization methods
+      - href: topics/multi_layer/optim_methods.qmd
+        text: Regression
 
 format:
   html:
     theme: cosmo
     css: styles.css
     toc: true
-    html-math-method: mathjax
-
-
-

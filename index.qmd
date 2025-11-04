@@ -1,17 +1,24 @@
 ---
-title: "BOI_DL_website"
+page-layout: full
 ---
 
-# Python workshop
-- [**Python workshop**](topics/python_workshop.qmd)
+<div class="icon-grid center">
 
-## Topics
-- [**Moving beyond linearity**](topics/intro.qmd)
-- **Single layer**
-    - [**Single layer – classification**](topics/single_layer_nn_classification.qmd)
-    - [**Single layer – regression**](topics/single_layer_nn_regression.qmd)
-- **Multi layer**
-    - [**Multi layer – credit scoring use case**](topics/multi_layer_credit_score.qmd)
-    - [**Optimization method**](topics/optim_methods.qmd)
+<a class="icon-card" href="topics/python_workshop/python_workshop.qmd">
+  <img src="images/python_workshop.png" alt="Python Workshop">
+</a>
 
-- [**Convolution network**](topics/convolution.qmd)
+<a class="icon-card" href="topics/intro.qmd">
+  <img src="images/intro.png" alt="Intro">
+</a>
+
+
+<a class="icon-card" href="topics/single_layer/regression.qmd">
+  <img src="images/single_icon.png" alt="Single Layer Neural Networks">
+</a>
+
+<a class="icon-card" href="topics/multi_layer/optim_methods.qmd">
+  <img src="images/multi_icon.png" alt="Multi Layer Neural Networks">
+</a>
+
+</div>
