@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Multi layer Neural Network for Credit Score classification</title>
+<title>Single layer Neural Network for Credit Score classification</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -163,7 +163,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../topics/multi_layer/multi_layer_credit_score.html">Regression</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../topics/single_layer/single_layer_credit_score.html">Credit Score example</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -177,14 +177,20 @@ window.Quarto = {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../topics/multi_layer/optim_methods.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Optimization methods</span></a>
+  <a href="../../topics/single_layer/classification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Classification</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../topics/multi_layer/multi_layer_credit_score.html" class="sidebar-item-text sidebar-link active">
+  <a href="../../topics/single_layer/regression.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Regression</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../topics/single_layer/single_layer_credit_score.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Credit Score example</span></a>
   </div>
 </li>
     </ul>
@@ -199,7 +205,6 @@ window.Quarto = {
   <ul>
   <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a>
   <ul class="collapse">
-  <li><a href="#why-this-architecture" id="toc-why-this-architecture" class="nav-link" data-scroll-target="#why-this-architecture">Why this architecture?</a></li>
   <li><a href="#data-target" id="toc-data-target" class="nav-link" data-scroll-target="#data-target">Data &amp; target</a></li>
   </ul></li>
   <li><a href="#data-preprocessing" id="toc-data-preprocessing" class="nav-link" data-scroll-target="#data-preprocessing">Data preprocessing</a></li>
@@ -224,7 +229,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Multi layer Neural Network for Credit Score classification</h1>
+<h1 class="title">Single layer Neural Network for Credit Score classification</h1>
 </div>
 
 
@@ -243,27 +248,14 @@ window.Quarto = {
 
 <section id="overview" class="level2">
 <h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>In this tutorial we’ll build and evaluate a <strong>multi-layer neural network</strong> (MLP) to predict <strong>credit default risk</strong> (<code>SeriousDlqin2yrs</code>, binary 0/1).<br>
-We will:</p>
+<p>In this tutorial we build and evaluate a single hidden layer neural network to predict credit default risk (SeriousDlqin2yrs, 0/1). The model:</p>
 <ul>
-<li>Split the data with stratification to keep the class balance.</li>
-<li>Standardize numeric features (important for MLP stability).</li>
-<li>Define a small MLP using ReLU hidden layers and a sigmoid output.</li>
-<li>Train with <strong>binary cross-entropy</strong> and report <strong>accuracy, AUC, precision, recall, and F1</strong>.</li>
-<li>Discuss practical knobs: epochs, batch size, and early stopping.</li>
+<li><p>Uses one hidden layer with ReLU activation</p></li>
+<li><p>Outputs a probability via sigmoid</p></li>
+<li><p>Trains using full-batch gradient descent (one update per epoch)</p></li>
+<li><p>Evaluates accuracy, AUC, precision, recall, and F1</p></li>
+<li><p>We standardize features to improve optimization stability.</p></li>
 </ul>
-<section id="why-this-architecture" class="level3">
-<h3 class="anchored" data-anchor-id="why-this-architecture">Why this architecture?</h3>
-<ul>
-<li><strong>Hidden layers:</strong> ReLU activations learn non-linear decision boundaries efficiently.<br>
-</li>
-<li><strong>Output layer:</strong> Sigmoid maps predictions to probabilities in ([0,1]) for binary classification.<br>
-</li>
-<li><strong>Loss:</strong> Binary cross-entropy aligns with Bernoulli likelihood and probabilistic outputs.<br>
-</li>
-<li><strong>Metrics:</strong> Accuracy can be misleading with imbalance; <strong>AUC, precision, recall, F1</strong> add nuance.</li>
-</ul>
-</section>
 <section id="data-target" class="level3">
 <h3 class="anchored" data-anchor-id="data-target">Data &amp; target</h3>
 <ul>
@@ -273,20 +265,21 @@ We will:</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Core data handling</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os                           <span class="co"># file paths</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np                  <span class="co"># numeric arrays, vectorized ops</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd                 <span class="co"># dataframes, CSV I/O</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Model selection &amp; preprocessing</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split   <span class="co"># train/test split with stratify</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler       <span class="co"># feature standardization (fit on train only!)</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Deep learning (Keras/TensorFlow)</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tensorflow <span class="im">as</span> tf</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras <span class="im">import</span> Sequential                <span class="co"># simple stack model</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.layers <span class="im">import</span> Dense, Input       <span class="co"># fully connected layers</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras <span class="im">import</span> metrics                   <span class="co"># ready-made metrics: AUC, Precision, Recall, F1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Core data handling</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np                  <span class="co"># numeric arrays, vectorized ops</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd                 <span class="co"># dataframes, CSV I/O</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Model selection &amp; preprocessing</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split   <span class="co"># train/test split with stratify</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler       <span class="co"># feature standardization (fit on train only!)</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Deep learning (Keras/TensorFlow)</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tensorflow <span class="im">as</span> tf</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras <span class="im">import</span> Sequential                <span class="co"># simple stack model</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras.layers <span class="im">import</span> Dense, Input       <span class="co"># fully connected layers</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras <span class="im">import</span> metrics                   <span class="co"># ready-made metrics: AUC, Precision, Recall, F1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -336,7 +329,7 @@ We will:</p>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Path to the dataset (inside Documents/BOI_DL_website/data)</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>data_path <span class="op">=</span> os.path.join(</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    os.path.expanduser(<span class="st">"~</span><span class="ch">\\</span><span class="st">Documents</span><span class="ch">\\</span><span class="st">BOI_DL_website"</span>),</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"data</span><span class="ch">\\</span><span class="st">credit_data.csv"</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"data</span><span class="ch">\\</span><span class="st">credit_small_sample.csv"</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Load raw dataset</span></span>
@@ -349,31 +342,32 @@ We will:</p>
 </section>
 <section id="model-architecture-training-setup" class="level2">
 <h2 class="anchored" data-anchor-id="model-architecture-training-setup">Model architecture &amp; training setup</h2>
-<p>We’ll build a small <strong>MLP (multi-layer perceptron)</strong>:</p>
+<p>We will build a <strong>single-hidden-layer neural network</strong>:</p>
 <ul>
-<li><strong>Input (10 features):</strong> matches the scaled columns produced in preprocessing.<br>
+<li><strong>Input (10 features):</strong> the standardized predictors from preprocessing.<br>
 </li>
-<li><strong>Hidden layers:</strong> <code>Dense(60, ReLU)</code> → <code>Dense(5, ReLU)</code>
+<li><strong>Hidden layer:</strong> <code>Dense(20, ReLU)</code>
 <ul>
-<li>ReLU speeds up training and handles nonlinearity well.<br>
+<li>ReLU introduces nonlinearity and allows the model to learn flexible decision boundaries.<br>
 </li>
-<li>Width 60 then 5 is a compact architecture suitable for tabular credit data.</li>
 </ul></li>
-<li><strong>Output:</strong> <code>Dense(1, Sigmoid)</code> gives a probability for the positive class.</li>
-<li><strong>Loss:</strong> <code>binary_crossentropy</code> (standard for binary classification).<br>
+<li><strong>Output layer:</strong> <code>Dense(1, Sigmoid)</code> produces a probability of default in ([0,1]).<br>
 </li>
-<li><strong>Optimizer:</strong> Adam with learning rate <code>1e-3</code> (robust default).<br>
+<li><strong>Loss:</strong> <code>binary_crossentropy</code> to match the probabilistic output.<br>
 </li>
-<li><strong>Metrics:</strong> accuracy + <strong>AUC, precision, recall, F1</strong> for a fuller picture on imbalanced data.</li>
-<li><strong>Training:</strong> 25 epochs, batch size 32.</li>
+<li><strong>Optimizer:</strong> Adam with learning rate <code>1e-3</code>.<br>
+</li>
+<li><strong>Metrics:</strong> accuracy, <strong>AUC</strong>, <strong>precision</strong>, <strong>recall</strong>, and <strong>F1</strong> for a balanced evaluation under class imbalance.<br>
+</li>
+<li><strong>Training:</strong> 25 epochs using <strong>full-batch gradient descent</strong>.</li>
 </ul>
-<p>Instead of updating weights after every single example (which would be noisy and slow) or after the entire dataset (which would be memory-heavy and inefficient), we train in <strong>mini-batches</strong>:</p>
+<p>Full-batch training means:</p>
 <ul>
-<li>Each epoch, the training data is split into groups of 32 samples (mini-batches).<br>
+<li>The entire training set is used as one batch.<br>
 </li>
-<li>For each mini-batch, the model computes predictions, calculates loss, and performs a weight update.<br>
+<li>Each epoch performs one forward pass and one weight update.<br>
 </li>
-<li>This balances <strong>stability</strong> (less noisy than 1-sample updates) with <strong>efficiency</strong> (faster than full-dataset updates).</li>
+<li>This approach is feasible because the dataset is small.</li>
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -384,36 +378,36 @@ We will:</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define a simple feed-forward network for binary classification</span></span>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define a simple feed-forward neural network</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Sequential([</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    Input(shape<span class="op">=</span>(<span class="dv">10</span>,)),                                   <span class="co"># Input vector of length 10 (scaled features)</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    Dense(<span class="dv">60</span>, activation<span class="op">=</span><span class="st">"relu"</span>, kernel_initializer<span class="op">=</span><span class="st">"uniform"</span>),  <span class="co"># Hidden layer 1: 60 units + ReLU</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    Dense(<span class="dv">5</span>,  activation<span class="op">=</span><span class="st">"relu"</span>, kernel_initializer<span class="op">=</span><span class="st">"uniform"</span>),  <span class="co"># Hidden layer 2: 5 units + ReLU</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    Dense(<span class="dv">1</span>,  activation<span class="op">=</span><span class="st">"sigmoid"</span>)                              <span class="co"># Output: probability of positive class</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    Input(shape<span class="op">=</span>(<span class="dv">10</span>,)),                         <span class="co"># The model expects 10 standardized input features</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    Dense(<span class="dv">20</span>, activation<span class="op">=</span><span class="st">"relu"</span>,                <span class="co"># Hidden layer with 20 neurons + ReLU non-linearity</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>          kernel_initializer<span class="op">=</span><span class="st">"uniform"</span>),        <span class="co"># Initialize weights uniformly (small random values)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    Dense(<span class="dv">1</span>, activation<span class="op">=</span><span class="st">"sigmoid"</span>)              <span class="co"># Output layer: sigmoid gives probability of default</span></span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>])</span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Compile with binary cross-entropy and a useful metric set for imbalance</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify training configuration</span></span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">compile</span>(</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    optimizer<span class="op">=</span>tf.keras.optimizers.Adam(<span class="fl">1e-3</span>),             <span class="co"># Adam with lr=0.001</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    loss<span class="op">=</span><span class="st">"binary_crossentropy"</span>,                           <span class="co"># Suitable for sigmoid output</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    optimizer<span class="op">=</span>tf.keras.optimizers.Adam(<span class="fl">1e-3</span>),   <span class="co"># Adam optimizer with learning rate = 0.001</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    loss<span class="op">=</span><span class="st">"binary_crossentropy"</span>,                 <span class="co"># Standard loss function for binary classification</span></span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    metrics<span class="op">=</span>[</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"accuracy"</span>,</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        metrics.AUC(name<span class="op">=</span><span class="st">"auc"</span>),</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        metrics.Precision(name<span class="op">=</span><span class="st">"precision"</span>),</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        metrics.Recall(name<span class="op">=</span><span class="st">"recall"</span>),</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        metrics.F1Score(name<span class="op">=</span><span class="st">"f1"</span>)                        <span class="co"># Requires TF &gt;= 2.11</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"accuracy"</span>,                             <span class="co"># Proportion of correct predictions</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        metrics.AUC(name<span class="op">=</span><span class="st">"auc"</span>),                <span class="co"># Area under ROC curve (ranking quality)</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        metrics.Precision(name<span class="op">=</span><span class="st">"precision"</span>),    <span class="co"># TP / (TP + FP) — “how many predicted positives are real”</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        metrics.Recall(name<span class="op">=</span><span class="st">"recall"</span>),          <span class="co"># TP / (TP + FN) — “how many true positives we catch”</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        metrics.F1Score(name<span class="op">=</span><span class="st">"f1"</span>)              <span class="co"># Harmonic mean of precision and recall</span></span>
 <span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    ]</span>
 <span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Train the model</span></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>history <span class="op">=</span> model.fit(</span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    X_train, y_train,</span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span><span class="dv">25</span>,                        <span class="co"># training passes over the dataset</span></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    batch_size<span class="op">=</span><span class="dv">32</span>,                    <span class="co"># mini-batch size</span></span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    <span class="co"># validation_split=0.2,           # (Optional) hold out 20% of train for validation curves</span></span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># callbacks=[es],                 # (Optional) add early stopping</span></span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    verbose<span class="op">=</span><span class="dv">0</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Use full-batch gradient descent: one weight update per epoch</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>batch_size <span class="op">=</span> X_train.shape[<span class="dv">0</span>]</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Train the model</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>history <span class="op">=</span> model.fit(</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    X_train, y_train,</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span><span class="dv">25</span>,                                  <span class="co"># Number of passes through the full dataset</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    batch_size<span class="op">=</span>batch_size,                      <span class="co"># Full batch = whole dataset at once</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    verbose<span class="op">=</span><span class="dv">0</span>                                   <span class="co"># Suppress training output for cleaner logs</span></span>
 <span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
@@ -435,11 +429,11 @@ Presenting them in a clean, rounded format makes the results easier to interpret
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>accuracy  : 0.93
-auc       : 0.82
+auc       : 0.50
 f1        : 0.13
-loss      : 0.20
-precision : 0.56
-recall    : 0.18</code></pre>
+loss      : 0.58
+precision : 0.60
+recall    : 0.02</code></pre>
 </div>
 </div>
 </section>
@@ -474,7 +468,7 @@ recall    : 0.18</code></pre>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="multi_layer_credit_score_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="576"></p>
+<p><img src="single_layer_credit_score_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="576"></p>
 </figure>
 </div>
 </div>
@@ -493,7 +487,7 @@ recall    : 0.18</code></pre>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="multi_layer_credit_score_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid figure-img" width="576"></p>
+<p><img src="single_layer_credit_score_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid figure-img" width="576"></p>
 </figure>
 </div>
 </div>

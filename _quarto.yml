@@ -18,13 +18,15 @@ website:
         text: Classification
       - href: topics/single_layer/regression.qmd
         text: Regression
+      - href: topics/single_layer/single_layer_credit_score.qmd
+        text: Credit Score example        
   - id: multi_layer
     title: "Multi Layer Neural Networks"
     style: docked
     contents:
       - href: topics/multi_layer/optim_methods.qmd
         text: Optimization methods
-      - href: topics/multi_layer/optim_methods.qmd
+      - href: topics/multi_layer/multi_layer_credit_score.qmd
         text: Regression
 
 format:
