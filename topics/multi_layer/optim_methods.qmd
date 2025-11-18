@@ -38,13 +38,9 @@ import numpy as np
 
 import os
 
-
-from func_package.tests import (test_forward_propagation,
-test_backward_propagation, test_model)
-
-from func_package.model import model
-
-from func_package.utils import predict_nn
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers, optimizers, losses
 
 from sklearn.metrics import accuracy_score
 
@@ -52,6 +48,78 @@ from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
 
 ```
+
+
+```{python define_functions}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+
+def model(X, y, layer_dims, optimizer, learning_rate,
+          num_epochs, batch_size, print_cost, print_every,
+          beta=0.9, beta2=0.999, epsilon=1e-8):
+
+    # 1. Build model according to layer_dims
+    keras_model = keras.Sequential()
+    keras_model.add(layers.Input(shape=(layer_dims[0],)))
+
+    # hidden layers
+    for units in layer_dims[1:-1]:
+        keras_model.add(layers.Dense(units, activation="tanh"))
+
+    # output layer
+    keras_model.add(layers.Dense(layer_dims[-1], activation="sigmoid"))
+
+    # 2. Choose optimizer
+    if optimizer == "gd":
+        opt = optimizers.SGD(learning_rate=learning_rate)
+    elif optimizer == "momentum":
+        opt = optimizers.SGD(learning_rate=learning_rate, momentum=beta)
+    elif optimizer == "rmsprop":
+        opt = optimizers.RMSprop(learning_rate=learning_rate, rho=beta2, epsilon=epsilon)
+    elif optimizer == "adam":
+        opt = optimizers.Adam(learning_rate=learning_rate, beta_1=beta, beta_2=beta2, epsilon=epsilon)
+    else:
+        raise ValueError("Unknown optimizer")
+
+    # 3. Compile model
+    keras_model.compile(optimizer=opt, loss="binary_crossentropy")
+
+    # 4. Fit model
+    history = keras_model.fit(
+        X.T,                # Keras expects shape (n_samples, n_features)
+        y.T,                # y must also be column format
+        epochs=num_epochs,
+        batch_size=batch_size if batch_size is not None else len(X.T),
+        verbose=0
+    )
+
+    # 5. Return model and the costs array
+    costs = history.history["loss"]
+
+    return keras_model, costs
+
+
+
+def predict_nn(X, keras_model):
+    """
+    X: shape (n_features, n_samples)
+    keras_model: Keras model object returned by model()
+    """
+
+    preds = keras_model.predict(X.T, verbose=0)  # Keras wants (samples, features)
+
+    # threshold to get 0/1 predictions
+    preds_binary = (preds > 0.5).astype(int)
+
+    return preds_binary.T   # return in original shape (1, n_samples)
+
+
+
+```
+
+
 
 ```{python import_data}
 #| code-fold: true
@@ -125,10 +193,11 @@ gd_parameters, gd_costs = model(
     optimizer="gd",
     learning_rate=0.01,
     num_epochs=params["num_epochs"],
-    batch_size=None,
+    batch_size=X.shape[1],      # full batch for GD
     print_cost=False,
     print_every=params["num_prints"]
 )
+
 
 ```
 
@@ -185,7 +254,7 @@ pred_sgd = predict_nn(X, sgd_parameters)
 
 sgd_score = accuracy_score(pred_sgd.flatten(),y.flatten())
 
-print(f"GD accuracy score is {sgd_score}")
+print(f"SGD accuracy score is {sgd_score}")
 
 ```
 
@@ -209,7 +278,7 @@ momentum_parameters, momentum_costs = model(
     optimizer="momentum",
     learning_rate=0.01,
     num_epochs=params["num_epochs"],
-    batch_size=None,
+    batch_size=X.shape[1],
     print_cost=False,
     print_every=params["num_prints"],
     beta = 0.9
@@ -252,7 +321,7 @@ rmsprop_parameters, rmsprop_costs = model(
     optimizer="rmsprop",
     learning_rate=0.001,
     num_epochs=params["num_epochs"],
-    batch_size=None,
+    batch_size=X.shape[1],
     print_cost=False,
     print_every=params["num_prints"],
     beta2 = 0.9,
@@ -296,7 +365,7 @@ adam_parameters, adam_costs = model(
     optimizer="adam",
     learning_rate=0.001,
     num_epochs=params["num_epochs"],
-    batch_size=None,
+    batch_size=X.shape[1],
     print_cost=False,
     print_every=params["num_prints"],
     beta1 = 0.9,
