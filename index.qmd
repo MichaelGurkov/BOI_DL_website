@@ -22,7 +22,7 @@ page-layout: full
 </a>
 
 <a class="icon-card" href="topics/exercises/exercise_1.qmd">
-  <img src="images/multi_icon.png" alt="Exercise Set">
+  <img src="images/exercise.png" alt="Exercise Set">
 </a>
 
 </div>
