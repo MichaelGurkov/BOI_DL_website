@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>index</title>
+<title>Neural Networks Workshop — Practice Exercise Set</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,23 +23,23 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-bce83624dd429190d13db9bf62533269.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-bce83624dd429190d13db9bf62533269.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -69,7 +69,7 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../../styles.css">
 </head>
 
 <body class="nav-fixed quarto-light">
@@ -85,7 +85,7 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="../../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
 </ul>
@@ -96,27 +96,272 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#load-and-inspect-the-data" id="toc-load-and-inspect-the-data" class="nav-link" data-scroll-target="#load-and-inspect-the-data">1. Load and Inspect the Data</a>
+  <ul class="collapse">
+  <li><a href="#load-the-dataset" id="toc-load-the-dataset" class="nav-link" data-scroll-target="#load-the-dataset">1.1 Load the dataset</a></li>
+  <li><a href="#inspect-its-structure" id="toc-inspect-its-structure" class="nav-link" data-scroll-target="#inspect-its-structure">1.2 Inspect its structure</a></li>
+  <li><a href="#identify-target-and-predictors" id="toc-identify-target-and-predictors" class="nav-link" data-scroll-target="#identify-target-and-predictors">1.3 Identify target and predictors</a></li>
+  </ul></li>
+  <li><a href="#handle-missing-values" id="toc-handle-missing-values" class="nav-link" data-scroll-target="#handle-missing-values">2. Handle Missing Values</a>
+  <ul class="collapse">
+  <li><a href="#detect-missingness" id="toc-detect-missingness" class="nav-link" data-scroll-target="#detect-missingness">2.1 Detect missingness</a></li>
+  <li><a href="#choose-an-imputation-strategy" id="toc-choose-an-imputation-strategy" class="nav-link" data-scroll-target="#choose-an-imputation-strategy">2.2 Choose an imputation strategy</a></li>
+  <li><a href="#create-a-cleaned-dataset" id="toc-create-a-cleaned-dataset" class="nav-link" data-scroll-target="#create-a-cleaned-dataset">2.3 Create a cleaned dataset</a></li>
+  </ul></li>
+  <li><a href="#exploratory-data-analysis-eda" id="toc-exploratory-data-analysis-eda" class="nav-link" data-scroll-target="#exploratory-data-analysis-eda">3. Exploratory Data Analysis (EDA)</a>
+  <ul class="collapse">
+  <li><a href="#examine-the-target-distribution" id="toc-examine-the-target-distribution" class="nav-link" data-scroll-target="#examine-the-target-distribution">3.1 Examine the target distribution</a></li>
+  <li><a href="#explore-important-numeric-features" id="toc-explore-important-numeric-features" class="nav-link" data-scroll-target="#explore-important-numeric-features">3.2 Explore important numeric features</a></li>
+  <li><a href="#correlation-inspection" id="toc-correlation-inspection" class="nav-link" data-scroll-target="#correlation-inspection">3.3 Correlation inspection</a></li>
+  </ul></li>
+  <li><a href="#traintest-split" id="toc-traintest-split" class="nav-link" data-scroll-target="#traintest-split">4. Train/Test Split</a>
+  <ul class="collapse">
+  <li><a href="#split-the-data" id="toc-split-the-data" class="nav-link" data-scroll-target="#split-the-data">4.1 Split the data</a></li>
+  <li><a href="#scale-the-predictors" id="toc-scale-the-predictors" class="nav-link" data-scroll-target="#scale-the-predictors">4.2 Scale the predictors</a></li>
+  </ul></li>
+  <li><a href="#logistic-regression-baseline" id="toc-logistic-regression-baseline" class="nav-link" data-scroll-target="#logistic-regression-baseline">5. Logistic Regression Baseline</a>
+  <ul class="collapse">
+  <li><a href="#fit-a-logistic-regression-model" id="toc-fit-a-logistic-regression-model" class="nav-link" data-scroll-target="#fit-a-logistic-regression-model">5.1 Fit a logistic regression model</a></li>
+  <li><a href="#evaluate-performance" id="toc-evaluate-performance" class="nav-link" data-scroll-target="#evaluate-performance">5.2 Evaluate performance</a></li>
+  <li><a href="#interpret-the-results" id="toc-interpret-the-results" class="nav-link" data-scroll-target="#interpret-the-results">5.3 Interpret the results</a></li>
+  </ul></li>
+  <li><a href="#single-layer-neural-network" id="toc-single-layer-neural-network" class="nav-link" data-scroll-target="#single-layer-neural-network">6. Single-Layer Neural Network</a>
+  <ul class="collapse">
+  <li><a href="#define-the-architecture" id="toc-define-the-architecture" class="nav-link" data-scroll-target="#define-the-architecture">6.1 Define the architecture</a></li>
+  <li><a href="#compile-the-model" id="toc-compile-the-model" class="nav-link" data-scroll-target="#compile-the-model">6.2 Compile the model</a></li>
+  <li><a href="#train-the-model" id="toc-train-the-model" class="nav-link" data-scroll-target="#train-the-model">6.3 Train the model</a></li>
+  <li><a href="#evaluate" id="toc-evaluate" class="nav-link" data-scroll-target="#evaluate">6.4 Evaluate</a></li>
+  </ul></li>
+  <li><a href="#optional-multi-layer-neural-network" id="toc-optional-multi-layer-neural-network" class="nav-link" data-scroll-target="#optional-multi-layer-neural-network">7. Optional: Multi-Layer Neural Network</a>
+  <ul class="collapse">
+  <li><a href="#build-a-deeper-architecture" id="toc-build-a-deeper-architecture" class="nav-link" data-scroll-target="#build-a-deeper-architecture">7.1 Build a deeper architecture</a></li>
+  <li><a href="#consider-regularization" id="toc-consider-regularization" class="nav-link" data-scroll-target="#consider-regularization">7.2 Consider regularization</a></li>
+  <li><a href="#train-and-compare" id="toc-train-and-compare" class="nav-link" data-scroll-target="#train-and-compare">7.3 Train and compare</a></li>
+  <li><a href="#discuss-findings" id="toc-discuss-findings" class="nav-link" data-scroll-target="#discuss-findings">7.4 Discuss findings</a></li>
+  </ul></li>
+  <li><a href="#summary-questions" id="toc-summary-questions" class="nav-link" data-scroll-target="#summary-questions">8. Summary Questions</a></li>
+  <li><a href="#end-of-exercise-set" id="toc-end-of-exercise-set" class="nav-link" data-scroll-target="#end-of-exercise-set">End of Exercise Set</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content" id="quarto-document-content">
 
-
-
-
-<div class="icon-grid center">
-<p><a class="icon-card" href="./topics/python_workshop/python_workshop.html"> <img src="images/python_workshop.png" alt="Python Workshop"> </a></p>
-<p><a class="icon-card" href="./topics/intro.html"> <img src="images/intro.png" alt="Intro"> </a></p>
-<p><a class="icon-card" href="./topics/single_layer/regression.html"> <img src="images/single_icon.png" alt="Single Layer Neural Networks"> </a></p>
-<p><a class="icon-card" href="./topics/multi_layer/optim_methods.html"> <img src="images/multi_icon.png" alt="Multi Layer Neural Networks"> </a></p>
-<p><a class="icon-card" href="./topics/exercises/exercise_1.html"> <img src="images/multi_icon.png" alt="Exercise Set"> </a></p>
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Neural Networks Workshop — Practice Exercise Set</h1>
 </div>
 
 
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<p>In this exercise, you will work with the <code>credit_data</code> dataset and progress step by step through a short exploratory data analysis, a logistic regression baseline, a single-layer neural network, and an optional multi-layer neural network. Each section builds on the previous one so you can follow the workflow without getting lost.</p>
+<p>The target variable is:</p>
+<ul>
+<li><strong><code>SeriousDlqin2yrs</code></strong> — whether the person experienced financial distress severe enough to be 90+ days delinquent within the next two years.</li>
+</ul>
+<p>All remaining columns serve as predictors.</p>
+<hr>
+</section>
+<section id="load-and-inspect-the-data" class="level1">
+<h1>1. Load and Inspect the Data</h1>
+<section id="load-the-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="load-the-dataset">1.1 Load the dataset</h3>
+<p>Load the CSV file into a DataFrame named <code>credit_data</code>.</p>
+</section>
+<section id="inspect-its-structure" class="level3">
+<h3 class="anchored" data-anchor-id="inspect-its-structure">1.2 Inspect its structure</h3>
+<p>View:</p>
+<ul>
+<li>the first rows<br>
+</li>
+<li>the column types<br>
+</li>
+<li>summary statistics</li>
+</ul>
+<p>Make sure <code>SeriousDlqin2yrs</code> contains only 0 and 1.</p>
+</section>
+<section id="identify-target-and-predictors" class="level3">
+<h3 class="anchored" data-anchor-id="identify-target-and-predictors">1.3 Identify target and predictors</h3>
+<p>Confirm that the target is binary and all other columns are features used for modeling.</p>
+<hr>
+</section>
+</section>
+<section id="handle-missing-values" class="level1">
+<h1>2. Handle Missing Values</h1>
+<section id="detect-missingness" class="level3">
+<h3 class="anchored" data-anchor-id="detect-missingness">2.1 Detect missingness</h3>
+<p>Count missing values per column and identify which features require imputation.</p>
+</section>
+<section id="choose-an-imputation-strategy" class="level3">
+<h3 class="anchored" data-anchor-id="choose-an-imputation-strategy">2.2 Choose an imputation strategy</h3>
+<p>Use the <strong>median</strong> for numeric features and explain why this is appropriate for skewed financial data.</p>
+</section>
+<section id="create-a-cleaned-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="create-a-cleaned-dataset">2.3 Create a cleaned dataset</h3>
+<p>Apply the transformations and verify that no missing values remain.</p>
+<hr>
+</section>
+</section>
+<section id="exploratory-data-analysis-eda" class="level1">
+<h1>3. Exploratory Data Analysis (EDA)</h1>
+<p>Keep this focused and practical.</p>
+<section id="examine-the-target-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="examine-the-target-distribution">3.1 Examine the target distribution</h3>
+<p>Plot the proportion of 0’s and 1’s to understand the level of class imbalance.</p>
+</section>
+<section id="explore-important-numeric-features" class="level3">
+<h3 class="anchored" data-anchor-id="explore-important-numeric-features">3.2 Explore important numeric features</h3>
+<p>Look at distributions (histograms or boxplots) of a few features such as:</p>
+<ul>
+<li>age<br>
+</li>
+<li>DebtRatio<br>
+</li>
+<li>MonthlyIncome</li>
+</ul>
+<p>Discuss any unusual patterns or outliers.</p>
+</section>
+<section id="correlation-inspection" class="level3">
+<h3 class="anchored" data-anchor-id="correlation-inspection">3.3 Correlation inspection</h3>
+<p>Compute a correlation matrix and observe:</p>
+<ul>
+<li>which features correlate most strongly with the target<br>
+</li>
+<li>which features correlate strongly with each other</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="traintest-split" class="level1">
+<h1>4. Train/Test Split</h1>
+<section id="split-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="split-the-data">4.1 Split the data</h3>
+<p>Create a stratified split such that the test set is 25% of the data.</p>
+</section>
+<section id="scale-the-predictors" class="level3">
+<h3 class="anchored" data-anchor-id="scale-the-predictors">4.2 Scale the predictors</h3>
+<p>Standardize the numeric predictors. Fit the scaling on the training data and apply it to both training and test sets.</p>
+<hr>
+</section>
+</section>
+<section id="logistic-regression-baseline" class="level1">
+<h1>5. Logistic Regression Baseline</h1>
+<section id="fit-a-logistic-regression-model" class="level3">
+<h3 class="anchored" data-anchor-id="fit-a-logistic-regression-model">5.1 Fit a logistic regression model</h3>
+<p>Use the cleaned, scaled training data.</p>
+</section>
+<section id="evaluate-performance" class="level3">
+<h3 class="anchored" data-anchor-id="evaluate-performance">5.2 Evaluate performance</h3>
+<p>Produce:</p>
+<ul>
+<li>accuracy<br>
+</li>
+<li>precision<br>
+</li>
+<li>recall<br>
+</li>
+<li>F1 score<br>
+</li>
+<li>AUC<br>
+</li>
+<li>confusion matrix</li>
+</ul>
+</section>
+<section id="interpret-the-results" class="level3">
+<h3 class="anchored" data-anchor-id="interpret-the-results">5.3 Interpret the results</h3>
+<p>Discuss at least one strength and one limitation of logistic regression in the context of this dataset.</p>
+<hr>
+</section>
+</section>
+<section id="single-layer-neural-network" class="level1">
+<h1>6. Single-Layer Neural Network</h1>
+<p>You will now build a shallow neural network with one hidden layer.</p>
+<section id="define-the-architecture" class="level3">
+<h3 class="anchored" data-anchor-id="define-the-architecture">6.1 Define the architecture</h3>
+<p>Use: - one hidden layer with a small number of units<br>
+- ReLU activation in the hidden layer<br>
+- sigmoid activation in the output layer</p>
+</section>
+<section id="compile-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="compile-the-model">6.2 Compile the model</h3>
+<p>Use binary cross-entropy loss, the Adam optimizer, and accuracy/AUC.</p>
+</section>
+<section id="train-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="train-the-model">6.3 Train the model</h3>
+<p>Train for about 20 epochs with a validation split.<br>
+Plot the training and validation curves and look for signs of overfitting.</p>
+</section>
+<section id="evaluate" class="level3">
+<h3 class="anchored" data-anchor-id="evaluate">6.4 Evaluate</h3>
+<p>Compare performance to logistic regression using the same metrics.</p>
+<hr>
+</section>
+</section>
+<section id="optional-multi-layer-neural-network" class="level1">
+<h1>7. Optional: Multi-Layer Neural Network</h1>
+<p>This section is for students who want to explore deeper models.</p>
+<section id="build-a-deeper-architecture" class="level3">
+<h3 class="anchored" data-anchor-id="build-a-deeper-architecture">7.1 Build a deeper architecture</h3>
+<p>Use two or more hidden layers (e.g.&nbsp;32 → 16 → 1).</p>
+</section>
+<section id="consider-regularization" class="level3">
+<h3 class="anchored" data-anchor-id="consider-regularization">7.2 Consider regularization</h3>
+<p>Try dropout or L2 regularization to reduce overfitting.</p>
+</section>
+<section id="train-and-compare" class="level3">
+<h3 class="anchored" data-anchor-id="train-and-compare">7.3 Train and compare</h3>
+<p>Evaluate your deep model and compare it with: - logistic regression<br>
+- single-layer network</p>
+</section>
+<section id="discuss-findings" class="level3">
+<h3 class="anchored" data-anchor-id="discuss-findings">7.4 Discuss findings</h3>
+<p>Explain whether depth helped or harmed performance and why.</p>
+<hr>
+</section>
+</section>
+<section id="summary-questions" class="level1">
+<h1>8. Summary Questions</h1>
+<p>Answer the following:</p>
+<ol type="1">
+<li>Which model achieved the highest AUC?<br>
+</li>
+<li>Which model showed signs of overfitting?<br>
+</li>
+<li>If you had to deploy one model, which would you choose and why?<br>
+</li>
+<li>What additional preprocessing or feature engineering steps could improve model performance?</li>
+</ol>
+<hr>
+</section>
+<section id="end-of-exercise-set" class="level1">
+<h1>End of Exercise Set</h1>
+<p>Work through the tasks in order, verifying each step before moving to the next. This workflow mirrors a real-world modeling pipeline and prepares you for more advanced neural network structures.</p>
+
+
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

@@ -1,0 +1,162 @@
+---
+title: "Neural Networks Workshop — Practice Exercise Set"
+format: html
+---
+  
+# Overview
+  
+In this exercise, you will work with the `credit_data` dataset and progress step by step through a short exploratory data analysis, a logistic regression baseline, a single-layer neural network, and an optional multi-layer neural network. Each section builds on the previous one so you can follow the workflow without getting lost.
+
+The target variable is:
+  
+  - **`SeriousDlqin2yrs`** — whether the person experienced financial distress severe enough to be 90+ days delinquent within the next two years.
+
+All remaining columns serve as predictors.
+
+---
+  
+# 1. Load and Inspect the Data
+
+### 1.1 Load the dataset  
+Load the CSV file into a DataFrame named `credit_data`.
+
+### 1.2 Inspect its structure  
+View:
+
+- the first rows  
+- the column types  
+- summary statistics  
+
+Make sure `SeriousDlqin2yrs` contains only 0 and 1.
+
+### 1.3 Identify target and predictors  
+Confirm that the target is binary and all other columns are features used for modeling.
+
+---
+  
+# 2. Handle Missing Values
+
+### 2.1 Detect missingness  
+Count missing values per column and identify which features require imputation.
+
+### 2.2 Choose an imputation strategy  
+Use the **median** for numeric features and explain why this is appropriate for skewed financial data.
+
+### 2.3 Create a cleaned dataset  
+Apply the transformations and verify that no missing values remain.
+
+---
+  
+# 3. Exploratory Data Analysis (EDA)
+
+Keep this focused and practical.
+
+### 3.1 Examine the target distribution  
+Plot the proportion of 0’s and 1’s to understand the level of class imbalance.
+
+### 3.2 Explore important numeric features  
+Look at distributions (histograms or boxplots) of a few features such as:
+
+
+- age  
+- DebtRatio  
+- MonthlyIncome  
+
+Discuss any unusual patterns or outliers.
+
+### 3.3 Correlation inspection  
+Compute a correlation matrix and observe:
+
+
+- which features correlate most strongly with the target  
+- which features correlate strongly with each other  
+
+---
+  
+# 4. Train/Test Split
+
+### 4.1 Split the data  
+Create a stratified split such that the test set is 25% of the data.
+
+### 4.2 Scale the predictors  
+Standardize the numeric predictors. Fit the scaling on the training data and apply it to both training and test sets.
+
+---
+  
+# 5. Logistic Regression Baseline
+
+### 5.1 Fit a logistic regression model  
+Use the cleaned, scaled training data.
+
+### 5.2 Evaluate performance  
+Produce:
+
+
+- accuracy  
+- precision  
+- recall  
+- F1 score  
+- AUC  
+- confusion matrix  
+
+### 5.3 Interpret the results  
+Discuss at least one strength and one limitation of logistic regression in the context of this dataset.
+
+---
+  
+# 6. Single-Layer Neural Network
+
+You will now build a shallow neural network with one hidden layer.
+
+### 6.1 Define the architecture  
+Use:
+- one hidden layer with a small number of units  
+- ReLU activation in the hidden layer  
+- sigmoid activation in the output layer  
+
+### 6.2 Compile the model  
+Use binary cross-entropy loss, the Adam optimizer, and accuracy/AUC.
+
+### 6.3 Train the model  
+Train for about 20 epochs with a validation split.  
+Plot the training and validation curves and look for signs of overfitting.
+
+### 6.4 Evaluate  
+Compare performance to logistic regression using the same metrics.
+
+---
+  
+# 7. Optional: Multi-Layer Neural Network
+
+This section is for students who want to explore deeper models.
+
+### 7.1 Build a deeper architecture  
+Use two or more hidden layers (e.g. 32 → 16 → 1).
+
+### 7.2 Consider regularization  
+Try dropout or L2 regularization to reduce overfitting.
+
+### 7.3 Train and compare  
+Evaluate your deep model and compare it with:
+- logistic regression  
+- single-layer network  
+
+### 7.4 Discuss findings  
+Explain whether depth helped or harmed performance and why.
+
+---
+  
+# 8. Summary Questions
+
+Answer the following:
+
+1. Which model achieved the highest AUC?  
+2. Which model showed signs of overfitting?  
+3. If you had to deploy one model, which would you choose and why?  
+4. What additional preprocessing or feature engineering steps could improve model performance?
+
+---
+
+# End of Exercise Set
+
+Work through the tasks in order, verifying each step before moving to the next. This workflow mirrors a real-world modeling pipeline and prepares you for more advanced neural network structures.

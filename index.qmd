@@ -21,4 +21,8 @@ page-layout: full
   <img src="images/multi_icon.png" alt="Multi Layer Neural Networks">
 </a>
 
+<a class="icon-card" href="topics/exercises/exercise_1.qmd">
+  <img src="images/multi_icon.png" alt="Exercise Set">
+</a>
+
 </div>
