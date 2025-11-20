@@ -9,7 +9,7 @@ In this exercise, you will work with the `credit_data` dataset and progress step
 
 The target variable is:
   
-  - **`SeriousDlqin2yrs`** — whether the person experienced financial distress severe enough to be 90+ days delinquent within the next two years.
+- **`SeriousDlqin2yrs`** — whether the person experienced financial distress severe enough to be 90+ days delinquent within the next two years.
 
 All remaining columns serve as predictors.
 
