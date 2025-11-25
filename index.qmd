@@ -25,4 +25,8 @@ page-layout: full
   <img src="images/exercise.png" alt="Exercise Set">
 </a>
 
+<a class="icon-card" href="topics/cnn/convolution.qmd">
+  <img src="images/exercise.png" alt="Conv">
+</a>
+
 </div>

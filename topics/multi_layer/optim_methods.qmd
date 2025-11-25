@@ -16,11 +16,11 @@ Implement and evaluate different optimization strategies for training a simple n
 if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
   
   python_path = paste0("C:\\Users\\internet\\AppData\\Local",
-                       "\\Programs\\Python\\Python312\\python.exe")
+                       "\\Programs\\Python\\Python311\\python.exe")
 } else {
   
   python_path = paste0("C:\\Users\\Home\\AppData\\Local",
-                       "\\Programs\\Python\\Python312\\python.exe")
+                       "\\Programs\\Python\\Python311\\python.exe")
 }
 
 reticulate::use_python(python_path)
@@ -161,9 +161,9 @@ plt.show()
 
 params = {}
 
-params["num_epochs"] = 2000
+params["num_epochs"] = 20
 
-params["num_prints"] = 100
+params["num_prints"] = 10
 
 ```
 
@@ -368,7 +368,7 @@ adam_parameters, adam_costs = model(
     batch_size=X.shape[1],
     print_cost=False,
     print_every=params["num_prints"],
-    beta1 = 0.9,
+    beta = 0.9,
     beta2 = 0.999,
     epsilon = 1 * 10 ** (-8)
 )
