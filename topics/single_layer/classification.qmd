@@ -10,11 +10,11 @@ Implement a simple neural network from scratch and compare its performance to lo
 if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
   
   python_path = paste0("C:\\Users\\internet\\AppData\\Local",
-                       "\\Programs\\Python\\Python312\\python.exe")
+                       "\\Programs\\Python\\Python311\\python.exe")
 } else {
   
   python_path = paste0("C:\\Users\\Home\\AppData\\Local",
-                       "\\Programs\\Python\\Python312\\python.exe")
+                       "\\Programs\\Python\\Python311\\python.exe")
 }
 
 reticulate::use_python(python_path)

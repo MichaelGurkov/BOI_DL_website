@@ -31,19 +31,26 @@ reticulate::use_python(python_path, required = TRUE)
 
 
 import pandas as pd
-
 import numpy as np
-
 import os
-
 import matplotlib.pyplot as plt
 
+import tensorflow as tf
+
 from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, Input
 
-from tensorflow.keras.models import Sequential
 
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from tensorflow.keras import backend as K
 
+
+from tf_keras_vis.gradcam import Gradcam
+from tf_keras_vis.gradcam_plus_plus import GradcamPlusPlus
+from tf_keras_vis.utils.scores import CategoricalScore
+from tf_keras_vis.utils.model_modifiers import ReplaceToLinear
+from tf_keras_vis.utils import normalize
+from tf_keras_vis.saliency import Saliency
 
 ```
 
@@ -61,10 +68,15 @@ test_set = pd.read_csv(os.path.join(os.path.expanduser("~\\Documents\\BOI_DL_web
 
 ```
 
-# Preprocessing
-- Create a function to preprocess pixel values: normalize and reshape to `(28, 28, 1)`.
-- Create a function to preprocess labels: remap classes to account for the missing letter 'J' and one-hot encode them.
-- Apply the preprocessing functions to the training and test sets.
+# Preprocessing Labels
+- The Sign Language MNIST dataset contains labels for letters A–Z, but the letter **J** has no images.
+- Because of this, the dataset's labels skip the index 9.
+- To make the labels continuous (0–23), we:
+  - Keep labels 0–8 as they are.
+  - Subtract 1 from all labels ≥ 10.
+- Then we apply one-hot encoding to obtain 24 output classes.
+- A helper function (`reverse_remap`) converts predictions back to the original A–Z index range when needed.
+
 
 ```{python auxilary_functions}
 #| code-fold: true
@@ -143,15 +155,16 @@ x_test = preprocess_data(test_set.drop('label', axis=1))
 ```
 
 # Define CNN Model
-- Construct a `Sequential` model with:
-  - A `Conv2D` layer (32 filters, 3×3 kernel, ReLU, padding='same').
-  - A `MaxPooling2D` layer (2×2).
-  - Another `Conv2D` + `MaxPooling2D` block with 64 filters.
-  - A `Flatten` layer.
-  - A fully connected `Dense` layer with 128 units and ReLU activation.
-  - A `Dropout` layer with rate 0.3.
-  - A final `Dense` layer with 24 units and softmax activation.
-- Compile the model using the Adam optimizer and categorical cross-entropy loss.
+- Build a Convolutional Neural Network using the Keras Functional API:
+  - An input layer for images of shape (28, 28, 1).
+  - **Block 1:** two Conv2D layers with 32 filters (3×3, ReLU, padding='same'), followed by a MaxPooling2D layer (2×2).
+  - **Block 2:** two Conv2D layers with 64 filters (3×3, ReLU, padding='same').
+  - **Block 3:** two Conv2D layers with 128 filters (3×3, ReLU, padding='same').
+  - A Flatten layer to convert feature maps into a vector.
+  - A Dense layer with 256 units and ReLU activation.
+  - A Dropout layer with rate 0.3 to reduce overfitting.
+  - A final Dense layer with 24 units and softmax activation for classification.
+- Compile the model using the Adam optimizer and the categorical cross-entropy loss function.
 
 ```{python define_model}
 #| code-fold: true
@@ -159,26 +172,41 @@ x_test = preprocess_data(test_set.drop('label', axis=1))
 #| output: false
 
 
-model = Sequential([
-    Conv2D(32, (3, 3), activation='relu', padding='same', input_shape=(28, 28, 1)),
-    MaxPooling2D(pool_size=(2, 2)),
+# Input
+inputs = Input(shape=(28, 28, 1))
 
-    Conv2D(64, (3, 3), activation='relu', padding='same'),
-    MaxPooling2D(pool_size=(2, 2)),
+# Block 1
+x = Conv2D(32, (3, 3), activation='relu', padding='same')(inputs)
+x = Conv2D(32, (3, 3), activation='relu', padding='same')(x)
+x = MaxPooling2D(pool_size=(2, 2))(x)
 
-    Flatten(),
-    Dense(128, activation='relu'),
-    Dropout(0.3),
-    Dense(24, activation='softmax')  # 24 because of label remapping
-])
+# Block 2
+x = Conv2D(64, (3, 3), activation='relu', padding='same')(x)
+x = Conv2D(64, (3, 3), activation='relu', padding='same')(x)
 
+# Block 3
+x = Conv2D(128, (3, 3), activation='relu', padding='same')(x)
+x = Conv2D(128, (3, 3), activation='relu', padding='same')(x)
 
+# Dense head
+x = Flatten()(x)
+x = Dense(256, activation='relu')(x)
+x = Dropout(0.3)(x)
+
+# Output
+outputs = Dense(24, activation='softmax')(x)
+
+# Final model
+model = Model(inputs, outputs)
+
+# Compile
 model.compile(
     optimizer='adam',
     loss='categorical_crossentropy',
     metrics=['accuracy']
 )
 
+model.summary()
 
 ```
 
@@ -195,7 +223,7 @@ model.compile(
 history = model.fit(
     x_train, y_train,
     validation_data=(x_test, y_test),
-    epochs=5,
+    epochs=10,
     batch_size=128,
     verbose = 0
 )
@@ -220,68 +248,141 @@ print(f"Test Accuracy: {accuracy:.4f}")
 
 # Visualizing Model Decisions with Grad-CAM
 
-Convolutional Neural Networks are sometimes criticized for being “black boxes,” since it is not always clear what parts of an image the network relies on to make its prediction. To address this, visualization techniques such as Gradient-weighted Class Activation Mapping (Grad-CAM) help us interpret and explain the model’s decisions.
+Convolutional Neural Networks can achieve high accuracy, but it is often unclear 
+which parts of an image drive their predictions. To make the model more 
+interpretable, we use visualization techniques such as **Grad-CAM**, 
+**Guided Backpropagation**, and **Guided Grad-CAM**.
 
-Grad-CAM lets us see which parts of the image most influenced the model’s prediction by creating a heatmap of the regions the network “looked at” (based on gradients in the final convolutional layer). Here we first apply it to a single test image, and then to several misclassified examples to check whether the model is focusing on the relevant parts of the finger gesture.
+- **Grad-CAM (Gradient-weighted Class Activation Mapping)**  
+  Highlights the image regions that had the strongest influence on the model’s 
+  predicted class. It does this by examining the gradients flowing into the 
+  *last convolutional layer*, which contains spatial information.
+
+- **Guided Backpropagation**  
+  Computes fine-grained pixel-level gradients that show which pixels most 
+  strongly support the predicted class. The result is a high-resolution 
+  saliency map.
+
+- **Guided Grad-CAM**  
+  Combines the coarse, region-level information from Grad-CAM with the 
+  fine details from Guided Backpropagation.  
+  The result is a high-resolution heatmap that highlights exactly which parts 
+  of the image contributed to the model’s decision.
+
+Below, we apply all three methods to a selected test image to see what the model 
+focused on when predicting the hand sign.
 
 
-```{python }
+The figure below shows four visualizations side by side:
+
+- **Original Image** – the input image given to the model.
+- **Grad-CAM** – a coarse heatmap showing which regions of the image contributed most to the model’s prediction.
+- **Guided Backpropagation** – a fine-grained gradient map showing which pixels support the predicted class.
+- **Guided Grad-CAM** – an overlay combining Grad-CAM with Guided Backprop to produce a high-resolution explanation.
+
+```{python get_visualisation_metrics}
 #| code-fold: true
 #| code-summary: "Show the code"
 
+# Choose which test image to analyze
+idx = 3
+image = x_test[idx:idx+1]  # shape (1, 28, 28, 1)
 
-# --- Grad-CAM: single example + misclassified overview -----------------------
-# Assumes: 
-#   - `model` is a trained CNN
-#   - `x_test` is a NumPy array / tensor of test images with the model's expected shape
-#   - `y_test` is one-hot labels (already remapped to 0..23, as in your pipeline)
-#   - The last conv layer is named "conv2d_1" (adjust if your model differs)
 
-from func_package.plotting import (
-    plot_gradcam,           # returns a dict with heatmap, overlay, pred_index, etc.
-    misclassified_indices,  # returns indices where model's argmax != true label
-    plot_gradcam_grid       # draws a grid of Grad-CAM overlays for given indices
+for layer in reversed(model.layers):
+    if isinstance(layer, tf.keras.layers.Conv2D):
+        last_conv_layer_name = layer.name
+        break
+
+
+# ---- 1. Predict class ----
+pred_probs = model.predict(image, verbose=0)[0]
+pred_index = np.argmax(pred_probs)
+print("Predicted class:", pred_index)
+
+# ---- 2. Grad-CAM ----
+score = CategoricalScore(pred_index)
+
+gradcam = Gradcam(
+    model,
+    model_modifier=None,
+    clone=True
 )
 
-# ---- Single example ----------------------------------------------------------
-# Compute and plot Grad-CAM for one test image (idx=0 by default).
-# Internally, this evaluates gradients of the predicted logit w.r.t. the chosen conv layer
-# to produce a heatmap highlighting influential spatial regions.
-out = plot_gradcam(
-    model, 
-    x_test, 
-    idx=1, 
-    last_conv_layer_name="conv2d_1"
+cam = gradcam(
+    score,
+    image,
+    penultimate_layer=last_conv_layer_name
+)
+heatmap = cam[0]   # remove batch dimension
+
+
+
+def model_modifier(m):
+    # Replace the final softmax activation with linear
+    m.layers[-1].activation = tf.keras.activations.linear
+
+
+# ---- 3. Guided Backprop ----
+saliency = Saliency(
+    model,
+    model_modifier=model_modifier,
+    clone=True
 )
 
-# Report the predicted class index (already remapped to 0..23 to match your label scheme).
-print("Pred (remapped 0..23):", out["pred_index"])
+gbp = saliency(score, image)   # guided backprop gradients, shape (1, 28, 28, N)
+gbp = gbp[0]                   # remove batch dimension → shape (28, 28, N)
+gbp = normalize(gbp)           # rescale 0–1
 
 
+
+# ---- 4. Guided Grad-CAM (Grad-CAM × Guided Backprop) ----
+guided_gradcam = gbp * heatmap
 
 
 ```
 
 
-```{python }
+```{python plot_results}
 #| code-fold: true
 #| code-summary: "Show the code"
 
-# ---- Misclassified overview --------------------------------------------------
-# Find which test samples are misclassified. `y_test` is one-hot, so this function
-# compares argmax(model(x_i)) with argmax(y_i) and returns their indices.
-bad = misclassified_indices(model, x_test, y_test)   # y_test is one-hot (remapped)
+# Normalize Grad-CAM heatmap to 0–1 for display
+heatmap_norm = (heatmap - heatmap.min()) / (heatmap.max() - heatmap.min() + 1e-8)
 
+# Convert Guided Backprop to a single-channel saliency map
+gbp_gray = normalize(gbp)
 
-# Visualize the first 3 misclassifications as a Grad-CAM grid. This helps spot
-# recurring failure modes (e.g., focusing on background rather than finger shape).
-# Tip: If you want the “hardest” mistakes, sort/choose by model confidence before slicing.
-plot_gradcam_grid(
-    model, 
-    x_test, 
-    indices=bad[:3], 
-    last_conv_layer_name="conv2d_1"
-)
+plt.figure(figsize=(13, 4))
+
+# Original
+plt.subplot(1, 4, 1)
+plt.title("Original")
+plt.imshow(image[0].reshape(28, 28), cmap='gray')
+plt.axis('off')
+
+# Grad-CAM
+plt.subplot(1, 4, 2)
+plt.title("Grad-CAM")
+plt.imshow(heatmap_norm, cmap='jet')
+plt.axis('off')
+
+# Guided Backprop
+plt.subplot(1, 4, 3)
+plt.title("Guided Backprop")
+plt.imshow(gbp_gray, cmap='gray')
+plt.axis('off')
+
+# Guided Grad-CAM
+plt.subplot(1, 4, 4)
+plt.title("Guided Grad-CAM")
+plt.imshow(image[0].reshape(28, 28), cmap='gray')
+plt.imshow(heatmap_norm, cmap='jet', alpha=0.45)
+plt.axis('off')
+
+plt.tight_layout()
+plt.show()
 
 ```
+
 

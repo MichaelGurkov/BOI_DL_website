@@ -26,7 +26,7 @@ page-layout: full
 </a>
 
 <a class="icon-card" href="topics/cnn/convolution.qmd">
-  <img src="images/exercise.png" alt="Conv">
+  <img src="images/conv.png" alt="Conv">
 </a>
 
 </div>
