@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Neural Networks Workshop — Practice Exercise Set</title>
+<title>Practice Exercise: Convolutional Neural Networks with MNIST (Kaggle)</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -99,7 +99,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../topics/exercises/exercise_1.html">Logistic</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../topics/exercises/cnn_exercise.html">CNN</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -113,13 +113,13 @@ ul.task-list li input[type="checkbox"] {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../topics/exercises/exercise_1.html" class="sidebar-item-text sidebar-link active">
+  <a href="../../topics/exercises/exercise_1.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Logistic</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../topics/exercises/cnn_exercise.html" class="sidebar-item-text sidebar-link">
+  <a href="../../topics/exercises/cnn_exercise.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">CNN</span></a>
   </div>
 </li>
@@ -133,52 +133,42 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
-  <li><a href="#load-and-inspect-the-data" id="toc-load-and-inspect-the-data" class="nav-link" data-scroll-target="#load-and-inspect-the-data">1. Load and Inspect the Data</a>
+  <li><a href="#convolutional-neural-network-cnn-practice-with-mnist" id="toc-convolutional-neural-network-cnn-practice-with-mnist" class="nav-link active" data-scroll-target="#convolutional-neural-network-cnn-practice-with-mnist">Convolutional Neural Network (CNN) Practice with MNIST</a>
   <ul class="collapse">
-  <li><a href="#load-the-dataset" id="toc-load-the-dataset" class="nav-link" data-scroll-target="#load-the-dataset">1.1 Load the dataset</a></li>
-  <li><a href="#inspect-its-structure" id="toc-inspect-its-structure" class="nav-link" data-scroll-target="#inspect-its-structure">1.2 Inspect its structure</a></li>
-  <li><a href="#identify-target-and-predictors" id="toc-identify-target-and-predictors" class="nav-link" data-scroll-target="#identify-target-and-predictors">1.3 Identify target and predictors</a></li>
-  </ul></li>
-  <li><a href="#handle-missing-values" id="toc-handle-missing-values" class="nav-link" data-scroll-target="#handle-missing-values">2. Handle Missing Values</a>
+  <li><a href="#download-mnist-data-from-kaggle" id="toc-download-mnist-data-from-kaggle" class="nav-link" data-scroll-target="#download-mnist-data-from-kaggle">1. Download MNIST Data from Kaggle</a>
   <ul class="collapse">
-  <li><a href="#detect-missingness" id="toc-detect-missingness" class="nav-link" data-scroll-target="#detect-missingness">2.1 Detect missingness</a></li>
-  <li><a href="#choose-an-imputation-strategy" id="toc-choose-an-imputation-strategy" class="nav-link" data-scroll-target="#choose-an-imputation-strategy">2.2 Choose an imputation strategy</a></li>
-  <li><a href="#create-a-cleaned-dataset" id="toc-create-a-cleaned-dataset" class="nav-link" data-scroll-target="#create-a-cleaned-dataset">2.3 Create a cleaned dataset</a></li>
+  <li><a href="#get-the-dataset-from-kaggle" id="toc-get-the-dataset-from-kaggle" class="nav-link" data-scroll-target="#get-the-dataset-from-kaggle">1.1 – Get the dataset from Kaggle</a></li>
   </ul></li>
-  <li><a href="#exploratory-data-analysis-eda" id="toc-exploratory-data-analysis-eda" class="nav-link" data-scroll-target="#exploratory-data-analysis-eda">3. Exploratory Data Analysis (EDA)</a>
+  <li><a href="#load-and-inspect-the-data-eda" id="toc-load-and-inspect-the-data-eda" class="nav-link" data-scroll-target="#load-and-inspect-the-data-eda">2. Load and Inspect the Data (EDA)</a>
   <ul class="collapse">
-  <li><a href="#examine-the-target-distribution" id="toc-examine-the-target-distribution" class="nav-link" data-scroll-target="#examine-the-target-distribution">3.1 Examine the target distribution</a></li>
-  <li><a href="#explore-important-numeric-features" id="toc-explore-important-numeric-features" class="nav-link" data-scroll-target="#explore-important-numeric-features">3.2 Explore important numeric features</a></li>
-  <li><a href="#correlation-inspection" id="toc-correlation-inspection" class="nav-link" data-scroll-target="#correlation-inspection">3.3 Correlation inspection</a></li>
+  <li><a href="#load-the-data" id="toc-load-the-data" class="nav-link" data-scroll-target="#load-the-data">2.1 – Load the data</a></li>
+  <li><a href="#basic-eda" id="toc-basic-eda" class="nav-link" data-scroll-target="#basic-eda">2.2 – Basic EDA</a></li>
+  <li><a href="#visualize-sample-digits" id="toc-visualize-sample-digits" class="nav-link" data-scroll-target="#visualize-sample-digits">2.3 – Visualize sample digits</a></li>
   </ul></li>
-  <li><a href="#traintest-split" id="toc-traintest-split" class="nav-link" data-scroll-target="#traintest-split">4. Train/Test Split</a>
+  <li><a href="#prepare-the-data-for-the-cnn" id="toc-prepare-the-data-for-the-cnn" class="nav-link" data-scroll-target="#prepare-the-data-for-the-cnn">3. Prepare the Data for the CNN</a>
   <ul class="collapse">
-  <li><a href="#split-the-data" id="toc-split-the-data" class="nav-link" data-scroll-target="#split-the-data">4.1 Split the data</a></li>
-  <li><a href="#scale-the-predictors" id="toc-scale-the-predictors" class="nav-link" data-scroll-target="#scale-the-predictors">4.2 Scale the predictors</a></li>
+  <li><a href="#separate-features-and-labels" id="toc-separate-features-and-labels" class="nav-link" data-scroll-target="#separate-features-and-labels">3.1 – Separate features and labels</a></li>
+  <li><a href="#create-a-trainingvalidation-split" id="toc-create-a-trainingvalidation-split" class="nav-link" data-scroll-target="#create-a-trainingvalidation-split">3.2 – Create a training/validation split</a></li>
+  <li><a href="#reshape-and-normalize-the-images" id="toc-reshape-and-normalize-the-images" class="nav-link" data-scroll-target="#reshape-and-normalize-the-images">3.3 – Reshape and normalize the images</a></li>
+  <li><a href="#encode-the-labels" id="toc-encode-the-labels" class="nav-link" data-scroll-target="#encode-the-labels">3.4 – Encode the labels</a></li>
   </ul></li>
-  <li><a href="#logistic-regression-baseline" id="toc-logistic-regression-baseline" class="nav-link" data-scroll-target="#logistic-regression-baseline">5. Logistic Regression Baseline</a>
+  <li><a href="#build-a-basic-convolutional-neural-network-cnn" id="toc-build-a-basic-convolutional-neural-network-cnn" class="nav-link" data-scroll-target="#build-a-basic-convolutional-neural-network-cnn">4. Build a Basic Convolutional Neural Network (CNN)</a>
   <ul class="collapse">
-  <li><a href="#fit-a-logistic-regression-model" id="toc-fit-a-logistic-regression-model" class="nav-link" data-scroll-target="#fit-a-logistic-regression-model">5.1 Fit a logistic regression model</a></li>
-  <li><a href="#evaluate-performance" id="toc-evaluate-performance" class="nav-link" data-scroll-target="#evaluate-performance">5.2 Evaluate performance</a></li>
-  <li><a href="#interpret-the-results" id="toc-interpret-the-results" class="nav-link" data-scroll-target="#interpret-the-results">5.3 Interpret the results</a></li>
+  <li><a href="#define-the-cnn-architecture" id="toc-define-the-cnn-architecture" class="nav-link" data-scroll-target="#define-the-cnn-architecture">4.1 – Define the CNN architecture</a></li>
+  <li><a href="#summarize-the-model" id="toc-summarize-the-model" class="nav-link" data-scroll-target="#summarize-the-model">4.2 – Summarize the model</a></li>
   </ul></li>
-  <li><a href="#single-layer-neural-network" id="toc-single-layer-neural-network" class="nav-link" data-scroll-target="#single-layer-neural-network">6. Single-Layer Neural Network</a>
+  <li><a href="#compile-and-train-the-model" id="toc-compile-and-train-the-model" class="nav-link" data-scroll-target="#compile-and-train-the-model">5. Compile and Train the Model</a>
   <ul class="collapse">
-  <li><a href="#define-the-architecture" id="toc-define-the-architecture" class="nav-link" data-scroll-target="#define-the-architecture">6.1 Define the architecture</a></li>
-  <li><a href="#compile-the-model" id="toc-compile-the-model" class="nav-link" data-scroll-target="#compile-the-model">6.2 Compile the model</a></li>
-  <li><a href="#train-the-model" id="toc-train-the-model" class="nav-link" data-scroll-target="#train-the-model">6.3 Train the model</a></li>
-  <li><a href="#evaluate" id="toc-evaluate" class="nav-link" data-scroll-target="#evaluate">6.4 Evaluate</a></li>
+  <li><a href="#compile-the-model" id="toc-compile-the-model" class="nav-link" data-scroll-target="#compile-the-model">5.1 – Compile the model</a></li>
+  <li><a href="#train-the-model" id="toc-train-the-model" class="nav-link" data-scroll-target="#train-the-model">5.2 – Train the model</a></li>
   </ul></li>
-  <li><a href="#optional-multi-layer-neural-network" id="toc-optional-multi-layer-neural-network" class="nav-link" data-scroll-target="#optional-multi-layer-neural-network">7. Optional: Multi-Layer Neural Network</a>
+  <li><a href="#evaluate-the-model" id="toc-evaluate-the-model" class="nav-link" data-scroll-target="#evaluate-the-model">6. Evaluate the Model</a>
   <ul class="collapse">
-  <li><a href="#build-a-deeper-architecture" id="toc-build-a-deeper-architecture" class="nav-link" data-scroll-target="#build-a-deeper-architecture">7.1 Build a deeper architecture</a></li>
-  <li><a href="#consider-regularization" id="toc-consider-regularization" class="nav-link" data-scroll-target="#consider-regularization">7.2 Consider regularization</a></li>
-  <li><a href="#train-and-compare" id="toc-train-and-compare" class="nav-link" data-scroll-target="#train-and-compare">7.3 Train and compare</a></li>
-  <li><a href="#discuss-findings" id="toc-discuss-findings" class="nav-link" data-scroll-target="#discuss-findings">7.4 Discuss findings</a></li>
+  <li><a href="#visualize-training-progress" id="toc-visualize-training-progress" class="nav-link" data-scroll-target="#visualize-training-progress">6.1 – Visualize training progress</a></li>
+  <li><a href="#evaluate-model-performance" id="toc-evaluate-model-performance" class="nav-link" data-scroll-target="#evaluate-model-performance">6.2 – Evaluate model performance</a></li>
+  <li><a href="#analyze-errors" id="toc-analyze-errors" class="nav-link" data-scroll-target="#analyze-errors">6.3 – Analyze errors</a></li>
   </ul></li>
-  <li><a href="#summary-questions" id="toc-summary-questions" class="nav-link" data-scroll-target="#summary-questions">8. Summary Questions</a></li>
-  <li><a href="#end-of-exercise-set" id="toc-end-of-exercise-set" class="nav-link" data-scroll-target="#end-of-exercise-set">End of Exercise Set</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -187,7 +177,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Neural Networks Workshop — Practice Exercise Set</h1>
+<h1 class="title">Practice Exercise: Convolutional Neural Networks with MNIST (Kaggle)</h1>
 </div>
 
 
@@ -204,192 +194,226 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="overview" class="level1">
-<h1>Overview</h1>
-<p>In this exercise, you will work with the <code>credit_data</code> dataset and progress step by step through a short exploratory data analysis, a logistic regression baseline, a single-layer neural network, and an optional multi-layer neural network. Each section builds on the previous one so you can follow the workflow without getting lost.</p>
-<p>The target variable is:</p>
+<section id="convolutional-neural-network-cnn-practice-with-mnist" class="level1">
+<h1>Convolutional Neural Network (CNN) Practice with MNIST</h1>
+<p>In this exercise you will:</p>
 <ul>
-<li><strong><code>SeriousDlqin2yrs</code></strong> — whether the person experienced financial distress severe enough to be 90+ days delinquent within the next two years.</li>
+<li>Download the MNIST digit dataset from Kaggle.<br>
+</li>
+<li>Perform a short exploratory data analysis (EDA).<br>
+</li>
+<li>Build, train, and evaluate a basic Convolutional Neural Network (CNN).</li>
 </ul>
-<p>All remaining columns serve as predictors.</p>
-<hr>
-</section>
-<section id="load-and-inspect-the-data" class="level1">
-<h1>1. Load and Inspect the Data</h1>
-<section id="load-the-dataset" class="level3">
-<h3 class="anchored" data-anchor-id="load-the-dataset">1.1 Load the dataset</h3>
-<p>Load the CSV file into a DataFrame named <code>credit_data</code>.</p>
-</section>
-<section id="inspect-its-structure" class="level3">
-<h3 class="anchored" data-anchor-id="inspect-its-structure">1.2 Inspect its structure</h3>
-<p>View:</p>
+<p>Use <strong>Python</strong> (Google Colab) and <strong>TensorFlow/Keras</strong>.</p>
+<section id="download-mnist-data-from-kaggle" class="level2">
+<h2 class="anchored" data-anchor-id="download-mnist-data-from-kaggle">1. Download MNIST Data from Kaggle</h2>
+<p>In this exercise we will use Kaggle’s <strong>Digit Recognizer</strong> dataset, which is a CSV version of the MNIST handwritten digits.</p>
+<section id="get-the-dataset-from-kaggle" class="level3">
+<h3 class="anchored" data-anchor-id="get-the-dataset-from-kaggle">1.1 – Get the dataset from Kaggle</h3>
+<ol type="1">
+<li>Go to <a href="https://www.kaggle.com" class="uri">https://www.kaggle.com</a>.</li>
+<li>Log in to your Kaggle account.</li>
+<li>In the search bar, type: <strong>Digit Recognizer</strong>.</li>
+<li>Open the competition named <strong>“Digit Recognizer”</strong>.</li>
+<li>Go to the <strong>Data</strong> tab.</li>
+<li>Download the following files:
 <ul>
-<li>the first rows<br>
-</li>
-<li>the column types<br>
-</li>
-<li>summary statistics</li>
-</ul>
-<p>Make sure <code>SeriousDlqin2yrs</code> contains only 0 and 1.</p>
-</section>
-<section id="identify-target-and-predictors" class="level3">
-<h3 class="anchored" data-anchor-id="identify-target-and-predictors">1.3 Identify target and predictors</h3>
-<p>Confirm that the target is binary and all other columns are features used for modeling.</p>
-<hr>
+<li><code>train.csv</code></li>
+<li><code>test.csv</code> (optional, for later use such as Kaggle submission)</li>
+</ul></li>
+</ol>
+<p><strong>Task 1</strong><br>
+Make sure you have the file: <code>cnn_mnist_kaggle/data/train.csv</code> ready for the next step.</p>
 </section>
 </section>
-<section id="handle-missing-values" class="level1">
-<h1>2. Handle Missing Values</h1>
-<section id="detect-missingness" class="level3">
-<h3 class="anchored" data-anchor-id="detect-missingness">2.1 Detect missingness</h3>
-<p>Count missing values per column and identify which features require imputation.</p>
-</section>
-<section id="choose-an-imputation-strategy" class="level3">
-<h3 class="anchored" data-anchor-id="choose-an-imputation-strategy">2.2 Choose an imputation strategy</h3>
-<p>Use the <strong>median</strong> for numeric features and explain why this is appropriate for skewed financial data.</p>
-</section>
-<section id="create-a-cleaned-dataset" class="level3">
-<h3 class="anchored" data-anchor-id="create-a-cleaned-dataset">2.3 Create a cleaned dataset</h3>
-<p>Apply the transformations and verify that no missing values remain.</p>
-<hr>
-</section>
-</section>
-<section id="exploratory-data-analysis-eda" class="level1">
-<h1>3. Exploratory Data Analysis (EDA)</h1>
-<p>Keep this focused and practical.</p>
-<section id="examine-the-target-distribution" class="level3">
-<h3 class="anchored" data-anchor-id="examine-the-target-distribution">3.1 Examine the target distribution</h3>
-<p>Plot the proportion of 0’s and 1’s to understand the level of class imbalance.</p>
-</section>
-<section id="explore-important-numeric-features" class="level3">
-<h3 class="anchored" data-anchor-id="explore-important-numeric-features">3.2 Explore important numeric features</h3>
-<p>Look at distributions (histograms or boxplots) of a few features such as:</p>
+<section id="load-and-inspect-the-data-eda" class="level2">
+<h2 class="anchored" data-anchor-id="load-and-inspect-the-data-eda">2. Load and Inspect the Data (EDA)</h2>
+<section id="load-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="load-the-data">2.1 – Load the data</h3>
 <ul>
-<li>age<br>
-</li>
-<li>DebtRatio<br>
-</li>
-<li>MonthlyIncome</li>
-</ul>
-<p>Discuss any unusual patterns or outliers.</p>
-</section>
-<section id="correlation-inspection" class="level3">
-<h3 class="anchored" data-anchor-id="correlation-inspection">3.3 Correlation inspection</h3>
-<p>Compute a correlation matrix and observe:</p>
-<ul>
-<li>which features correlate most strongly with the target<br>
-</li>
-<li>which features correlate strongly with each other</li>
-</ul>
-<hr>
-</section>
-</section>
-<section id="traintest-split" class="level1">
-<h1>4. Train/Test Split</h1>
-<section id="split-the-data" class="level3">
-<h3 class="anchored" data-anchor-id="split-the-data">4.1 Split the data</h3>
-<p>Create a stratified split such that the test set is 25% of the data.</p>
-</section>
-<section id="scale-the-predictors" class="level3">
-<h3 class="anchored" data-anchor-id="scale-the-predictors">4.2 Scale the predictors</h3>
-<p>Standardize the numeric predictors. Fit the scaling on the training data and apply it to both training and test sets.</p>
-<hr>
-</section>
-</section>
-<section id="logistic-regression-baseline" class="level1">
-<h1>5. Logistic Regression Baseline</h1>
-<section id="fit-a-logistic-regression-model" class="level3">
-<h3 class="anchored" data-anchor-id="fit-a-logistic-regression-model">5.1 Fit a logistic regression model</h3>
-<p>Use the cleaned, scaled training data.</p>
-</section>
-<section id="evaluate-performance" class="level3">
-<h3 class="anchored" data-anchor-id="evaluate-performance">5.2 Evaluate performance</h3>
-<p>Produce:</p>
-<ul>
-<li>accuracy<br>
-</li>
-<li>precision<br>
-</li>
-<li>recall<br>
-</li>
-<li>F1 score<br>
-</li>
-<li>AUC<br>
-</li>
-<li>confusion matrix</li>
+<li>Load <code>train.csv</code> into a DataFrame.</li>
+<li>Print its dimensions (number of rows and columns).</li>
+<li>Display the first 5 rows to understand the structure.</li>
 </ul>
 </section>
-<section id="interpret-the-results" class="level3">
-<h3 class="anchored" data-anchor-id="interpret-the-results">5.3 Interpret the results</h3>
-<p>Discuss at least one strength and one limitation of logistic regression in the context of this dataset.</p>
-<hr>
+<section id="basic-eda" class="level3">
+<h3 class="anchored" data-anchor-id="basic-eda">2.2 – Basic EDA</h3>
+<ul>
+<li>Display basic dataset info (<code>dtypes</code>, missing values, etc.).</li>
+<li>Review summary statistics of the pixel columns.</li>
+<li>Count how many examples there are for each digit (0–9).</li>
+<li>Plot a bar chart showing the frequency of each digit.</li>
+</ul>
+</section>
+<section id="visualize-sample-digits" class="level3">
+<h3 class="anchored" data-anchor-id="visualize-sample-digits">2.3 – Visualize sample digits</h3>
+<ul>
+<li>Select at least three rows from the dataset.</li>
+<li>Extract the pixel values and reshape them into 28×28 images.</li>
+<li>Display each image along with its true label.</li>
+<li>Briefly describe what you observe (e.g., clarity, noise, differences between digits).</li>
+</ul>
+<p><strong>Task 2</strong><br>
+Perform a complete EDA: inspect structure, analyze label distribution, and visualize several example digits.</p>
 </section>
 </section>
-<section id="single-layer-neural-network" class="level1">
-<h1>6. Single-Layer Neural Network</h1>
-<p>You will now build a shallow neural network with one hidden layer.</p>
-<section id="define-the-architecture" class="level3">
-<h3 class="anchored" data-anchor-id="define-the-architecture">6.1 Define the architecture</h3>
-<p>Use: - one hidden layer with a small number of units<br>
-- ReLU activation in the hidden layer<br>
-- sigmoid activation in the output layer</p>
+<section id="prepare-the-data-for-the-cnn" class="level2">
+<h2 class="anchored" data-anchor-id="prepare-the-data-for-the-cnn">3. Prepare the Data for the CNN</h2>
+<section id="separate-features-and-labels" class="level3">
+<h3 class="anchored" data-anchor-id="separate-features-and-labels">3.1 – Separate features and labels</h3>
+<ul>
+<li>Split the dataset into:
+<ul>
+<li><code>X</code>: all pixel columns.</li>
+<li><code>y</code>: the <code>label</code> column.</li>
+</ul></li>
+<li>Verify their shapes.</li>
+</ul>
 </section>
+<section id="create-a-trainingvalidation-split" class="level3">
+<h3 class="anchored" data-anchor-id="create-a-trainingvalidation-split">3.2 – Create a training/validation split</h3>
+<ul>
+<li>Split the data into a training set and a validation set (for example: 80% / 20%).</li>
+<li>Make sure the split preserves class proportions (stratified split).</li>
+<li>Record the final sample counts for each split.</li>
+</ul>
+</section>
+<section id="reshape-and-normalize-the-images" class="level3">
+<h3 class="anchored" data-anchor-id="reshape-and-normalize-the-images">3.3 – Reshape and normalize the images</h3>
+<ul>
+<li>Reshape each observation from a flat vector of 784 values into a 28×28×1 tensor.</li>
+<li>Convert pixel values to floats.</li>
+<li>Normalize pixel values to the range [0, 1].</li>
+</ul>
+</section>
+<section id="encode-the-labels" class="level3">
+<h3 class="anchored" data-anchor-id="encode-the-labels">3.4 – Encode the labels</h3>
+<ul>
+<li>Convert the labels into one-hot encoded vectors with 10 classes (0–9).</li>
+<li>Confirm the resulting shape of the encoded labels.</li>
+</ul>
+<p><strong>Task 3</strong><br>
+Prepare the data so it is ready to be fed into a CNN: split, reshape, normalize, and one-hot encode.</p>
+</section>
+</section>
+<section id="build-a-basic-convolutional-neural-network-cnn" class="level2">
+<h2 class="anchored" data-anchor-id="build-a-basic-convolutional-neural-network-cnn">4. Build a Basic Convolutional Neural Network (CNN)</h2>
+<section id="define-the-cnn-architecture" class="level3">
+<h3 class="anchored" data-anchor-id="define-the-cnn-architecture">4.1 – Define the CNN architecture</h3>
+<p>Construct a simple CNN model using the following structure:</p>
+<ol type="1">
+<li><strong>Input layer</strong>: images of shape 28×28×1<br>
+</li>
+<li><strong>Convolution + Activation</strong>:
+<ul>
+<li>A convolutional layer (e.g., 32 filters, 3×3 kernel)<br>
+</li>
+<li>ReLU activation<br>
+</li>
+</ul></li>
+<li><strong>Max-Pooling</strong>:
+<ul>
+<li>2×2 pooling window<br>
+</li>
+</ul></li>
+<li><strong>Second Convolution + Activation</strong>:
+<ul>
+<li>A second convolutional layer (e.g., 64 filters, 3×3 kernel)<br>
+</li>
+<li>ReLU activation<br>
+</li>
+</ul></li>
+<li><strong>Second Max-Pooling</strong><br>
+</li>
+<li><strong>Flatten layer</strong> to convert feature maps to a vector<br>
+</li>
+<li><strong>Fully connected (Dense) layer</strong> with a chosen number of units (e.g., 128)<br>
+</li>
+<li><strong>Output layer</strong> with 10 units (digits 0–9) and softmax activation</li>
+</ol>
+</section>
+<section id="summarize-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="summarize-the-model">4.2 – Summarize the model</h3>
+<ul>
+<li>Print a model summary to verify the layer shapes.<br>
+</li>
+<li>Confirm that the number of parameters makes sense.</li>
+</ul>
+<p><strong>Task 4</strong><br>
+Build a CNN following the architecture above and generate a model summary.</p>
+</section>
+</section>
+<section id="compile-and-train-the-model" class="level2">
+<h2 class="anchored" data-anchor-id="compile-and-train-the-model">5. Compile and Train the Model</h2>
 <section id="compile-the-model" class="level3">
-<h3 class="anchored" data-anchor-id="compile-the-model">6.2 Compile the model</h3>
-<p>Use binary cross-entropy loss, the Adam optimizer, and accuracy/AUC.</p>
+<h3 class="anchored" data-anchor-id="compile-the-model">5.1 – Compile the model</h3>
+<ul>
+<li>Choose an optimizer (e.g., Adam).</li>
+<li>Use an appropriate loss function for multi-class classification (e.g., categorical crossentropy).</li>
+<li>Track accuracy as the evaluation metric.</li>
+<li>Confirm that the model compiles without errors.</li>
+</ul>
 </section>
 <section id="train-the-model" class="level3">
-<h3 class="anchored" data-anchor-id="train-the-model">6.3 Train the model</h3>
-<p>Train for about 20 epochs with a validation split.<br>
-Plot the training and validation curves and look for signs of overfitting.</p>
-</section>
-<section id="evaluate" class="level3">
-<h3 class="anchored" data-anchor-id="evaluate">6.4 Evaluate</h3>
-<p>Compare performance to logistic regression using the same metrics.</p>
-<hr>
-</section>
-</section>
-<section id="optional-multi-layer-neural-network" class="level1">
-<h1>7. Optional: Multi-Layer Neural Network</h1>
-<p>This section is for students who want to explore deeper models.</p>
-<section id="build-a-deeper-architecture" class="level3">
-<h3 class="anchored" data-anchor-id="build-a-deeper-architecture">7.1 Build a deeper architecture</h3>
-<p>Use two or more hidden layers (e.g.&nbsp;32 → 16 → 1).</p>
-</section>
-<section id="consider-regularization" class="level3">
-<h3 class="anchored" data-anchor-id="consider-regularization">7.2 Consider regularization</h3>
-<p>Try dropout or L2 regularization to reduce overfitting.</p>
-</section>
-<section id="train-and-compare" class="level3">
-<h3 class="anchored" data-anchor-id="train-and-compare">7.3 Train and compare</h3>
-<p>Evaluate your deep model and compare it with: - logistic regression<br>
-- single-layer network</p>
-</section>
-<section id="discuss-findings" class="level3">
-<h3 class="anchored" data-anchor-id="discuss-findings">7.4 Discuss findings</h3>
-<p>Explain whether depth helped or harmed performance and why.</p>
-<hr>
+<h3 class="anchored" data-anchor-id="train-the-model">5.2 – Train the model</h3>
+<ul>
+<li>Train the model for a chosen number of epochs (e.g., 5–10).</li>
+<li>Use a reasonable batch size (e.g., 64 or 128).</li>
+<li>Provide the validation set for monitoring performance.</li>
+<li>Record training and validation accuracy after each epoch.</li>
+<li>Observe whether the model is overfitting, underfitting, or training as expected.</li>
+</ul>
+<p><strong>Task 5</strong><br>
+Compile the CNN and train it while monitoring accuracy and loss on both training and validation sets.</p>
 </section>
 </section>
-<section id="summary-questions" class="level1">
-<h1>8. Summary Questions</h1>
-<p>Answer the following:</p>
-<ol type="1">
-<li>Which model achieved the highest AUC?<br>
+<section id="evaluate-the-model" class="level2">
+<h2 class="anchored" data-anchor-id="evaluate-the-model">6. Evaluate the Model</h2>
+<section id="visualize-training-progress" class="level3">
+<h3 class="anchored" data-anchor-id="visualize-training-progress">6.1 – Visualize training progress</h3>
+<ul>
+<li>Plot the training accuracy vs.&nbsp;epochs.</li>
+<li>Plot the validation accuracy vs.&nbsp;epochs.</li>
+<li>(Optional) Also plot training and validation loss.</li>
+<li>Comment on the learning curves:
+<ul>
+<li>Is validation accuracy close to training accuracy?</li>
+<li>Do you see signs of overfitting?</li>
+<li>Is more training needed?</li>
+</ul></li>
+</ul>
+</section>
+<section id="evaluate-model-performance" class="level3">
+<h3 class="anchored" data-anchor-id="evaluate-model-performance">6.2 – Evaluate model performance</h3>
+<ul>
+<li>Evaluate the final model on the validation set and record:
+<ul>
+<li>Validation accuracy<br>
 </li>
-<li>Which model showed signs of overfitting?<br>
-</li>
-<li>If you had to deploy one model, which would you choose and why?<br>
-</li>
-<li>What additional preprocessing or feature engineering steps could improve model performance?</li>
-</ol>
-<hr>
+<li>Validation loss</li>
+</ul></li>
+<li>Generate predictions for the validation set.</li>
+<li>Convert probabilities to class labels (0–9).</li>
+</ul>
 </section>
-<section id="end-of-exercise-set" class="level1">
-<h1>End of Exercise Set</h1>
-<p>Work through the tasks in order, verifying each step before moving to the next. This workflow mirrors a real-world modeling pipeline and prepares you for more advanced neural network structures.</p>
+<section id="analyze-errors" class="level3">
+<h3 class="anchored" data-anchor-id="analyze-errors">6.3 – Analyze errors</h3>
+<ul>
+<li>Create a confusion matrix of true vs.&nbsp;predicted labels.</li>
+<li>Identify which digits are most frequently misclassified.</li>
+<li>Look at a few misclassified examples:
+<ul>
+<li>Display the image</li>
+<li>Show the true label and predicted label</li>
+<li>Briefly explain what might have caused the mistake</li>
+</ul></li>
+</ul>
+<p><strong>Task 6</strong><br>
+Evaluate the model quantitatively (accuracy, confusion matrix) and qualitatively (misclassified examples), and interpret the results.</p>
 
 
+</section>
+</section>
 </section>
 
 </main> <!-- /main -->

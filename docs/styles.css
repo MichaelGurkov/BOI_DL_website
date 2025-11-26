@@ -1,11 +1,11 @@
 /* --- Icon row on home page (desktop layout) --- */
 .icon-grid {
-  display: flex;
-  flex-direction: row;       /* arrange icons in a row */
-  justify-content: center;   /* center horizontally */
-  align-items: center;       /* align vertically */
-  gap: 3rem;                 /* spacing between icons */
-  margin: 5rem auto;         /* center block with top/bottom margin */
+  display: grid;
+  grid-template-columns: repeat(3, auto);  /* two rows with 3 icons each */
+  justify-content: center;                 /* center the whole grid */
+  align-items: center;
+  gap: 3rem;
+  margin: 5rem auto;
 }
 
 .icon-card {

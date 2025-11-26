@@ -28,6 +28,16 @@ website:
         text: Optimization methods
       - href: topics/multi_layer/multi_layer_credit_score.qmd
         text: Regression
+        
+  - id: exercises
+    title: "Exercise sets"
+    style: docked
+    contents:
+      - href: topics/exercises/exercise_1.qmd
+        text: Logistic
+      - href: topics/exercises/cnn_exercise.qmd
+        text: CNN
+        
 
 format:
   html:
