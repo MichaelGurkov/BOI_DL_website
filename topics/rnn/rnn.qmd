@@ -4,8 +4,8 @@ title: "Reccurent Neural Network for Time series forecasting"
 
 
 
-```{r set_up_python, echo=FALSE}
-#|echo: FALSE
+```{r set_up_python}
+#| echo: false
 
 if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
   
@@ -22,7 +22,7 @@ reticulate::use_python(python_path, required = TRUE)
 
 
 ```{python supress_warning}
-#|echo: FALSE
+#| echo: false
 
 
 import warnings
@@ -139,6 +139,10 @@ To provide a classical time-series benchmark, we include an AR(10) model. This m
 # Models fit
 
 ```{python fit_models}
+#| echo: false
+#| message: false
+#| warning: false
+#| results: 'hide'
 #| code-fold: true
 #| code-summary: "Show the code"
 
@@ -251,6 +255,8 @@ To visually compare model behavior, we plot the first 200 predictions from the t
 
 
 ```{python plot_predictions}
+#| code-fold: true
+#| code-summary: "Show the code"
 
 plt.figure(figsize=(10, 5));
 

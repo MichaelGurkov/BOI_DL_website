@@ -1,15 +1,16 @@
-/* --- Icon row on home page (desktop layout) --- */
+/* --- Icon grid: 3 columns, dynamic rows --- */
 .icon-grid {
-  display: flex;
-  flex-direction: row;       /* arrange icons in a row */
-  justify-content: center;   /* center horizontally */
-  align-items: center;       /* align vertically */
-  gap: 3rem;                 /* spacing between icons */
-  margin: 5rem auto;         /* center block with top/bottom margin */
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);  /* exactly 3 columns */
+  gap: 3rem;                              
+  justify-items: center;                  /* center each card */
+  align-items: start;
+  margin: 5rem auto;
 }
 
+/* Icon card styling stays the same */
 .icon-card {
-  display: inline-block;
+  display: block;
   border-radius: 12px;
   overflow: hidden;
   transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
@@ -17,9 +18,9 @@
 
 .icon-card img {
   display: block;
-  width: 220px;              /* adjust icon size (try 130–170px as needed) */
+  width: 220px;
   height: auto;
-  border-radius: 10px;       /* optional rounded corners */
+  border-radius: 10px;
   margin: 0 auto;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
@@ -28,4 +29,17 @@
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   filter: saturate(1.05);
+}
+
+/* Optional: responsive adjustment */
+@media (max-width: 900px) {
+  .icon-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .icon-grid {
+    grid-template-columns: 1fr;
+  }
 }
