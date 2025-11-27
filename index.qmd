@@ -21,12 +21,18 @@ page-layout: full
   <img src="images/multi_icon.png" alt="Multi Layer Neural Networks">
 </a>
 
+<a class="icon-card" href="topics/cnn/convolution.qmd">
+  <img src="images/conv.png" alt="Conv">
+</a>
+
+<a class="icon-card" href="topics/rnn/rnn.qmd">
+  <img src="images/conv.png" alt="Conv">
+</a>
+
 <a class="icon-card" href="topics/exercises/exercise_1.qmd">
   <img src="images/exercise.png" alt="Exercise Set">
 </a>
 
-<a class="icon-card" href="topics/cnn/convolution.qmd">
-  <img src="images/conv.png" alt="Conv">
-</a>
+
 
 </div>
