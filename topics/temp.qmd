@@ -1,0 +1,363 @@
+
+```{r set_up_python}
+#| echo: false
+
+if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
+  
+  python_path = "C:\\Users\\internet\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"
+  
+} else {
+  
+  python_path = "C:\\Users\\Home\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"
+}
+
+reticulate::use_python(python_path, required = TRUE)
+
+```
+
+
+```{python setup_and_load_libraries}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+# === Imports ===
+import os
+import numpy as np
+import pandas as pd
+import tensorflow as tf
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_score
+
+from tensorflow.keras import layers, models
+
+
+# Ensure eager execution (important for reticulate/Quarto)
+tf.config.run_functions_eagerly(True)
+
+
+```
+
+
+
+```{python import_cpi_data}
+#| code-fold: true
+#| code-summary: "Load and clean CPI data"
+
+# === Load CPI panel dataset ===
+cpi_data_path = os.path.join(
+  os.path.expanduser("~\\Documents\\BOI_DL_website"),
+  "data\\cpi_series.csv"
+)
+
+cpi_raw = pd.read_csv(cpi_data_path)
+
+# === Basic cleaning ===
+# Parse dates
+cpi_raw['timestamp'] = pd.to_datetime(cpi_raw['timestamp'])
+
+# Sort properly
+cpi_raw = cpi_raw.sort_values(['item_id', 'timestamp']).reset_index(drop=True)
+
+# Keep only necessary columns (item_id, timestamp, target)
+cpi_raw = cpi_raw[['item_id', 'timestamp', 'target']].dropna().reset_index(drop=True)
+
+# Show a preview
+cpi_raw.head()
+
+```
+
+```{python subset_df}
+
+selected_series = ["CP000000_CPI_CPI_5_0_3_MAIN_M_N__Z__Z_I24_L__Z_A__Z__Z_CP_00",
+                   "CP010000_CPI_CPI_5_1_8_MAIN_M_N__Z__Z_I24_L__Z_A__Z__Z_CP_01"]
+                   
+cpi_df = cpi_raw.loc[cpi_raw["item_id"].isin(selected_series)].copy()
+
+cpi_df.head()
+
+```
+
+
+```{python scale}
+#| code-fold: true
+#| code-summary: "Scale each series separately (final corrected version)"
+
+from sklearn.preprocessing import StandardScaler
+import numpy as np
+
+# Build forward mapping
+item_ids = cpi_df["item_id"].unique().tolist()
+
+item_to_int = {item_id: idx for idx, item_id in enumerate(item_ids)}
+
+# Add item_code column
+cpi_df["item_code"] = cpi_df["item_id"].map(item_to_int)
+
+# Scale per integer ID
+scalers = {}
+
+cpi_df["target_scaled"] = np.nan
+
+for code in sorted(item_to_int.values()):
+    mask = cpi_df["item_code"] == code
+    scaler = StandardScaler()
+    vals = cpi_df.loc[mask, "target"].values.reshape(-1, 1)
+    scaled = scaler.fit_transform(vals)
+    cpi_df.loc[mask, "target_scaled"] = scaled.flatten()
+    scalers[code] = scaler         
+    
+    
+# Show preview
+
+cpi_df.head()
+
+
+```
+
+
+```{python train_test_split}
+# --- Panel-aware train/val/test split (correct version) ---
+
+WINDOW = 24
+
+X_train_list = []
+y_train_list = []
+X_val_list   = []
+y_val_list   = []
+X_test_list  = []
+y_test_list  = []
+
+for code in np.unique(cpi_df["item_code"]):
+
+    df_i = cpi_df[cpi_df["item_code"] == code]
+    vals = df_i["target_scaled"].values
+    codes = df_i["item_code"].values
+
+    # Build windows for this specific series
+    Xi = []
+    yi = []
+    for t in range(len(vals) - WINDOW):
+        w_target = vals[t:t+WINDOW].reshape(WINDOW, 1)
+        w_code   = np.full((WINDOW, 1), codes[0])
+        Xi.append(np.hstack([w_target, w_code]))
+        yi.append(vals[t + WINDOW])
+
+    Xi = np.array(Xi)
+    yi = np.array(yi)
+
+    # Time-based split inside this single series
+    n = len(Xi)
+    train_end = int(n * 0.70)
+    val_end   = int(n * 0.85)
+
+    X_train_list.append(Xi[:train_end])
+    y_train_list.append(yi[:train_end])
+
+    X_val_list.append(Xi[train_end:val_end])
+    y_val_list.append(yi[train_end:val_end])
+
+    X_test_list.append(Xi[val_end:])
+    y_test_list.append(yi[val_end:])
+
+# --- Concatenate windows from all series into global pooled sets ---
+
+X_train = np.vstack(X_train_list)
+y_train = np.concatenate(y_train_list)
+
+X_val   = np.vstack(X_val_list)
+y_val   = np.concatenate(y_val_list)
+
+X_test  = np.vstack(X_test_list)
+y_test  = np.concatenate(y_test_list)
+
+print("Train:", X_train.shape, y_train.shape)
+print("Val:  ", X_val.shape,   y_val.shape)
+print("Test: ", X_test.shape,  y_test.shape)
+
+
+```
+
+```{python model}
+#| code-fold: true
+#| code-summary: "Build Global RNN with item embedding"
+
+
+
+NUM_ITEMS = len(np.unique(cpi_df["item_code"]))  # should be 2
+EMBED_DIM = 4                      # can tune later
+
+# === Separate the inputs ===
+
+# Input 1: time series values (scaled target)
+
+inp_series = layers.Input(shape=(WINDOW, 1), name="series_input")
+
+# Input 2: item code (integer)
+
+inp_code = layers.Input(shape=(1,), name="item_code_input")
+
+# === Embedding for item id ===
+
+emb = layers.Embedding(input_dim=NUM_ITEMS, output_dim=EMBED_DIM)(inp_code)
+emb = layers.Reshape((EMBED_DIM,))(emb)              # shape: (batch, EMBED_DIM)
+emb = layers.RepeatVector(WINDOW)(emb)               # shape: (batch, WINDOW, EMBED_DIM)
+
+# === Concatenate embedding with series input ===
+
+x = layers.Concatenate(axis=-1)([inp_series, emb])   # shape: (batch, WINDOW, 1 + EMBED_DIM)
+
+# === RNN layer(s) ===
+
+x = layers.GRU(32, activation="tanh", return_sequences=False)(x)
+
+# Output layer
+
+out = layers.Dense(1)(x)
+
+# Build model
+
+model = models.Model(inputs=[inp_series, inp_code], outputs=out)
+
+model.compile(
+optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+loss="mse",
+metrics=["mae"]
+)
+
+model.summary()
+
+
+
+```
+
+```{python reshape_inputs}
+#| code-fold: true
+#| code-summary: "Prepare model inputs"
+
+# Extract scaled series values as a separate input
+
+X_train_series = X_train[:, :, 0].reshape(-1, WINDOW, 1)
+X_val_series   = X_val[:, :, 0].reshape(-1, WINDOW, 1)
+X_test_series  = X_test[:, :, 0].reshape(-1, WINDOW, 1)
+
+# Extract item_code as a separate input
+
+X_train_code = X_train[:, 0, 1].reshape(-1, 1)
+X_val_code   = X_val[:, 0, 1].reshape(-1, 1)
+X_test_code  = X_test[:, 0, 1].reshape(-1, 1)
+
+print("Series input:", X_train_series.shape)
+print("Item code input:", X_train_code.shape)
+
+
+```
+
+```{python train_the_model}
+#| code-fold: true
+#| code-summary: "Train Global RNN"
+
+EPOCHS = 15
+BATCH_SIZE = 32
+
+history = model.fit(
+  x=[X_train_series, X_train_code],
+  y=y_train,
+  validation_data=([X_val_series, X_val_code], y_val),
+  epochs=EPOCHS,
+  batch_size=BATCH_SIZE,
+  verbose=0
+)
+
+
+```
+
+```{python predictions}
+#| code-fold: true
+#| code-summary: "Predict on test set (scaled units)"
+
+y_pred_scaled = model.predict([X_test_series, X_test_code]).flatten()
+
+print("Predictions (scaled):", y_pred_scaled[:10])
+print("True (scaled):", y_test[:10])
+
+
+```
+
+```{python inverse_scaling}
+#| code-fold: true
+#| code-summary: "Inverse-scale predictions"
+
+y_pred = np.zeros_like(y_pred_scaled)
+y_true = np.zeros_like(y_test)
+
+for i in range(len(y_pred_scaled)):
+    code = int(X_test_code[i][0])     # integer ID
+    scaler = scalers[code]            # direct lookup using integer
+    y_pred[i] = scaler.inverse_transform([[y_pred_scaled[i]]])[0][0]
+    y_true[i] = scaler.inverse_transform([[y_test[i]]])[0][0]
+
+
+np.set_printoptions(precision=10, suppress=False)
+print("Predictions (original scale):", y_pred[:10])
+print("True (original scale):      ", y_true[:10])
+
+
+```
+
+```{python evaluation_metrics}
+#| code-fold: true
+#| code-summary: "Evaluation metrics on test set (original scale)"
+
+rmse = root_mean_squared_error(y_true, y_pred)
+mae  = mean_absolute_error(y_true, y_pred)
+r2   = r2_score(y_true, y_pred)
+
+metrics_df = pd.DataFrame({
+"RMSE": [rmse],
+"MAE":  [mae],
+"R2":   [r2]
+})
+
+print(metrics_df)
+
+
+```
+
+
+```{python plot_predictions}
+#| code-fold: true
+#| code-summary: "Plot predictions vs actual per series (2-column grid, original scale)"
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+test_codes = X_test_code.flatten()
+unique_codes = np.unique(test_codes)
+
+fig, axes = plt.subplots(1, len(unique_codes), figsize=(16, 5), sharey=True)
+
+if len(unique_codes) == 1:
+axes = [axes]
+
+for ax, code in zip(axes, unique_codes):
+  mask = test_codes == code
+
+  ax.plot(y_true[mask], label="Actual", color="black", linewidth=2)
+  ax.plot(y_pred[mask], label="Predicted", alpha=0.85)
+  
+  ax.set_title(f"Item Code {code}")
+  ax.set_xlabel("Time index")
+  ax.grid(True)
+
+
+  axes[0].set_ylabel("CPI Level")
+  axes[0].legend()
+  
+plt.tight_layout()
+plt.show()
+
+
+```
+
