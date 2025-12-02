@@ -31,7 +31,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_score
 
 from tensorflow.keras import layers, models
-
+from tensorflow.keras.callbacks import EarlyStopping
 
 # Ensure eager execution (important for reticulate/Quarto)
 tf.config.run_functions_eagerly(True)
@@ -63,190 +63,317 @@ cpi_raw = cpi_raw.sort_values(['item_id', 'timestamp']).reset_index(drop=True)
 # Keep only necessary columns (item_id, timestamp, target)
 cpi_raw = cpi_raw[['item_id', 'timestamp', 'target']].dropna().reset_index(drop=True)
 
-# Show a preview
-cpi_raw.head()
+```
+
+
+```{python auxiliary_functions}
+#| code-fold: true
+#| code-summary: "Load and clean CPI data"
+
+def assign_splits_per_series(df, train_ratio=0.70, val_ratio=0.15):
+    """
+    Assign 'train', 'val', 'test' labels within EACH series
+    based strictly on time order.
+    """
+    df = df.copy()
+    df["split"] = None
+
+    for code in df["item_code"].unique():
+        df_i = df[df["item_code"] == code].sort_values("timestamp")
+        idx = df_i.index.to_numpy()
+
+        n = len(idx)
+        t_end = int(n * train_ratio)
+        v_end = int(n * (train_ratio + val_ratio))
+
+        df.loc[idx[:t_end], "split"] = "train"
+        df.loc[idx[t_end:v_end], "split"] = "val"
+        df.loc[idx[v_end:], "split"] = "test"
+
+    return df
+
+
+
+def preprocess_data(cpi_raw, selected_series, train_ratio=0.70, val_ratio=0.15):
+    """
+    Preprocess CPI panel data WITHOUT leakage:
+      - filter selected series
+      - sort by timestamp
+      - assign integer item codes
+      - assign per-series splits
+      - scale each series using only its training segment
+      - return dataframe + scalers
+    """
+
+    # --- Filter ---
+    df = cpi_raw.loc[cpi_raw["item_id"].isin(selected_series)].copy()
+    df = df.sort_values(["item_id", "timestamp"]).reset_index(drop=True)
+
+    # --- Assign integer codes ---
+    item_ids = df["item_id"].unique().tolist()
+    item_to_int = {item_id: idx for idx, item_id in enumerate(item_ids)}
+    df["item_code"] = df["item_id"].map(item_to_int)
+
+    # --- Assign per-series splits (NO LEAKAGE) ---
+    df = assign_splits_per_series(df, train_ratio=train_ratio, val_ratio=val_ratio)
+
+    # --- Scale each series ONLY on its training portion ---
+    scalers = {}
+    df["target_scaled"] = np.nan
+
+    for code in sorted(item_to_int.values()):
+        df_i = df[df["item_code"] == code]
+
+        # fit scaler on TRAIN ONLY
+        train_vals = df_i[df_i["split"] == "train"]["target"].values.reshape(-1, 1)
+        scaler = StandardScaler().fit(train_vals)
+
+        # transform all splits with same scaler
+        all_vals = df_i["target"].values.reshape(-1, 1)
+        df.loc[df_i.index, "target_scaled"] = scaler.transform(all_vals).flatten()
+
+        scalers[code] = scaler
+
+    return df, scalers
+
+
+
+def make_windows(cpi_df, WINDOW):
+    """
+    Create sliding windows for a panel CPI dataset.
+    Returns pooled windows across all series:
+      X_windows : (N, WINDOW, 2)   # [target_scaled, item_code]
+      y_windows : (N,)             # next-step value (scaled)
+      t_windows : (N,)             # timestamp of the target point
+    """
+
+    X_list = []
+    y_list = []
+    t_list = []
+
+    # Loop per item_code (per series)
+    for code in np.unique(cpi_df["item_code"]):
+
+        df_i = cpi_df[cpi_df["item_code"] == code]
+        vals = df_i["target_scaled"].values
+        codes = df_i["item_code"].values
+        ts    = df_i["timestamp"].values
+
+        # Build windows for this series
+        for t in range(len(vals) - WINDOW):
+
+            # Sliding window values
+            w_target = vals[t:t+WINDOW].reshape(WINDOW, 1)
+            w_code   = np.full((WINDOW, 1), codes[0])
+
+            window = np.hstack([w_target, w_code])
+
+            X_list.append(window)
+            y_list.append(vals[t + WINDOW])
+            t_list.append(ts[t + WINDOW])   # target timestamp
+
+    # Convert to arrays
+    X_windows = np.array(X_list)
+    y_windows = np.array(y_list)
+    t_windows = np.array(t_list)
+
+    return X_windows, y_windows, t_windows
+
+
+def split_by_time(X_all, y_all, t_all, train_ratio=0.70, val_ratio=0.15):
+    """
+    Perform a global chronological split on pooled windowed data.
+    Inputs:
+        X_all : np.array (N, WINDOW, 2)
+        y_all : np.array (N,)
+        t_all : np.array (N,) timestamps aligned with y_all
+        train_ratio : fraction of samples for training
+        val_ratio   : fraction of samples for validation (after train)
+
+    Returns:
+        (X_train, y_train),
+        (X_val,   y_val),
+        (X_test,  y_test)
+    """
+
+    # ---- 1. Sort globally by timestamp ----
+    order = np.argsort(t_all)
+    X_sorted = X_all[order]
+    y_sorted = y_all[order]
+    t_sorted = t_all[order]   # not strictly needed after this step, but kept
+
+    # ---- 2. Compute split indices ----
+    n = len(X_sorted)
+    train_end = int(n * train_ratio)
+    val_end   = int(n * (train_ratio + val_ratio))
+
+    # ---- 3. Slice ----
+    X_train = X_sorted[:train_end]
+    y_train = y_sorted[:train_end]
+
+    X_val   = X_sorted[train_end:val_end]
+    y_val   = y_sorted[train_end:val_end]
+
+    X_test  = X_sorted[val_end:]
+    y_test  = y_sorted[val_end:]
+
+    return (X_train, y_train), (X_val, y_val), (X_test, y_test)
+
+
+def prepare_all_inputs(X_train, X_val, X_test, WINDOW):
+    """Prepare series and item-code inputs for the model."""
+
+    return {
+        "train_series": X_train[:, :, 0].reshape(-1, WINDOW, 1),
+        "train_code":   X_train[:, 0, 1].reshape(-1, 1),
+
+        "val_series":   X_val[:, :, 0].reshape(-1, WINDOW, 1),
+        "val_code":     X_val[:, 0, 1].reshape(-1, 1),
+
+        "test_series":  X_test[:, :, 0].reshape(-1, WINDOW, 1),
+        "test_code":    X_test[:, 0, 1].reshape(-1, 1),
+    }
+
+
+
+def build_model(num_items: int, window: int, embed_dim: int = 8):
+    """
+    Build the global RNN model with:
+    - item embedding
+    - 2-layer GRU stack
+    - dense head
+    """
+    from tensorflow.keras import layers, models
+    import tensorflow as tf
+
+    # === Inputs ===
+    inp_series = layers.Input(shape=(window, 1), name="series_input")
+    inp_code   = layers.Input(shape=(1,), name="item_code_input")
+
+    # === Embedding ===
+    emb = layers.Embedding(
+        input_dim=num_items,
+        output_dim=embed_dim
+    )(inp_code)
+
+    emb = layers.Reshape((embed_dim,))(emb)
+    emb = layers.RepeatVector(window)(emb)   # broadcast to full sequence length
+
+    # === Merge ===
+    x = layers.Concatenate(axis=-1)([inp_series, emb])   # shape (window, 1 + embed_dim)
+
+    # === RNN stack ===
+    x = layers.GRU(128, return_sequences=True)(x)
+    x = layers.Dropout(0.1)(x)
+
+    x = layers.GRU(32, return_sequences=False)(x)
+    x = layers.Dropout(0.1)(x)
+
+    # === Dense head ===
+    x = layers.Dense(32, activation="relu")(x)
+    x = layers.Dense(16, activation="relu")(x)
+
+    # === Output ===
+    out = layers.Dense(1)(x)
+
+    # === Build model ===
+    model = models.Model(inputs=[inp_series, inp_code], outputs=out)
+
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+        loss="mse",
+        metrics=["mae"]
+    )
+
+    return model
+
+def get_predictions(model, X_series, X_code, y_scaled, scalers):
+    """
+    Complete prediction pipeline:
+      1. Predict in scaled space
+      2. Invert scale of predictions
+      3. Invert scale of true values
+
+    Inputs:
+        model      : trained Keras model
+        X_series   : (N, WINDOW, 1)
+        X_code     : (N, 1) integer item code
+        y_scaled   : (N,) true values in scaled space
+        scalers    : dict {code → StandardScaler}
+
+    Returns:
+        y_pred        : predictions in original scale
+        y_true        : true values in original scale
+        y_pred_scaled : predictions in scaled units
+    """
+
+    # --- 1. scaled predictions ---
+    y_pred_scaled = model.predict([X_series, X_code], verbose=0).flatten()
+
+    # --- 2. inverse-transform predictions ---
+    y_pred = np.zeros_like(y_pred_scaled)
+
+    # --- 3. inverse-transform true values ---
+    y_true = np.zeros_like(y_scaled)
+
+    for i in range(len(y_pred_scaled)):
+        code = int(X_code[i][0])
+        scaler = scalers[code]
+
+        y_pred[i] = scaler.inverse_transform([[y_pred_scaled[i]]])[0][0]
+        y_true[i] = scaler.inverse_transform([[y_scaled[i]]])[0][0]
+
+    return y_pred, y_true, y_pred_scaled
+
 
 ```
 
-```{python subset_df}
+
+
+# Preprocess
+
+```{python subset_and_scale_df}
 
 selected_series = ["CP000000_CPI_CPI_5_0_3_MAIN_M_N__Z__Z_I24_L__Z_A__Z__Z_CP_00",
                    "CP010000_CPI_CPI_5_1_8_MAIN_M_N__Z__Z_I24_L__Z_A__Z__Z_CP_01"]
                    
-cpi_df = cpi_raw.loc[cpi_raw["item_id"].isin(selected_series)].copy()
+cpi_df, scalers = preprocess_data(cpi_raw, selected_series)
 
 cpi_df.head()
-
-```
-
-
-```{python scale}
-#| code-fold: true
-#| code-summary: "Scale each series separately (final corrected version)"
-
-from sklearn.preprocessing import StandardScaler
-import numpy as np
-
-# Build forward mapping
-item_ids = cpi_df["item_id"].unique().tolist()
-
-item_to_int = {item_id: idx for idx, item_id in enumerate(item_ids)}
-
-# Add item_code column
-cpi_df["item_code"] = cpi_df["item_id"].map(item_to_int)
-
-# Scale per integer ID
-scalers = {}
-
-cpi_df["target_scaled"] = np.nan
-
-for code in sorted(item_to_int.values()):
-    mask = cpi_df["item_code"] == code
-    scaler = StandardScaler()
-    vals = cpi_df.loc[mask, "target"].values.reshape(-1, 1)
-    scaled = scaler.fit_transform(vals)
-    cpi_df.loc[mask, "target_scaled"] = scaled.flatten()
-    scalers[code] = scaler         
-    
-    
-# Show preview
-
-cpi_df.head()
-
 
 ```
 
 
 ```{python train_test_split}
-# --- Panel-aware train/val/test split (correct version) ---
-
-WINDOW = 24
-
-X_train_list = []
-y_train_list = []
-X_val_list   = []
-y_val_list   = []
-X_test_list  = []
-y_test_list  = []
-
-for code in np.unique(cpi_df["item_code"]):
-
-    df_i = cpi_df[cpi_df["item_code"] == code]
-    vals = df_i["target_scaled"].values
-    codes = df_i["item_code"].values
-
-    # Build windows for this specific series
-    Xi = []
-    yi = []
-    for t in range(len(vals) - WINDOW):
-        w_target = vals[t:t+WINDOW].reshape(WINDOW, 1)
-        w_code   = np.full((WINDOW, 1), codes[0])
-        Xi.append(np.hstack([w_target, w_code]))
-        yi.append(vals[t + WINDOW])
-
-    Xi = np.array(Xi)
-    yi = np.array(yi)
-
-    # Time-based split inside this single series
-    n = len(Xi)
-    train_end = int(n * 0.70)
-    val_end   = int(n * 0.85)
-
-    X_train_list.append(Xi[:train_end])
-    y_train_list.append(yi[:train_end])
-
-    X_val_list.append(Xi[train_end:val_end])
-    y_val_list.append(yi[train_end:val_end])
-
-    X_test_list.append(Xi[val_end:])
-    y_test_list.append(yi[val_end:])
-
-# --- Concatenate windows from all series into global pooled sets ---
-
-X_train = np.vstack(X_train_list)
-y_train = np.concatenate(y_train_list)
-
-X_val   = np.vstack(X_val_list)
-y_val   = np.concatenate(y_val_list)
-
-X_test  = np.vstack(X_test_list)
-y_test  = np.concatenate(y_test_list)
-
-print("Train:", X_train.shape, y_train.shape)
-print("Val:  ", X_val.shape,   y_val.shape)
-print("Test: ", X_test.shape,  y_test.shape)
+# --- Correct panel-aware time-based split (timestamp-preserving) ---
 
 
-```
+WINDOW = 36
+X_all, y_all, t_all = make_windows(cpi_df, WINDOW)
 
-```{python model}
-#| code-fold: true
-#| code-summary: "Build Global RNN with item embedding"
-
-
-
-NUM_ITEMS = len(np.unique(cpi_df["item_code"]))  # should be 2
-EMBED_DIM = 4                      # can tune later
-
-# === Separate the inputs ===
-
-# Input 1: time series values (scaled target)
-
-inp_series = layers.Input(shape=(WINDOW, 1), name="series_input")
-
-# Input 2: item code (integer)
-
-inp_code = layers.Input(shape=(1,), name="item_code_input")
-
-# === Embedding for item id ===
-
-emb = layers.Embedding(input_dim=NUM_ITEMS, output_dim=EMBED_DIM)(inp_code)
-emb = layers.Reshape((EMBED_DIM,))(emb)              # shape: (batch, EMBED_DIM)
-emb = layers.RepeatVector(WINDOW)(emb)               # shape: (batch, WINDOW, EMBED_DIM)
-
-# === Concatenate embedding with series input ===
-
-x = layers.Concatenate(axis=-1)([inp_series, emb])   # shape: (batch, WINDOW, 1 + EMBED_DIM)
-
-# === RNN layer(s) ===
-
-x = layers.GRU(32, activation="tanh", return_sequences=False)(x)
-
-# Output layer
-
-out = layers.Dense(1)(x)
-
-# Build model
-
-model = models.Model(inputs=[inp_series, inp_code], outputs=out)
-
-model.compile(
-optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
-loss="mse",
-metrics=["mae"]
+(X_train, y_train), (X_val, y_val), (X_test, y_test) = split_by_time(
+    X_all, y_all, t_all
 )
 
-model.summary()
-
-
 
 ```
+
 
 ```{python reshape_inputs}
 #| code-fold: true
 #| code-summary: "Prepare model inputs"
 
-# Extract scaled series values as a separate input
+inputs = prepare_all_inputs(X_train, X_val, X_test, WINDOW)
 
-X_train_series = X_train[:, :, 0].reshape(-1, WINDOW, 1)
-X_val_series   = X_val[:, :, 0].reshape(-1, WINDOW, 1)
-X_test_series  = X_test[:, :, 0].reshape(-1, WINDOW, 1)
+X_train_series = inputs["train_series"]
+X_train_code   = inputs["train_code"]
 
-# Extract item_code as a separate input
+X_val_series   = inputs["val_series"]
+X_val_code     = inputs["val_code"]
 
-X_train_code = X_train[:, 0, 1].reshape(-1, 1)
-X_val_code   = X_val[:, 0, 1].reshape(-1, 1)
-X_test_code  = X_test[:, 0, 1].reshape(-1, 1)
+X_test_series  = inputs["test_series"]
+X_test_code    = inputs["test_code"]
+
 
 print("Series input:", X_train_series.shape)
 print("Item code input:", X_train_code.shape)
@@ -254,57 +381,74 @@ print("Item code input:", X_train_code.shape)
 
 ```
 
+
+
+# Fit model
+
+```{python define_model}
+#| code-fold: true
+#| code-summary: "Build Global RNN with item embedding"
+
+NUM_ITEMS = len(cpi_df["item_code"].unique())   # comes from preprocess step
+
+model = build_model(
+    num_items=NUM_ITEMS,
+    window=WINDOW,
+    embed_dim=8
+)
+
+model.summary()
+
+
+```
+
+
 ```{python train_the_model}
 #| code-fold: true
 #| code-summary: "Train Global RNN"
 
-EPOCHS = 15
+
+EPOCHS = 50
 BATCH_SIZE = 32
 
+# Early stopping callback
+cb = EarlyStopping(
+    monitor="val_loss",
+    patience=5,
+    restore_best_weights=True
+)
+
 history = model.fit(
-  x=[X_train_series, X_train_code],
-  y=y_train,
-  validation_data=([X_val_series, X_val_code], y_val),
-  epochs=EPOCHS,
-  batch_size=BATCH_SIZE,
-  verbose=0
+    x=[X_train_series, X_train_code],
+    y=y_train,
+    validation_data=([X_val_series, X_val_code], y_val),
+    epochs=EPOCHS,
+    batch_size=BATCH_SIZE,
+    callbacks=[cb],
+    verbose=0
 )
 
 
 ```
 
+
+# Evaluation
+
+
 ```{python predictions}
 #| code-fold: true
 #| code-summary: "Predict on test set (scaled units)"
 
-y_pred_scaled = model.predict([X_test_series, X_test_code]).flatten()
-
-print("Predictions (scaled):", y_pred_scaled[:10])
-print("True (scaled):", y_test[:10])
-
-
-```
-
-```{python inverse_scaling}
-#| code-fold: true
-#| code-summary: "Inverse-scale predictions"
-
-y_pred = np.zeros_like(y_pred_scaled)
-y_true = np.zeros_like(y_test)
-
-for i in range(len(y_pred_scaled)):
-    code = int(X_test_code[i][0])     # integer ID
-    scaler = scalers[code]            # direct lookup using integer
-    y_pred[i] = scaler.inverse_transform([[y_pred_scaled[i]]])[0][0]
-    y_true[i] = scaler.inverse_transform([[y_test[i]]])[0][0]
-
-
-np.set_printoptions(precision=10, suppress=False)
-print("Predictions (original scale):", y_pred[:10])
-print("True (original scale):      ", y_true[:10])
-
+y_pred, y_true, y_pred_scaled = get_predictions(
+    model,
+    X_test_series,
+    X_test_code,
+    y_test,
+    scalers
+)
 
 ```
+
 
 ```{python evaluation_metrics}
 #| code-fold: true
@@ -339,7 +483,7 @@ unique_codes = np.unique(test_codes)
 fig, axes = plt.subplots(1, len(unique_codes), figsize=(16, 5), sharey=True)
 
 if len(unique_codes) == 1:
-axes = [axes]
+  axes = [axes]
 
 for ax, code in zip(axes, unique_codes):
   mask = test_codes == code
@@ -352,8 +496,8 @@ for ax, code in zip(axes, unique_codes):
   ax.grid(True)
 
 
-  axes[0].set_ylabel("CPI Level")
-  axes[0].legend()
+axes[0].set_ylabel("CPI Level")
+axes[0].legend()
   
 plt.tight_layout()
 plt.show()

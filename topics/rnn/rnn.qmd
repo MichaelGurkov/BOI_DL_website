@@ -63,8 +63,7 @@ This tutorial demonstrates how to use recurrent neural networks to forecast fina
 —SimpleRNN, LSTM, and GRU—alongside a classical AR(10) model used as a baseline for comparison.
 
 
-We construct input sequences of 10 consecutive time steps, where each sequence is used to predict the following observation. After building these sequences, we split the dataset into training and testing subsets to evaluate model performance.
-
+We construct input sequences of 10 consecutive time steps, where each sequence is used to predict the following observation. After building Othese sequences, we split the dataset into training and testing subsets to evaluate model performance.
 
 # Feature engineering
 
