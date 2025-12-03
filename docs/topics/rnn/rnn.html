@@ -187,7 +187,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 <p>This tutorial demonstrates how to use recurrent neural networks to forecast financial time series data. We will work with daily Dow Jones data and predict the next day’s log trading volume using information from the previous ten days. The analysis includes three neural architectures —SimpleRNN, LSTM, and GRU—alongside a classical AR(10) model used as a baseline for comparison.</p>
-<p>We construct input sequences of 10 consecutive time steps, where each sequence is used to predict the following observation. After building these sequences, we split the dataset into training and testing subsets to evaluate model performance.</p>
+<p>We construct input sequences of 10 consecutive time steps, where each sequence is used to predict the following observation. After building Othese sequences, we split the dataset into training and testing subsets to evaluate model performance.</p>
 <section id="feature-engineering" class="level1">
 <h1>Feature engineering</h1>
 <div class="cell">
@@ -280,9 +280,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>    Model     RMSE      MAE        R²
-      GRU 0.215369 0.150987  0.188694
-     LSTM 0.244985 0.170578 -0.049777
-SimpleRNN 0.286468 0.211334 -0.435388
+      GRU 0.212826 0.148185  0.207744
+     LSTM 0.233759 0.162691  0.044226
+SimpleRNN 0.235476 0.174852  0.030136
    AR(10) 0.613533 0.569302 -5.567422</code></pre>
 </div>
 </div>
