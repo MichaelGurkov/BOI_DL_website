@@ -1,0 +1,438 @@
+---
+title: "CNN for Univariate Time Series Forecasting"
+format: html
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+In this tutorial we build a 1-D Convolutional Neural Network (CNN) to forecast a **single time series** (univariate forecasting).  
+The goal is to show the full workflow:
+
+1. Import and visualize a CPI series.
+2. Preprocess the data (optional log/scale/difference).
+3. Turn the series into sliding windows for a CNN.
+4. Build and train a simple 1-D CNN model.
+5. Evaluate the model on a hold-out test set.
+
+```{r set_up_python}
+#| echo: false
+
+if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
+  
+  python_path = "C:\\Users\\internet\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"
+  
+} else {
+  
+  python_path = "C:\\Users\\Home\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"
+}
+
+reticulate::use_python(python_path, required = TRUE)
+
+```
+
+
+```{python import_libraries}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+import numpy as np
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv1D, MaxPooling1D, Flatten, Dense
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+
+
+```
+
+
+# Import data
+
+In this example we use a CPI dataset stored locally in cpi_series.csv.
+From this file we select a single series (item_id == "Seasonal_1") and split it into a training part (first 80% of observations) and a test part (last 20%).
+Before building any model, it is important to look at the raw series.
+Here we convert the timestamp column to a proper date type and plot the selected CPI series over time to get a sense of its level, trend and volatility.
+
+```{python import_data }
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+data_path = os.path.join(
+    os.path.expanduser("~\\Documents\\BOI_DL_website"),
+    "data\\cpi_series.csv"
+)
+
+cpi_data = pd.read_csv(data_path)
+
+temp_df = cpi_data.loc[cpi_data["item_id"] == "Seasonal_1",["timestamp","target"]].copy()
+
+series = temp_df['target'].values
+
+train_size = int(len(series) * 0.8)
+train_series_raw = series[:train_size]
+test_series_raw  = series[train_size:]
+
+```
+
+```{python plot_data}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+temp_df['timestamp'] = pd.to_datetime(temp_df['timestamp'])
+
+plt.figure(figsize=(12, 6))
+plt.plot(temp_df['timestamp'], temp_df['target'])
+plt.xlabel('Timestamp')
+plt.ylabel('Target')
+plt.title('Target over Timestamp in temp_df')
+plt.grid(True)
+plt.show()
+
+```
+
+
+
+# Auxiliary Functions
+
+To keep the workflow clean, we separate the major tasks into helper functions:
+
+1. **Preprocessing functions** – optional log-transform, differencing, and scaling.  
+2. **Window creation** – converting a raw series into fixed-length input sequences.  
+3. **Model construction** – building a 1-D CNN for forecasting.  
+4. **Plotting utilities** – visualizing predictions.
+
+This modular structure makes the notebook easier to maintain and allows you to reuse components across different experiments.
+
+```{python auxiliary_functions_preprocessing}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+def preprocess_data(
+    train_series,
+    test_series,
+    scale=True,
+    log_transform=False,
+    diff_transform=False
+):
+    train = train_series.astype(float).copy()
+    test  = test_series.astype(float).copy()
+
+    objects = {
+        "scaler": None,
+        "log_shift": None,
+        "diff_last_value": None
+    }
+
+    # 1. Log transform
+    if log_transform:
+        min_val = min(train.min(), test.min())
+        shift = 1 - min_val if min_val <= 0 else 0
+        objects["log_shift"] = shift
+        train = np.log(train + shift)
+        test  = np.log(test + shift)
+
+    # 2. Differencing
+    if diff_transform:
+        objects["diff_last_value"] = train[-1]
+        train = np.diff(train)
+        test  = np.diff(test)
+
+    # 3. Scaling
+    if scale:
+        scaler = StandardScaler()
+        scaler.fit(train.reshape(-1, 1))
+        train = scaler.transform(train.reshape(-1, 1)).flatten()
+        test  = scaler.transform(test.reshape(-1, 1)).flatten()
+        objects["scaler"] = scaler
+
+    return train, test, objects
+
+def invert_predictions(y_pred, y_true, objects):
+    y_pred_inv = y_pred.copy().astype(float)
+    y_true_inv = y_true.copy().astype(float)
+
+    # 1. Invert scaling
+    scaler = objects["scaler"]
+    if scaler is not None:
+        y_pred_inv = scaler.inverse_transform(y_pred_inv.reshape(-1, 1)).flatten()
+        y_true_inv = scaler.inverse_transform(y_true_inv.reshape(-1, 1)).flatten()
+
+    # 2. Invert differencing
+    if objects["diff_last_value"] is not None:
+        last_val = objects["diff_last_value"]
+        y_pred_inv = np.cumsum(np.insert(y_pred_inv, 0, last_val))
+        y_true_inv = np.cumsum(np.insert(y_true_inv, 0, last_val))
+
+    # 3. Invert log transform
+    if objects["log_shift"] is not None:
+        shift = objects["log_shift"]
+        y_pred_inv = np.exp(y_pred_inv) - shift
+        y_true_inv = np.exp(y_true_inv) - shift
+
+    return y_pred_inv, y_true_inv
+
+
+```
+
+# Building the CNN Model
+
+A 1-D Convolutional Neural Network can extract short-range temporal patterns from a time series in much the same way that a 2-D CNN extracts spatial features from images.  
+
+The idea is simple:
+- The **Conv1D layers** learn local patterns across the last \( W \) observations (trend shapes, small cycles, short spikes).
+- **MaxPooling** reduces noise and compresses the learned features.
+- A **Dense layer** maps these learned features into a forecast for the next value.
+
+The model defined below contains:
+1. Two initial convolutional layers with ReLU activation.
+2. A max-pooling layer.
+3. A deeper convolutional layer.
+4. A flattening step followed by a dense hidden layer.
+5. A final dense output neuron producing a single next-step forecast.
+
+```{python auxiliary_functions_models}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+
+def build_cnn_model(W, 
+                    filters1=32, filters2=64,
+                    kernel_size=3,
+                    dense_units=64):
+    
+    model = Sequential([
+        Conv1D(filters=filters1, kernel_size=kernel_size, activation='relu', input_shape=(W, 1)),
+        Conv1D(filters=filters1, kernel_size=kernel_size, activation='relu'),
+        MaxPooling1D(pool_size=2),
+
+        Conv1D(filters=filters2, kernel_size=kernel_size, activation='relu'),
+        Flatten(),
+
+        Dense(dense_units, activation='relu'),
+        Dense(1)
+    ])
+
+    model.compile(
+        loss='mse',
+        optimizer='adam',
+        metrics=['mae']
+    )
+
+    return model
+
+def train_model(model, X_train, y_train, epochs=50, batch_size=16):
+    history = model.fit(
+        X_train, y_train,
+        validation_split=0.1,
+        epochs=epochs,
+        batch_size=batch_size,
+        verbose=1
+    )
+    return history
+
+
+```
+
+Why we need windowing for CNNs
+
+A CNN expects a fixed-width input segment, similar to how images have fixed dimensions.
+For a time series, the equivalent is a sliding window of length W:
+
+The window is the input, containing the last W observations.
+
+The target is the next observation immediately following the window.
+
+This converts a single long series into many supervised examples.
+
+```{python auxiliary_function_windows}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+
+def make_windows_train(train_processed, W):
+    X_train = []
+    y_train = []
+
+    n = len(train_processed)
+
+    # Slide a window of length W across the training set
+    for i in range(n - W):
+        X_train.append(train_processed[i : i + W])
+        y_train.append(train_processed[i + W])
+
+    X_train = np.array(X_train)
+    y_train = np.array(y_train)
+
+    # Reshape for CNN: (samples, W, 1)
+    X_train = X_train.reshape(-1, W, 1)
+
+    return X_train, y_train
+import numpy as np
+
+def make_windows_test(train_processed, test_processed, W):
+    X_test = []
+    y_test = []
+
+    # Take the last W values from the training set
+    last_train_window = train_processed[-W:]
+
+    # Total test length
+    n_test = len(test_processed)
+
+    # Create rolling windows over the test set
+    for i in range(n_test):
+        if i == 0:
+            # First test window uses only train history
+            window = last_train_window
+        else:
+            # Next windows slide forward into test_processed
+            # Combine tail of last train values with part of test
+            window = np.concatenate([
+                last_train_window[i:],       # decreasing slice of train
+                test_processed[:i]           # increasing slice of test
+            ])
+
+        # Ensure window is exactly length W
+        window = window[-W:]
+
+        X_test.append(window)
+        y_test.append(test_processed[i])
+
+    X_test = np.array(X_test)
+    y_test = np.array(y_test)
+
+    # Reshape for CNN: (samples, W, 1)
+    X_test = X_test.reshape(-1, W, 1)
+
+    return X_test, y_test
+
+```
+
+```{python auxiliary_function_plotting}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+def plot_forecast(y_true_inv, y_pred_inv):
+    plt.figure(figsize=(12, 5))
+    plt.plot(y_true_inv, label="Actual", linewidth=2)
+    plt.plot(y_pred_inv, label="Predicted", alpha=0.8)
+
+    plt.title("CNN Forecast on Original Scale")
+    plt.xlabel("Test Index")
+    plt.ylabel("Value")
+    plt.grid(True)
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+
+```
+
+
+# Preprocessing and Window Construction
+
+Before training the CNN, we must prepare the series so the model receives inputs in the correct format.  
+This step performs three tasks:
+
+1. **Split the raw data** into training and test segments.  
+2. **Apply preprocessing** (log-transform, scaling, optional differencing).  
+3. **Convert the processed series into sliding windows** of length \( W \), which form the inputs for the CNN.
+
+The window length \( W \) controls how much historical information the model sees for each prediction.  
+In this example the model uses the past 36 observations to predict the next one.
+
+```{python preprocessing}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+W = 36
+
+# 1. Split raw series
+series = temp_df['target'].values
+train_size = int(len(series) * 0.8)
+train_series_raw = series[:train_size]
+test_series_raw  = series[train_size:]
+
+# 2. Preprocess
+train_p, test_p, objects = preprocess_data(train_series_raw, test_series_raw,
+                                           log_transform=True,diff_transform=False,scale=True)
+
+# 3. Create windows
+X_train, y_train = make_windows_train(train_p, W)
+X_test,  y_test  = make_windows_test(train_p, test_p, W)
+
+```
+
+# Fitting the CNN Model
+
+With the data prepared and the network architecture defined, we can now train the CNN.  
+Training consists of two steps:
+
+1. **Build the model** with the chosen window size \( W \).  
+2. **Fit the model** on the windowed training data.
+
+The training call uses:
+- `validation_split=0.1` to monitor performance on unseen data during training,
+- `epochs=50` and `batch_size=16` as reasonable defaults for a small univariate series.
+
+```{python fit_models}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| results: hide
+
+
+
+# 4. Build model
+model = build_cnn_model(W)
+
+# 5. Train
+history = train_model(model, X_train, y_train, epochs=50, batch_size=16)
+
+
+
+
+```
+
+# Evaluation and Forecast Visualization
+
+Once the CNN is trained, we can use it to generate predictions for the entire test set.  
+Since the model was trained on **preprocessed** data, the predictions must be converted back to the original scale to make them interpretable.
+
+The evaluation workflow consists of:
+
+1. **Predicting on the test windows**.  
+2. **Inverting all preprocessing steps** (scaling, log-transform, differencing).  
+3. **Plotting predicted vs. actual values** on the original scale.
+
+```{python predict_and_plot}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| results: hide
+
+# 6. Predict
+y_pred = model.predict(X_test).flatten()
+
+# 7. Invert preprocessing
+y_pred_inv, y_test_inv = invert_predictions(y_pred, y_test, objects)
+
+```
+
+```{python }
+#| code-fold: true
+#| code-summary: "Show the code"
+
+# 8. Plot
+plot_forecast(y_test_inv, y_pred_inv)
+
+```
+

@@ -1,0 +1,122 @@
+---
+title: "Practice Exercise: Recurrent Neural Network (RNN) for Time Series"
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+This exercise guides you through training a simple **Recurrent Neural
+Network (RNN)** to forecast a univariate CPI series. You will work with
+the series: **Seasonal_2**
+
+The workflow includes:
+
+-   Loading and plotting the data
+-   Preprocessing (log transform, scaling)
+-   Creating sliding windows
+-   Building and training a SimpleRNN model
+-   Evaluating predictions on a test set
+
+## 1. Load the Seasonal_2 Series
+
+Load the file `cpi_series.csv` from your local directory and filter the
+data to include only rows where `item_id == "Seasonal_2"`.
+
+**Task 1** Create these objects:
+
+-   `series` — the full target series
+-   `train_raw` — first 80% of observations
+-   `test_raw` — last 20% of observations
+
+Report the lengths of each.
+
+## 2. Visualize the Raw Time Series
+
+Plot Seasonal_2 over time to understand its behavior.
+
+Your plot should include:
+
+-   A proper datetime conversion for `timestamp`
+-   A line plot of `target` over time
+-   Axis labels
+-   A title
+
+**Task 2** Produce a clean, readable plot of the raw data.
+
+## 3. Preprocess the Series
+
+Apply the following transformations:
+
+1.  Optional log transform
+2.  Scaling using StandardScaler
+3.  Sliding window creation
+
+Use the window size:
+
+**W = 24**
+
+This means the model will use the past 24 observations to predict the
+next one.
+
+**Task 3** Implement:
+
+-   A preprocessing function (log transform + scaling)
+-   A windowing function to generate (X_train, y_train) and (X_test,
+    y_test)
+-   Ensure the inputs have shape (samples, W, 1)
+
+## 4. Build a SimpleRNN Model
+
+Create a minimal RNN architecture with:
+
+-   SimpleRNN layer (32 units, ReLU activation)
+-   Dense output layer with 1 unit
+-   Adam optimizer
+-   MSE loss
+
+**Task 4**
+
+Write a function `build_rnn_model(W)` that returns a compiled model.
+Print a model summary and verify the layer dimensions.
+
+## 5. Train the Model
+
+Train the model using:
+
+-   50 epochs
+-   Batch size 16
+-   Validation split: 0.1
+
+Track training and validation loss.
+
+**Task 5**
+
+Fit the model and plot the learning curves. Comment on whether the model
+shows stable learning, underfitting, or overfitting.
+
+## 6. Evaluate the Forecast
+
+Evaluate the model by:
+
+1.  Predicting on the full test window set
+2.  Inverting the scaling/log transformation
+3.  Plotting predicted vs actual values
+4.  Computing error metrics:
+
+-   MAE
+-   RMSE
+
+**Task 6**
+
+Produce the final forecast plot and compute MAE and RMSE on the inverted
+predictions.
+
+## 7. Reflection Questions
+
+Answer the following:
+
+1.  Does the RNN capture short-term patterns in Seasonal_2?
+2.  Would using a larger or smaller window improve results?
+3.  Where do predictions deviate most from actual values?
+4.  Which preprocessing step (log, scaling, differencing) seems most
+    important for this series?
