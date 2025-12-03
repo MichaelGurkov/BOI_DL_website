@@ -1,0 +1,310 @@
+---
+title: "Recurrent Neural Network for Time Series Forecasting"
+
+execute:
+  message: false
+  warning: false
+  
+format:
+  html:
+    code-fold: true
+    code-summary: "Show the code"
+---
+
+
+
+```{r set_up_python}
+#| echo: false
+
+if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
+  
+  python_path = "C:\\Users\\internet\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"
+  
+} else {
+  
+  python_path = "C:\\Users\\Home\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"
+}
+
+reticulate::use_python(python_path, required = TRUE)
+
+```
+
+
+```{python supress_warning}
+#| echo: false
+
+
+import warnings
+warnings.filterwarnings("ignore")
+
+import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
+```
+
+
+```{python setup_and_load_libraries}
+
+# === Imports ===
+import os
+import numpy as np
+import pandas as pd
+import tensorflow as tf
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from statsmodels.tsa.ar_model import AutoReg
+
+# Ensure eager execution (important for reticulate/Quarto)
+tf.config.run_functions_eagerly(True)
+
+
+```
+
+
+This tutorial demonstrates how to use recurrent neural networks to forecast financial time series data. We will work with daily Dow Jones data and predict the next day’s log trading volume using information from the previous ten days. The analysis includes two recurrent neural architectures—RNN and GRU—used to forecast next-day log trading volume. 
+
+
+
+# Feature engineering
+Before training the models, we perform several feature-engineering steps to extract informative signals from the raw data. We compute the log of trading volume, daily log-returns, and a 10-day rolling estimate of volatility. These features capture trading activity, price movements, and short-term uncertainty, forming the three inputs used by the models.
+
+```{python load_and_preprocess_data}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+# === Load data ===
+# Example: file path to local CSV (adjust to your environment)
+data_path = os.path.join(
+    os.path.expanduser("~\\Documents\\BOI_DL_website"),
+    "data\\dow_jones_data.csv"
+)
+raw_df = pd.read_csv(data_path)
+
+# === Feature engineering ===
+col_names = ["Volume", "Close"]
+data = raw_df[["Date"] + col_names].copy()
+data['log_volume'] = np.log(data['Volume'])
+data['return'] = np.log(data['Close'] / data['Close'].shift(1))
+data['log_volatility'] = np.log(data['return'].rolling(window=10).std() + 1e-6)
+data = data.dropna().reset_index(drop=True)
+data = data.drop(col_names, axis=1).copy()
+
+```
+
+
+```{python plot_data}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+data['Date'] = pd.to_datetime(data['Date'])
+
+N = 300
+df = data.tail(N)
+
+fig, axes = plt.subplots(3, 1, figsize=(10, 8))
+
+cols = ['log_volume', 'return', 'log_volatility']
+
+for ax, col in zip(axes, cols):
+    ax.plot(df['Date'], df[col])
+    ax.grid(True)
+
+    # Remove axis ticks
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    # Add a clean left-side label
+    ax.text(0.01, 0.85, col, transform=ax.transAxes,
+            fontsize=12, va='top', ha='left')
+
+# Suptitle with no overlap
+fig.suptitle(f"Last {N} Observations", fontsize=16, y=0.98)
+
+plt.subplots_adjust(top=0.90, hspace=0.35)
+plt.show()
+
+
+
+
+```
+
+We construct input sequences of 10 consecutive time steps, where each sequence is used to predict the following observation. After building these sequences, we split the dataset into training and testing subsets to evaluate model performance.
+
+Because neural networks are sensitive to the scale of their inputs, we standardize both the feature sequences and the target variable. Each feature is transformed to have zero mean and unit variance based on the training set only. This ensures stable training and prevents information from the test set from leaking into the model during preprocessing.
+
+```{python preprocess_data}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+# === Create sequences ===
+def create_sequences(df, features, target, window):
+    X, y = [], []
+    for i in range(window, len(df)):
+        X.append(df[features].iloc[i-window:i].values)
+        y.append(df[target].iloc[i])
+    return np.array(X), np.array(y)
+
+features = ['log_volume', 'return', 'log_volatility']
+
+target = 'log_volume'
+
+X, y = create_sequences(data, features, target, window = 10)
+
+# === Train/test split ===
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, shuffle=False
+)
+
+# === Scale data ===
+scaler_X = StandardScaler().fit(X_train.reshape(-1, X_train.shape[-1]))
+X_train = scaler_X.transform(X_train.reshape(-1, X_train.shape[-1])).reshape(X_train.shape)
+X_test = scaler_X.transform(X_test.reshape(-1, X_test.shape[-1])).reshape(X_test.shape)
+
+scaler_y = StandardScaler().fit(y_train.reshape(-1, 1))
+y_train_scaled = scaler_y.transform(y_train.reshape(-1, 1)).flatten()
+y_test_scaled = scaler_y.transform(y_test.reshape(-1, 1)).flatten()
+
+```
+
+
+
+We now build two recurrent neural network architectures commonly used for sequential data. Each model receives a 10×3 input window (log volume, return, and log volatility) and predicts the next day’s log volume:
+
+- **SimpleRNN** — a basic recurrent unit suitable for short-range dependencies.  
+- **GRU** — a gated recurrent unit capable of capturing longer patterns with fewer parameters than LSTM.
+
+Both models use 12 hidden units and are trained for 30 epochs.
+
+
+# Models fit
+
+```{python fit_models}
+#| results: 'hide'
+
+
+# ==============================================================
+#  Recurrent Neural Networks for Financial Time Series Forecasting
+#  Forecast next-day log volume using past values of
+#  log_volume, return, and log_volatility
+# ==============================================================
+
+
+# === Build and train models ===
+LEARNING_RATE = 1e-4
+EPOCHS = 30
+BATCH_SIZE = 32
+INPUT_SHAPE = (10, 3)
+
+def build_model(cell):
+    model = tf.keras.Sequential([
+        cell(12, activation='tanh', input_shape=INPUT_SHAPE),
+        tf.keras.layers.Dense(1)
+    ])
+    optimizer = tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE)
+    model.compile(optimizer=optimizer, loss='mse')
+    return model
+
+model_rnn  = build_model(tf.keras.layers.SimpleRNN)
+model_gru  = build_model(tf.keras.layers.GRU)
+
+def train_model(model, X, y):
+    return model.fit(
+        X, y,
+        epochs=EPOCHS,
+        batch_size=BATCH_SIZE,
+        validation_split=0.2,
+        verbose=0
+    )
+
+hist_rnn  = train_model(model_rnn,  X_train, y_train_scaled)
+hist_gru  = train_model(model_gru,  X_train, y_train_scaled)
+
+
+
+```
+
+
+# Evaluation
+
+```{python }
+#| results: 'hide'
+
+# === Evaluate models ===
+def evaluate_model(model, X_test, y_test_scaled, label):
+    pred_scaled = model.predict(X_test)
+    pred = scaler_y.inverse_transform(pred_scaled)
+    y_true = scaler_y.inverse_transform(y_test_scaled.reshape(-1, 1))
+    rmse = np.sqrt(mean_squared_error(y_true, pred))
+    mae  = mean_absolute_error(y_true, pred)
+    r2   = r2_score(y_true, pred)
+    print(f"{label:10s} | RMSE: {rmse:.4f} | MAE: {mae:.4f} | R²: {r2:.4f}")
+    return pred.flatten(), y_true.flatten(), rmse, mae, r2
+
+pred_rnn,  y_true, rmse_rnn,  mae_rnn,  r2_rnn  = evaluate_model(model_rnn,
+X_test, y_test_scaled, "SimpleRNN")
+
+pred_gru,  _,      rmse_gru,  mae_gru,  r2_gru  = evaluate_model(model_gru,
+X_test, y_test_scaled, "GRU")
+
+```
+
+
+After training all models, we evaluate their performance on the test set using standard regression metrics. These metrics quantify different aspects of forecast accuracy:
+
+- **RMSE (Root Mean Squared Error):** penalizes larger errors more heavily.  
+- **MAE (Mean Absolute Error):** reflects typical forecast error in the original units.  
+- **R² (Coefficient of Determination):** measures how much of the variance in the true values is explained by the model.
+
+Comparing these values across the two recurrent models allows us to assess how SimpleRNN and GRU differ in accuracy and whether the additional gating mechanisms in GRU provide a measurable improvement.
+
+
+```{python print_metrics}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+results = pd.DataFrame({
+    'Model': ['SimpleRNN', 'GRU'],
+    'RMSE': [rmse_rnn, rmse_gru],
+    'MAE':  [mae_rnn, mae_gru],
+    'R²':   [r2_rnn, r2_gru]
+}).sort_values(by="RMSE")
+
+print("\n=== Model Performance Comparison ===")
+print(results.to_string(index=False))
+
+
+```
+
+To visually compare model behavior, we plot the first 200 predictions from the test set. This shows how closely the SimpleRNN and GRU models follow the true log-volume values over time. A well-performing model should track both the overall level and the short-term fluctuations of the series.
+
+
+```{python plot_predictions}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+plt.figure(figsize=(10, 5));
+
+plt.plot(y_true[:200], label='Actual', color='black', linewidth=2);
+plt.plot(pred_rnn[:200], label='SimpleRNN', alpha=0.8);
+plt.plot(pred_gru[:200], label='GRU', alpha=0.8);
+
+plt.title('Next-day Log Volume Forecast — SimpleRNN vs GRU');
+plt.xlabel('Time Step (Test Period)');
+plt.ylabel('Log Volume');
+plt.legend();
+plt.tight_layout();
+plt.show()
+
+
+```
+
+
+
