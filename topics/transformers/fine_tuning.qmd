@@ -1,0 +1,493 @@
+---
+title: "Fine-Tuning BERT on TweetEval Sentiment"
+
+execute:
+  message: false
+  warning: false
+  
+format:
+  html:
+    code-fold: true
+    code-summary: "Show the code"
+---
+
+```{r set_up_python}
+#| echo: false
+
+if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
+  
+  python_path = "C:\\Users\\internet\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"
+  
+} else {
+  
+  python_path = "C:\\Users\\Home\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"
+}
+
+reticulate::use_python(python_path, required = TRUE)
+
+```
+
+```{python supress_warning}
+#| echo: false
+
+
+import warnings
+warnings.filterwarnings("ignore")
+
+import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
+```
+
+
+```{python import_data_set}
+
+#!pip install -q transformers datasets accelerate
+
+from datasets import load_dataset
+from transformers import BertTokenizerFast
+from collections import Counter
+
+dataset = load_dataset("tweet_eval", "sentiment")
+
+N_train = 2000
+N_val   = 500
+
+dataset["train"] = dataset["train"].select(range(N_train))
+
+dataset["validation"] = dataset["validation"].select(range(N_val))
+
+tokenizer = BertTokenizerFast.from_pretrained("bert-base-uncased")
+
+```
+## Dataset: TweetEval Sentiment
+
+For this tutorial we use the **TweetEval Sentiment** dataset, a benchmark collection of tweets labeled for sentiment analysis. The dataset was introduced as part of the TweetEval benchmark, which unifies several Twitter NLP tasks under a common framework.
+
+The sentiment subset contains tweets annotated with three classes:
+
+- **0 — Negative**
+- **1 — Neutral**
+- **2 — Positive**
+
+TweetEval is well-suited for fine-tuning transformer models because:
+
+- Tweets contain slang, emojis, irregular grammar, abbreviations, and sarcasm.
+- These characteristics make the domain challenging for general pre-trained models.
+- Fine-tuning allows BERT to adapt from formal text (BooksCorpus, Wikipedia) to the informal, noisy style of Twitter.
+
+### Dataset Size (Before Downsampling)
+
+The full dataset includes approximately:
+
+- **45,000 tweets** for training  
+- **12,000 tweets** for validation  
+- **2,000 tweets** for testing  
+
+Since full training can be slow during development, this notebook uses a **downsampled version**
+
+## Tokenization
+
+Before we can feed text into BERT, we must convert each tweet into the numerical format that the model expects. BERT does not work directly with raw strings—it operates on token IDs and attention masks. The tokenizer performs this conversion and applies several important preprocessing steps.
+
+BERT uses a **WordPiece tokenizer**, which breaks text into subword units. This allows the model to handle noisy and informal language often found in tweets, including slang, abbreviations, hashtags, and even misspellings. If a word is not in the vocabulary, it is decomposed into smaller subwords that BERT can still interpret meaningfully.
+
+During tokenization, the tokenizer also:
+
+-   **Adds special tokens** such as `[CLS]` (classification token) and `[SEP]` (separator).
+-   **Truncates** sequences so they fit within a fixed maximum length (64 tokens in this tutorial).
+-   **Pads** shorter sequences so all inputs are the same length.
+-   **Builds an attention mask**, which tells BERT which tokens are real and which are padding.
+
+After tokenization, each example in the dataset contains:
+
+-   `input_ids`: the numerical tokens representing the text\
+-   `attention_mask`: indicators showing which positions should be attended to\
+-   `label`: the sentiment class
+
+We apply the tokenizer to the entire dataset using the `map()` function and then reformat the output so it can be used directly with PyTorch.
+
+```{python tokenize}
+#| results: hide
+
+def tokenize_batch(batch):
+    return tokenizer(
+        batch["text"],
+        padding="max_length",
+        truncation=True,
+        max_length=64
+    )
+
+tokenized_dataset = dataset.map(tokenize_batch, batched=True)
+tokenized_dataset = tokenized_dataset.remove_columns(["text"])
+
+tokenized_dataset.set_format(
+    type="torch",
+    columns=["input_ids", "attention_mask", "label"]
+)
+
+tokenized_dataset["train"][0]
+
+
+```
+
+## Preparing DataLoaders
+
+After tokenization, the dataset contains all the components BERT needs—`input_ids`, `attention_mask`, and `label`. The next step is to prepare these examples for efficient training.
+
+Neural networks in PyTorch expect data to be provided through **DataLoaders**, which handle batching, shuffling, and iteration over the dataset. This is especially important for transformer models, where training is computationally intensive and must be performed in batches that fit into GPU memory.
+
+We construct two DataLoaders:
+
+-   **Training DataLoader**\
+    Shuffles the data at every epoch to prevent the model from learning order-specific patterns and to encourage better generalization.
+
+-   **Validation DataLoader**\
+    Does not shuffle the data and is used to evaluate model performance after training without introducing randomness.
+
+Each batch produced by the DataLoader contains:
+
+-   a tensor of tokenized tweets (`input_ids`)
+-   a tensor of attention masks (`attention_mask`)
+-   a tensor of labels
+
+These will be passed directly into BERT during training and evaluation. Creating DataLoaders ensures that the model receives input in a structured, optimized, and reproducible format.
+
+```{python data_loaders}
+#| results: hide
+
+# Creating DataLoaders for training and validation
+
+from torch.utils.data import DataLoader
+
+batch_size = 32
+
+train_loader = DataLoader(
+    tokenized_dataset["train"],
+    batch_size=batch_size,
+    shuffle=True
+)
+
+val_loader = DataLoader(
+    tokenized_dataset["validation"],
+    batch_size=batch_size,
+    shuffle=False
+)
+
+
+```
+
+
+## Baseline Model (No Fine-Tuning)
+
+Before fine-tuning BERT, it is important to establish a **baseline performance level**. This baseline shows how well a pre-trained model performs *without* any adaptation to the domain—in this case, Twitter sentiment.
+
+Although BERT is trained on large general-purpose corpora (BooksCorpus and Wikipedia), it has **never been exposed to the specific linguistic style of tweets**. Tweets differ dramatically from formal text: they are short, noisy, packed with slang, emojis, abbreviations, hashtags, irony, and sarcasm. As a result, a pre-trained BERT model typically struggles when applied directly to this dataset.
+
+To measure this effect, we freeze all of BERT’s encoder layers so that:
+
+- the transformer parameters remain unchanged,
+- only the classification head exists (untrained),
+- the model effectively performs **zero-shot** sentiment classification.
+
+Evaluating this model provides a realistic lower bound:  
+**How well does BERT understand tweet sentiment before training?**
+
+This baseline accuracy serves as a reference point for comparing the improvements introduced by partial and full fine-tuning in later steps.
+
+```{python baseline}
+#| results: hide
+# Baseline Model (No Fine-Tuning)
+
+from transformers import BertForSequenceClassification
+import torch
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+# Load a pre-trained BERT classifier
+baseline_model = BertForSequenceClassification.from_pretrained(
+    "bert-base-uncased",
+    num_labels=3
+).to(device)
+
+# Freeze all encoder layers → no fine-tuning
+for param in baseline_model.bert.parameters():
+    param.requires_grad = False
+
+# Evaluation function
+def evaluate(model, data_loader):
+    model.eval()
+    correct, total = 0, 0
+
+    with torch.no_grad():
+        for batch in data_loader:
+            ids = batch["input_ids"].to(device)
+            mask = batch["attention_mask"].to(device)
+            y = batch["label"].to(device)
+
+            logits = model(ids, attention_mask=mask).logits
+            preds = torch.argmax(logits, dim=1)
+
+            correct += (preds == y).sum().item()
+            total += y.size(0)
+
+    return correct / total
+
+```
+
+## Partial Fine-Tuning
+
+The baseline model demonstrates how poorly a pre-trained BERT performs when it is not adapted to the TweetEval domain. To improve performance while still keeping computational cost low, we apply **partial fine-tuning**.
+
+BERT consists of 12 transformer encoder layers stacked on top of one another. The lower layers typically learn general linguistic features such as token identity, morphology, and short-range dependencies. The upper layers capture more **task-specific** information, including sentiment cues and semantic relationships.
+
+In partial fine-tuning, we freeze the **lower encoder layers** (layers 0–8) and train only the **upper layers** (layers 9–11) together with the classification head. This approach:
+
+- reduces the number of trainable parameters,
+- speeds up training,
+- lowers VRAM requirements,
+- reduces risk of overfitting on small datasets,
+- still allows BERT to learn important domain-specific patterns from tweets.
+
+Partial fine-tuning typically yields a large improvement in accuracy compared to the baseline, while still being efficient enough to run quickly in environments like Google Colab.
+
+The next code block implements partial fine-tuning for one epoch and evaluates its performance.
+
+```{python partial_tune}
+#| results: hide
+# Partial Fine-Tuning (train upper layers only)
+
+from transformers import BertForSequenceClassification
+from torch.optim import AdamW
+import torch
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# Load a fresh BERT model
+partial_model = BertForSequenceClassification.from_pretrained(
+    "bert-base-uncased",
+    num_labels=3
+).to(device)
+
+# Freeze lower BERT layers: 0–8
+for layer_idx in range(9):
+    for param in partial_model.bert.encoder.layer[layer_idx].parameters():
+        param.requires_grad = False
+
+# Train only layers 9, 10, 11 + classifier head
+trainable_params = [p for p in partial_model.parameters() if p.requires_grad]
+
+
+optimizer = AdamW(trainable_params, lr=2e-5)
+
+# One training epoch
+partial_model.train()
+for batch in train_loader:
+    optimizer.zero_grad()
+
+    ids = batch["input_ids"].to(device)
+    mask = batch["attention_mask"].to(device)
+    y = batch["label"].to(device)
+
+    outputs = partial_model(ids, attention_mask=mask, labels=y)
+    loss = outputs.loss
+    loss.backward()
+    optimizer.step()
+
+
+```
+
+
+## Full Fine-Tuning
+
+Partial fine-tuning provides a substantial performance boost, but it still restricts learning to only the top few transformer layers. To give the model maximum flexibility and allow it to fully adapt to the characteristics of Twitter language, we now perform **full fine-tuning**, where **all** BERT parameters are updated.
+
+Full fine-tuning trains:
+
+- all 12 transformer layers,
+- the attention mechanisms inside each layer,
+- the intermediate feedforward networks,
+- layer normalization parameters,
+- and the final classification head.
+
+This approach generally achieves the highest accuracy because the model can adjust every level of linguistic representation, from low-level token embeddings to high-level semantic patterns. As a result, the model becomes better at interpreting informal grammar, emojis, irony, abbreviations, and the overall noisy structure common in tweets.
+
+The trade-offs are:
+
+- higher computational cost,
+- longer training time,
+- increased risk of overfitting on very small datasets.
+
+In this exercise, the training set is large enough and the model is already well regularized from pretraining, so full fine-tuning typically yields the best results.  
+The following code block performs one epoch of full fine-tuning and reports the resulting accuracy.
+
+```{python full_train}
+#| results: hide
+# Full Fine-Tuning (train ALL layers)
+
+from transformers import BertForSequenceClassification
+from torch.optim import AdamW
+import torch
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+# Load a fresh BERT model for full fine-tuning
+full_model = BertForSequenceClassification.from_pretrained(
+    "bert-base-uncased",
+    num_labels=3
+).to(device)
+
+# Unfreeze ALL parameters → full end-to-end training
+for param in full_model.parameters():
+    param.requires_grad = True
+
+# Count total trainable parameters
+trainable_params = [p for p in full_model.parameters() if p.requires_grad]
+
+
+optimizer = AdamW(trainable_params, lr=2e-5)
+
+# One training epoch
+full_model.train()
+for batch in train_loader:
+    optimizer.zero_grad()
+
+    ids = batch["input_ids"].to(device)
+    mask = batch["attention_mask"].to(device)
+    y = batch["label"].to(device)
+
+    outputs = full_model(ids, attention_mask=mask, labels=y)
+    loss = outputs.loss
+    loss.backward()
+    optimizer.step()
+
+
+```
+
+
+## Comparing the Three Models
+
+Now that we have trained all three versions of the model—baseline, partial fine-tuning, and full fine-tuning—we can compare their performance directly. This comparison highlights how each level of adaptation improves the model’s ability to understand tweet sentiment.
+
+### Why Comparison Matters
+
+Evaluating all three models side by side reveals:
+
+- **The impact of domain mismatch:**  
+  The baseline model performs poorly because raw BERT has never seen the structure of tweets, which often include emojis, slang, abbreviations, and informal grammar.
+
+- **The benefit of partial fine-tuning:**  
+  Training only the top transformer layers allows the model to adjust its higher-level semantic representations, significantly improving accuracy without updating the entire network.
+
+- **The advantages of full fine-tuning:**  
+  Updating all layers gives the model maximal flexibility to adapt to the tweet domain, typically yielding the highest performance.
+
+### What We Expect to See
+
+- Baseline accuracy: very low  
+- Partial fine-tuning: large improvement  
+- Full fine-tuning: best performance overall  
+
+This comparison provides the clearest demonstration of why fine-tuning is essential in modern NLP workflows. The next code block prints all three accuracies side by side.
+
+
+```{python evaluation}
+
+import pandas as pd
+
+baseline_acc = evaluate(baseline_model, val_loader)
+
+partial_acc = evaluate(partial_model, val_loader)
+
+full_acc = evaluate(full_model, val_loader)
+
+# Collect metrics into a DataFrame
+results_df = pd.DataFrame({
+    "Model": [
+        "Baseline (no fine-tuning)",
+        "Partial fine-tuning",
+        "Full fine-tuning"
+    ],
+    "Accuracy": [
+        round(baseline_acc, 4),
+        round(partial_acc, 4),
+        round(full_acc, 4)
+    ]
+})
+
+print(results_df)
+
+
+```
+
+
+## Qualitative Comparison
+
+Accuracy scores and confusion matrices give a numerical summary of model performance, but they do not show *how* the models behave on individual examples. To understand the practical differences between the baseline, partial fine-tuning, and full fine-tuning, we compare their predictions on actual tweets.
+
+This qualitative analysis is important because tweets often contain:
+
+- sarcasm  
+- emojis  
+- informal grammar  
+- abbreviations  
+- ambiguous sentiment cues  
+
+These characteristics make sentiment classification difficult for a model that has not been adapted to Twitter-specific language patterns.
+
+### What We Look For
+
+By examining a small set of tweets and the predictions from all three models, we can observe:
+
+- The **baseline model** may misinterpret emojis or fail to detect sarcasm.  
+- The **partial fine-tuning model** improves substantially, especially on clearer sentiment cues.  
+- The **full fine-tuning model** typically gives the most reliable predictions and handles noisy input better.
+
+This side-by-side comparison makes the benefits of fine-tuning immediately visible and intuitive.
+
+The next code block selects random tweets and prints the predictions from all three models alongside the true labels.
+
+```{python compare_tweets}
+
+# Qualitative Comparison: Predictions on Sample Tweets
+
+import random
+import torch
+
+label_names = dataset["train"].features["label"].names
+
+# Select 10 random validation examples
+indices = random.sample(range(len(dataset["validation"])), 10)
+
+print("\n=== QUALITATIVE MODEL COMPARISON ===\n")
+
+for idx in indices:
+    text = dataset["validation"][idx]["text"]
+    true_label = label_names[dataset["validation"][idx]["label"]]
+
+    # Tokenize a single tweet
+    inputs = tokenizer(
+        text,
+        return_tensors="pt",
+        padding=True,
+        truncation=True,
+        max_length=64
+    ).to(device)
+
+    # Predictions from each model
+    baseline_pred = label_names[baseline_model(**inputs).logits.argmax(dim=1).item()]
+    partial_pred  = label_names[partial_model(**inputs).logits.argmax(dim=1).item()]
+    full_pred     = label_names[full_model(**inputs).logits.argmax(dim=1).item()]
+
+    print(f"Tweet: {text}")
+    print(f"True label:       {true_label}")
+    print(f"Baseline:         {baseline_pred}")
+    print(f"Partial-tuned:    {partial_pred}")
+    print(f"Full-tuned:       {full_pred}")
+    print("-" * 80)
+
+
+```
+
