@@ -41,6 +41,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 
 ```{python import_data_set}
+#| results: hide
 
 #!pip install -q transformers datasets accelerate
 
@@ -126,8 +127,6 @@ tokenized_dataset.set_format(
     columns=["input_ids", "attention_mask", "label"]
 )
 
-tokenized_dataset["train"][0]
-
 
 ```
 
@@ -180,20 +179,24 @@ val_loader = DataLoader(
 
 ## Baseline Model (No Fine-Tuning)
 
-Before fine-tuning BERT, it is important to establish a **baseline performance level**. This baseline shows how well a pre-trained model performs *without* any adaptation to the domain—in this case, Twitter sentiment.
+Before applying any supervised training, it is essential to establish a **baseline performance level**. This baseline measures how well a pre-trained BERT model performs *without* learning anything about sentiment classification and *without* adapting to the style of Twitter language.
 
-Although BERT is trained on large general-purpose corpora (BooksCorpus and Wikipedia), it has **never been exposed to the specific linguistic style of tweets**. Tweets differ dramatically from formal text: they are short, noisy, packed with slang, emojis, abbreviations, hashtags, irony, and sarcasm. As a result, a pre-trained BERT model typically struggles when applied directly to this dataset.
+BERT is trained on large, general-purpose corpora (BooksCorpus and Wikipedia), but it has **never been exposed to sentiment labels** and has **never been trained on the informal, noisy structure of tweets**. Tweets differ from formal text in several ways: they are short, contain slang, emojis, abbreviations, hashtags, and often rely on irony or sarcasm. A pretrained BERT encoder, used as-is, typically performs poorly on such data.
 
-To measure this effect, we freeze all of BERT’s encoder layers so that:
+To evaluate this, we construct a model by attaching a small **classification head** to the `[CLS]` embedding produced by BERT. This head is required because BERT alone cannot output sentiment labels; it only produces contextual representations. In the baseline scenario:
 
-- the transformer parameters remain unchanged,
-- only the classification head exists (untrained),
-- the model effectively performs **zero-shot** sentiment classification.
+- all of BERT’s encoder parameters are **frozen**,  
+- the classification head remains **randomly initialized**,  
+- no supervised training is performed on either component,  
+- the model therefore performs **zero-shot** sentiment classification.
 
-Evaluating this model provides a realistic lower bound:  
-**How well does BERT understand tweet sentiment before training?**
+Zero-shot here means that the model has seen **zero sentiment-labeled examples** during training; it relies solely on BERT’s general language understanding and a random classifier.
 
-This baseline accuracy serves as a reference point for comparing the improvements introduced by partial and full fine-tuning in later steps.
+Evaluating this zero-shot model gives us a meaningful lower bound:  
+**How well does BERT handle tweet sentiment without any supervised training or domain adaptation?**
+
+This baseline accuracy will later serve as a reference point when comparing partial and full fine-tuning results.
+
 
 ```{python baseline}
 #| results: hide
@@ -237,6 +240,23 @@ def evaluate(model, data_loader):
 ```
 
 ## Partial Fine-Tuning
+### What Fine-Tuning Means in This Context
+
+Fine-tuning is a **supervised learning process** in which BERT is trained on labeled examples for a specific downstream task—in this case, sentiment classification. During fine-tuning, the model receives tweet–label pairs such as:
+
+- “I love this!” → Positive  
+- “This is awful.” → Negative  
+- “It’s okay, I guess.” → Neutral  
+
+By learning from these supervised labels, BERT adjusts its internal parameters so that its representations become more useful for predicting sentiment. This is fundamentally different from the baseline model, where no labeled training occurs and no parameters are updated. Fine-tuning therefore means:
+
+- the model learns from **labeled sentiment data**,  
+- selected parameters are updated during training,  
+- performance improves significantly over the zero-shot baseline.
+
+With this definition in place, we now describe how *partial* fine-tuning selectively updates only the upper layers of BERT while keeping the lower layers frozen.
+
+---
 
 The baseline model demonstrates how poorly a pre-trained BERT performs when it is not adapted to the TweetEval domain. To improve performance while still keeping computational cost low, we apply **partial fine-tuning**.
 
@@ -244,13 +264,13 @@ BERT consists of 12 transformer encoder layers stacked on top of one another. Th
 
 In partial fine-tuning, we freeze the **lower encoder layers** (layers 0–8) and train only the **upper layers** (layers 9–11) together with the classification head. This approach:
 
-- reduces the number of trainable parameters,
-- speeds up training,
-- lowers VRAM requirements,
-- reduces risk of overfitting on small datasets,
-- still allows BERT to learn important domain-specific patterns from tweets.
+- reduces the number of trainable parameters,  
+- speeds up training,  
+- lowers VRAM requirements,  
+- reduces the risk of overfitting on a small dataset,  
+- still allows BERT to learn important domain-specific patterns from tweets.  
 
-Partial fine-tuning typically yields a large improvement in accuracy compared to the baseline, while still being efficient enough to run quickly in environments like Google Colab.
+Partial fine-tuning typically yields a large improvement in accuracy compared to the baseline while remaining efficient enough to run quickly in environments like Google Colab.
 
 The next code block implements partial fine-tuning for one epoch and evaluates its performance.
 
@@ -301,26 +321,40 @@ for batch in train_loader:
 
 ## Full Fine-Tuning
 
-Partial fine-tuning provides a substantial performance boost, but it still restricts learning to only the top few transformer layers. To give the model maximum flexibility and allow it to fully adapt to the characteristics of Twitter language, we now perform **full fine-tuning**, where **all** BERT parameters are updated.
+Partial fine-tuning restricts learning to the upper encoder layers, allowing BERT to adjust some of its representations while keeping the lower layers fixed. To give the model maximal flexibility, we now perform **full fine-tuning**, where **every parameter in the network is updated** based on labeled sentiment examples.
 
-Full fine-tuning trains:
+### What Makes Full Fine-Tuning Different?
 
-- all 12 transformer layers,
-- the attention mechanisms inside each layer,
-- the intermediate feedforward networks,
-- layer normalization parameters,
-- and the final classification head.
+In full fine-tuning:
 
-This approach generally achieves the highest accuracy because the model can adjust every level of linguistic representation, from low-level token embeddings to high-level semantic patterns. As a result, the model becomes better at interpreting informal grammar, emojis, irony, abbreviations, and the overall noisy structure common in tweets.
+- **All 12 transformer layers are trainable**,  
+- The attention heads inside each layer are updated,  
+- The intermediate feedforward networks are updated,  
+- Layer normalization parameters are updated,  
+- The classification head is updated as well.
 
-The trade-offs are:
+This means the entire model — from low-level token embeddings to high-level semantics — can adapt to the specific characteristics of Twitter language.
 
-- higher computational cost,
-- longer training time,
-- increased risk of overfitting on very small datasets.
+Full fine-tuning is the complete opposite of the baseline:
 
-In this exercise, the training set is large enough and the model is already well regularized from pretraining, so full fine-tuning typically yields the best results.  
-The following code block performs one epoch of full fine-tuning and reports the resulting accuracy.
+- In the baseline: **no supervised learning** occurs and all encoder weights remain fixed.  
+- In partial fine-tuning: **only the upper layers and classifier learn**.  
+- In full fine-tuning: **all layers and the classifier learn simultaneously**.
+
+Because sentiment classification is a supervised task, full fine-tuning allows BERT to integrate the sentiment labels deeply into every layer of its internal representation.
+
+### Why Full Fine-Tuning Usually Performs Best
+
+Tweets contain irregular grammar, emojis, sarcasm, abbreviations, and other linguistic patterns that differ significantly from BERT’s pretraining domain. When all parameters are trainable, the model can:
+
+- refine embeddings for informal vocabulary,  
+- adjust attention patterns to better detect sentiment cues,  
+- reorganize its semantic space around the three sentiment labels,  
+- learn subtle distinctions that partial tuning cannot fully capture.
+
+The trade-offs are higher computational cost and potentially longer training time, but the improvement in performance is typically notable.
+
+The next code block performs one epoch of full fine-tuning and then evaluates the model on the validation set.
 
 ```{python full_train}
 #| results: hide
@@ -369,7 +403,44 @@ for batch in train_loader:
 
 ## Comparing the Three Models
 
-Now that we have trained all three versions of the model—baseline, partial fine-tuning, and full fine-tuning—we can compare their performance directly. This comparison highlights how each level of adaptation improves the model’s ability to understand tweet sentiment.
+Now that we have trained all three versions of the model—baseline, partial fine-tuning, and full fine-tuning—we can compare their performance directly. Understanding **which parts of the model are allowed to learn** is essential for interpreting these results.
+
+### What Learns in Each Model?
+
+- **Baseline (Zero-Shot)**
+  - BERT encoder: **frozen**
+  - Classification head: **untrained**
+  - Supervised learning: **none**
+  
+  The model makes predictions using BERT’s general language understanding and a random classifier. No part of the network adapts to sentiment labels or Twitter-style text.
+
+- **Partial Fine-Tuning**
+  - BERT layers 0–8: **frozen**
+  - BERT layers 9–11: **trainable**
+  - Classification head: **trainable**
+  - Supervised learning: **upper encoder layers + classifier**
+
+  The model can learn high-level sentiment cues but keeps foundational linguistic representations fixed.
+
+- **Full Fine-Tuning**
+  - All BERT layers: **trainable**
+  - Classification head: **trainable**
+  - Supervised learning: **entire model**
+
+  Every parameter in BERT adjusts to sentiment labels and Twitter’s linguistic characteristics.
+
+### Why These Differences Matter
+
+Evaluating the models side by side clearly demonstrates the effect of supervision:
+
+- The **baseline** reflects how poorly a non-adapted model handles Twitter sentiment.  
+- **Partial fine-tuning** often yields a large performance boost by allowing only the upper semantic layers to adapt.  
+- **Full fine-tuning** typically achieves the best performance because all layers participate in learning the sentiment task.
+
+This progression — from zero learning, to partial learning, to full learning — illustrates the core principle of transfer learning with BERT.
+
+The following code block prints the accuracy of each model for direct comparison.
+
 
 ### Why Comparison Matters
 
@@ -425,29 +496,38 @@ print(results_df)
 
 ## Qualitative Comparison
 
-Accuracy scores and confusion matrices give a numerical summary of model performance, but they do not show *how* the models behave on individual examples. To understand the practical differences between the baseline, partial fine-tuning, and full fine-tuning, we compare their predictions on actual tweets.
+Numerical accuracy provides a useful summary, but qualitative examples make the differences between the three models immediately visible. By examining real tweets, we can observe how each model behaves based on **which parts of the network were allowed to learn**.
 
-This qualitative analysis is important because tweets often contain:
+### How Each Model Behaves on Individual Tweets
 
-- sarcasm  
-- emojis  
-- informal grammar  
-- abbreviations  
-- ambiguous sentiment cues  
+- **Baseline (Zero-Shot)**
+  - BERT encoder: frozen  
+  - Classifier: untrained  
+  - No supervised learning  
 
-These characteristics make sentiment classification difficult for a model that has not been adapted to Twitter-specific language patterns.
+  Because neither the encoder nor the classifier has seen sentiment labels, the model often misinterprets sentiment cues, ignores emojis, and fails to recognize sarcasm or informal grammar. Predictions may appear arbitrary or overly biased toward one class.
 
-### What We Look For
+- **Partial Fine-Tuning**
+  - Only upper BERT layers + classifier learn  
+  - Lower linguistic layers remain fixed  
 
-By examining a small set of tweets and the predictions from all three models, we can observe:
+  This model improves considerably on clear sentiment cues—positive phrases, strong negative language, common emoji patterns. However, it may still struggle with subtle or ambiguous cases because only part of the model adapted to the task.
 
-- The **baseline model** may misinterpret emojis or fail to detect sarcasm.  
-- The **partial fine-tuning model** improves substantially, especially on clearer sentiment cues.  
-- The **full fine-tuning model** typically gives the most reliable predictions and handles noisy input better.
+- **Full Fine-Tuning**
+  - All BERT layers learn from supervised labels  
 
-This side-by-side comparison makes the benefits of fine-tuning immediately visible and intuitive.
+  This model generally provides the most reliable and stable predictions. It adapts deeply to Twitter’s informal style, handles emojis better, and captures sentiment even in short or noisy tweets. Sarcasm and ambiguous expressions may still be difficult, but performance is consistently superior.
 
-The next code block selects random tweets and prints the predictions from all three models alongside the true labels.
+### What We Look For in This Comparison
+
+By comparing the predictions of all three models on the same tweet, we can see:
+
+- how **supervised learning** changes the model’s understanding,  
+- how much improvement occurs when more layers are allowed to adapt,  
+- how full fine-tuning overcomes many of the weaknesses of the zero-shot and partially tuned models.
+
+The next code block selects random validation tweets and prints the predictions from all three models alongside their true labels.
+
 
 ```{python compare_tweets}
 
@@ -491,3 +571,24 @@ for idx in indices:
 
 ```
 
+## Summary: From Zero-Shot to Full Fine-Tuning
+
+This notebook demonstrates the full progression of adapting BERT to a supervised sentiment classification task:
+
+1. **Baseline (Zero-Shot)**  
+   - No supervised learning  
+   - BERT encoder frozen  
+   - Classifier untrained  
+   - Predictions come from general language knowledge only  
+
+2. **Partial Fine-Tuning**  
+   - Upper BERT layers + classifier learn from labeled data  
+   - Lower layers remain frozen  
+   - Model adapts partially to sentiment cues and Twitter language  
+
+3. **Full Fine-Tuning**  
+   - Every parameter in the network learns  
+   - Model fully adapts to both the task and the domain  
+   - Highest performance and most robust predictions  
+
+This progression illustrates how supervised fine-tuning transforms BERT from a general-purpose text encoder into a task-specific sentiment classifier. The baseline shows how little BERT understands tweet sentiment without labeled training, partial fine-tuning demonstrates the benefit of updating high-level semantic layers, and full fine-tuning provides the strongest results by allowing all layers to adjust to the task.

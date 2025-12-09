@@ -1,6 +1,7 @@
 ---
 title: "Neural Networks Workshop — Practice Exercise Set"
 format: html
+sidebar: exercises
 ---
   
 # Overview

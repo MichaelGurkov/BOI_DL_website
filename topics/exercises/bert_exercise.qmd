@@ -1,0 +1,94 @@
+---
+title: "Practice Exercise: Fine-Tuning BERT for Tweet Sentiment Classification"
+sidebar: exercises
+---
+
+## Practice Exercise: Fine-Tuning BERT for Tweet Sentiment Classification
+
+This exercise guides you through training and evaluating three versions of BERT on the TweetEval Sentiment dataset:
+
+-   A baseline zero-shot model (no fine-tuning)
+-   A partially fine-tuned model
+-   A fully fine-tuned model
+
+You will repeat the workflow demonstrated in class, but with different downsampling values.
+
+## 1. Load the TweetEval Dataset
+
+Load the dataset using the HuggingFace Datasets library.
+
+Downsample using:
+
+-   Training set: first 3,000 examples
+-   Validation set: first 1,000 examples
+
+**Task 1** Create:
+
+-   dataset_train
+-   dataset_val
+
+Report the number of examples in each.
+
+## 2. Tokenize the Dataset
+
+Use the BERT tokenizer (bert-base-uncased) with:
+
+-   padding to length 64
+-   truncation
+-   attention masks
+
+Convert the tokenized output to PyTorch tensors.
+
+**Task 2** Implement a tokenize_batch function and display the first tokenized example. Explain why BERT requires padding and attention masks.
+
+## 3. Prepare DataLoaders
+
+Create PyTorch DataLoaders with:
+
+-   batch size = 32
+-   shuffling for training only
+
+**Task 3** Build the loaders and print the shape of one batch.
+
+## 4. Baseline Model (Zero-Shot)
+
+Load BertForSequenceClassification with num_labels = 3. Freeze all encoder layers so no supervised learning occurs.
+
+**Task 4** 1. Freeze the layers. 2. Evaluate the model on the validation set. 3. Explain why this model is considered zero-shot.
+
+## 5. Partial Fine-Tuning
+
+Load a fresh model. Freeze layers 0–7 and train only layers 8–11 + the classifier for one epoch using AdamW with lr = 2e-5.
+
+**Task 5** 1. Identify all trainable layers. 2. Train for one epoch. 3. Evaluate validation accuracy. 4. Explain what partial fine-tuning means.
+
+## 6. Full Fine-Tuning
+
+Load a new model. Unfreeze all layers and train for one epoch with the same optimizer.
+
+**Task 6** 1. Train the fully fine-tuned model. 2. Evaluate validation accuracy. 3. Compare the three accuracies: baseline, partial, full.
+
+## 7. Qualitative Comparison
+
+Select 10 random validation tweets. For each tweet, show:
+
+-   the text
+-   the true label
+-   predictions from the baseline model
+-   predictions from the partial model
+-   predictions from the full model
+
+**Task 7** Discuss:
+
+1.  Where does the baseline fail?
+2.  How does partial fine-tuning improve predictions?
+3.  How does full fine-tuning behave on noisy, sarcastic, or emoji-heavy tweets?
+
+## 8. Reflection Questions
+
+1.  What does this exercise reveal about transfer learning in NLP?
+2.  Why does the classification head require supervised labels to learn the task?
+3.  Which model would you choose for deployment, and why?
+4.  How does the level of fine-tuning affect BERT’s ability to adapt to Twitter-style language?
+
+Return all results and explanations in one markdown-formatted document.

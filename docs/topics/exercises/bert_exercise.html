@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Neural Networks Workshop — Practice Exercise Set</title>
+<title>Practice Exercise: Fine-Tuning BERT for Tweet Sentiment Classification</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -99,7 +99,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../topics/exercises/exercise_1.html">Logistic</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../topics/exercises/bert_exercise.html">Transformers</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -113,7 +113,7 @@ ul.task-list li input[type="checkbox"] {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../topics/exercises/exercise_1.html" class="sidebar-item-text sidebar-link active">
+  <a href="../../topics/exercises/exercise_1.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Logistic</span></a>
   </div>
 </li>
@@ -131,7 +131,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../topics/exercises/bert_exercise.html" class="sidebar-item-text sidebar-link">
+  <a href="../../topics/exercises/bert_exercise.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Transformers</span></a>
   </div>
 </li>
@@ -145,52 +145,15 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
-  <li><a href="#load-and-inspect-the-data" id="toc-load-and-inspect-the-data" class="nav-link" data-scroll-target="#load-and-inspect-the-data">1. Load and Inspect the Data</a>
-  <ul class="collapse">
-  <li><a href="#load-the-dataset" id="toc-load-the-dataset" class="nav-link" data-scroll-target="#load-the-dataset">1.1 Load the dataset</a></li>
-  <li><a href="#inspect-its-structure" id="toc-inspect-its-structure" class="nav-link" data-scroll-target="#inspect-its-structure">1.2 Inspect its structure</a></li>
-  <li><a href="#identify-target-and-predictors" id="toc-identify-target-and-predictors" class="nav-link" data-scroll-target="#identify-target-and-predictors">1.3 Identify target and predictors</a></li>
-  </ul></li>
-  <li><a href="#handle-missing-values" id="toc-handle-missing-values" class="nav-link" data-scroll-target="#handle-missing-values">2. Handle Missing Values</a>
-  <ul class="collapse">
-  <li><a href="#detect-missingness" id="toc-detect-missingness" class="nav-link" data-scroll-target="#detect-missingness">2.1 Detect missingness</a></li>
-  <li><a href="#choose-an-imputation-strategy" id="toc-choose-an-imputation-strategy" class="nav-link" data-scroll-target="#choose-an-imputation-strategy">2.2 Choose an imputation strategy</a></li>
-  <li><a href="#create-a-cleaned-dataset" id="toc-create-a-cleaned-dataset" class="nav-link" data-scroll-target="#create-a-cleaned-dataset">2.3 Create a cleaned dataset</a></li>
-  </ul></li>
-  <li><a href="#exploratory-data-analysis-eda" id="toc-exploratory-data-analysis-eda" class="nav-link" data-scroll-target="#exploratory-data-analysis-eda">3. Exploratory Data Analysis (EDA)</a>
-  <ul class="collapse">
-  <li><a href="#examine-the-target-distribution" id="toc-examine-the-target-distribution" class="nav-link" data-scroll-target="#examine-the-target-distribution">3.1 Examine the target distribution</a></li>
-  <li><a href="#explore-important-numeric-features" id="toc-explore-important-numeric-features" class="nav-link" data-scroll-target="#explore-important-numeric-features">3.2 Explore important numeric features</a></li>
-  <li><a href="#correlation-inspection" id="toc-correlation-inspection" class="nav-link" data-scroll-target="#correlation-inspection">3.3 Correlation inspection</a></li>
-  </ul></li>
-  <li><a href="#traintest-split" id="toc-traintest-split" class="nav-link" data-scroll-target="#traintest-split">4. Train/Test Split</a>
-  <ul class="collapse">
-  <li><a href="#split-the-data" id="toc-split-the-data" class="nav-link" data-scroll-target="#split-the-data">4.1 Split the data</a></li>
-  <li><a href="#scale-the-predictors" id="toc-scale-the-predictors" class="nav-link" data-scroll-target="#scale-the-predictors">4.2 Scale the predictors</a></li>
-  </ul></li>
-  <li><a href="#logistic-regression-baseline" id="toc-logistic-regression-baseline" class="nav-link" data-scroll-target="#logistic-regression-baseline">5. Logistic Regression Baseline</a>
-  <ul class="collapse">
-  <li><a href="#fit-a-logistic-regression-model" id="toc-fit-a-logistic-regression-model" class="nav-link" data-scroll-target="#fit-a-logistic-regression-model">5.1 Fit a logistic regression model</a></li>
-  <li><a href="#evaluate-performance" id="toc-evaluate-performance" class="nav-link" data-scroll-target="#evaluate-performance">5.2 Evaluate performance</a></li>
-  <li><a href="#interpret-the-results" id="toc-interpret-the-results" class="nav-link" data-scroll-target="#interpret-the-results">5.3 Interpret the results</a></li>
-  </ul></li>
-  <li><a href="#single-layer-neural-network" id="toc-single-layer-neural-network" class="nav-link" data-scroll-target="#single-layer-neural-network">6. Single-Layer Neural Network</a>
-  <ul class="collapse">
-  <li><a href="#define-the-architecture" id="toc-define-the-architecture" class="nav-link" data-scroll-target="#define-the-architecture">6.1 Define the architecture</a></li>
-  <li><a href="#compile-the-model" id="toc-compile-the-model" class="nav-link" data-scroll-target="#compile-the-model">6.2 Compile the model</a></li>
-  <li><a href="#train-the-model" id="toc-train-the-model" class="nav-link" data-scroll-target="#train-the-model">6.3 Train the model</a></li>
-  <li><a href="#evaluate" id="toc-evaluate" class="nav-link" data-scroll-target="#evaluate">6.4 Evaluate</a></li>
-  </ul></li>
-  <li><a href="#optional-multi-layer-neural-network" id="toc-optional-multi-layer-neural-network" class="nav-link" data-scroll-target="#optional-multi-layer-neural-network">7. Optional: Multi-Layer Neural Network</a>
-  <ul class="collapse">
-  <li><a href="#build-a-deeper-architecture" id="toc-build-a-deeper-architecture" class="nav-link" data-scroll-target="#build-a-deeper-architecture">7.1 Build a deeper architecture</a></li>
-  <li><a href="#consider-regularization" id="toc-consider-regularization" class="nav-link" data-scroll-target="#consider-regularization">7.2 Consider regularization</a></li>
-  <li><a href="#train-and-compare" id="toc-train-and-compare" class="nav-link" data-scroll-target="#train-and-compare">7.3 Train and compare</a></li>
-  <li><a href="#discuss-findings" id="toc-discuss-findings" class="nav-link" data-scroll-target="#discuss-findings">7.4 Discuss findings</a></li>
-  </ul></li>
-  <li><a href="#summary-questions" id="toc-summary-questions" class="nav-link" data-scroll-target="#summary-questions">8. Summary Questions</a></li>
-  <li><a href="#end-of-exercise-set" id="toc-end-of-exercise-set" class="nav-link" data-scroll-target="#end-of-exercise-set">End of Exercise Set</a></li>
+  <li><a href="#practice-exercise-fine-tuning-bert-for-tweet-sentiment-classification" id="toc-practice-exercise-fine-tuning-bert-for-tweet-sentiment-classification" class="nav-link active" data-scroll-target="#practice-exercise-fine-tuning-bert-for-tweet-sentiment-classification">Practice Exercise: Fine-Tuning BERT for Tweet Sentiment Classification</a></li>
+  <li><a href="#load-the-tweeteval-dataset" id="toc-load-the-tweeteval-dataset" class="nav-link" data-scroll-target="#load-the-tweeteval-dataset">1. Load the TweetEval Dataset</a></li>
+  <li><a href="#tokenize-the-dataset" id="toc-tokenize-the-dataset" class="nav-link" data-scroll-target="#tokenize-the-dataset">2. Tokenize the Dataset</a></li>
+  <li><a href="#prepare-dataloaders" id="toc-prepare-dataloaders" class="nav-link" data-scroll-target="#prepare-dataloaders">3. Prepare DataLoaders</a></li>
+  <li><a href="#baseline-model-zero-shot" id="toc-baseline-model-zero-shot" class="nav-link" data-scroll-target="#baseline-model-zero-shot">4. Baseline Model (Zero-Shot)</a></li>
+  <li><a href="#partial-fine-tuning" id="toc-partial-fine-tuning" class="nav-link" data-scroll-target="#partial-fine-tuning">5. Partial Fine-Tuning</a></li>
+  <li><a href="#full-fine-tuning" id="toc-full-fine-tuning" class="nav-link" data-scroll-target="#full-fine-tuning">6. Full Fine-Tuning</a></li>
+  <li><a href="#qualitative-comparison" id="toc-qualitative-comparison" class="nav-link" data-scroll-target="#qualitative-comparison">7. Qualitative Comparison</a></li>
+  <li><a href="#reflection-questions" id="toc-reflection-questions" class="nav-link" data-scroll-target="#reflection-questions">8. Reflection Questions</a></li>
   </ul>
 </nav>
     </div>
@@ -199,7 +162,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Neural Networks Workshop — Practice Exercise Set</h1>
+<h1 class="title">Practice Exercise: Fine-Tuning BERT for Tweet Sentiment Classification</h1>
 </div>
 
 
@@ -216,190 +179,92 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="overview" class="level1">
-<h1>Overview</h1>
-<p>In this exercise, you will work with the <code>credit_data</code> dataset and progress step by step through a short exploratory data analysis, a logistic regression baseline, a single-layer neural network, and an optional multi-layer neural network. Each section builds on the previous one so you can follow the workflow without getting lost.</p>
-<p>The target variable is:</p>
+<section id="practice-exercise-fine-tuning-bert-for-tweet-sentiment-classification" class="level2">
+<h2 class="anchored" data-anchor-id="practice-exercise-fine-tuning-bert-for-tweet-sentiment-classification">Practice Exercise: Fine-Tuning BERT for Tweet Sentiment Classification</h2>
+<p>This exercise guides you through training and evaluating three versions of BERT on the TweetEval Sentiment dataset:</p>
 <ul>
-<li><strong><code>SeriousDlqin2yrs</code></strong> — whether the person experienced financial distress severe enough to be 90+ days delinquent within the next two years.</li>
+<li>A baseline zero-shot model (no fine-tuning)</li>
+<li>A partially fine-tuned model</li>
+<li>A fully fine-tuned model</li>
 </ul>
-<p>All remaining columns serve as predictors.</p>
-<hr>
+<p>You will repeat the workflow demonstrated in class, but with different downsampling values.</p>
 </section>
-<section id="load-and-inspect-the-data" class="level1">
-<h1>1. Load and Inspect the Data</h1>
-<section id="load-the-dataset" class="level3">
-<h3 class="anchored" data-anchor-id="load-the-dataset">1.1 Load the dataset</h3>
-<p>Load the CSV file into a DataFrame named <code>credit_data</code>.</p>
-</section>
-<section id="inspect-its-structure" class="level3">
-<h3 class="anchored" data-anchor-id="inspect-its-structure">1.2 Inspect its structure</h3>
-<p>View:</p>
+<section id="load-the-tweeteval-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="load-the-tweeteval-dataset">1. Load the TweetEval Dataset</h2>
+<p>Load the dataset using the HuggingFace Datasets library.</p>
+<p>Downsample using:</p>
 <ul>
-<li>the first rows<br>
-</li>
-<li>the column types<br>
-</li>
-<li>summary statistics</li>
+<li>Training set: first 3,000 examples</li>
+<li>Validation set: first 1,000 examples</li>
 </ul>
-<p>Make sure <code>SeriousDlqin2yrs</code> contains only 0 and 1.</p>
-</section>
-<section id="identify-target-and-predictors" class="level3">
-<h3 class="anchored" data-anchor-id="identify-target-and-predictors">1.3 Identify target and predictors</h3>
-<p>Confirm that the target is binary and all other columns are features used for modeling.</p>
-<hr>
-</section>
-</section>
-<section id="handle-missing-values" class="level1">
-<h1>2. Handle Missing Values</h1>
-<section id="detect-missingness" class="level3">
-<h3 class="anchored" data-anchor-id="detect-missingness">2.1 Detect missingness</h3>
-<p>Count missing values per column and identify which features require imputation.</p>
-</section>
-<section id="choose-an-imputation-strategy" class="level3">
-<h3 class="anchored" data-anchor-id="choose-an-imputation-strategy">2.2 Choose an imputation strategy</h3>
-<p>Use the <strong>median</strong> for numeric features and explain why this is appropriate for skewed financial data.</p>
-</section>
-<section id="create-a-cleaned-dataset" class="level3">
-<h3 class="anchored" data-anchor-id="create-a-cleaned-dataset">2.3 Create a cleaned dataset</h3>
-<p>Apply the transformations and verify that no missing values remain.</p>
-<hr>
-</section>
-</section>
-<section id="exploratory-data-analysis-eda" class="level1">
-<h1>3. Exploratory Data Analysis (EDA)</h1>
-<p>Keep this focused and practical.</p>
-<section id="examine-the-target-distribution" class="level3">
-<h3 class="anchored" data-anchor-id="examine-the-target-distribution">3.1 Examine the target distribution</h3>
-<p>Plot the proportion of 0’s and 1’s to understand the level of class imbalance.</p>
-</section>
-<section id="explore-important-numeric-features" class="level3">
-<h3 class="anchored" data-anchor-id="explore-important-numeric-features">3.2 Explore important numeric features</h3>
-<p>Look at distributions (histograms or boxplots) of a few features such as:</p>
+<p><strong>Task 1</strong> Create:</p>
 <ul>
-<li>age<br>
-</li>
-<li>DebtRatio<br>
-</li>
-<li>MonthlyIncome</li>
+<li>dataset_train</li>
+<li>dataset_val</li>
 </ul>
-<p>Discuss any unusual patterns or outliers.</p>
+<p>Report the number of examples in each.</p>
 </section>
-<section id="correlation-inspection" class="level3">
-<h3 class="anchored" data-anchor-id="correlation-inspection">3.3 Correlation inspection</h3>
-<p>Compute a correlation matrix and observe:</p>
+<section id="tokenize-the-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="tokenize-the-dataset">2. Tokenize the Dataset</h2>
+<p>Use the BERT tokenizer (bert-base-uncased) with:</p>
 <ul>
-<li>which features correlate most strongly with the target<br>
-</li>
-<li>which features correlate strongly with each other</li>
+<li>padding to length 64</li>
+<li>truncation</li>
+<li>attention masks</li>
 </ul>
-<hr>
+<p>Convert the tokenized output to PyTorch tensors.</p>
+<p><strong>Task 2</strong> Implement a tokenize_batch function and display the first tokenized example. Explain why BERT requires padding and attention masks.</p>
 </section>
-</section>
-<section id="traintest-split" class="level1">
-<h1>4. Train/Test Split</h1>
-<section id="split-the-data" class="level3">
-<h3 class="anchored" data-anchor-id="split-the-data">4.1 Split the data</h3>
-<p>Create a stratified split such that the test set is 25% of the data.</p>
-</section>
-<section id="scale-the-predictors" class="level3">
-<h3 class="anchored" data-anchor-id="scale-the-predictors">4.2 Scale the predictors</h3>
-<p>Standardize the numeric predictors. Fit the scaling on the training data and apply it to both training and test sets.</p>
-<hr>
-</section>
-</section>
-<section id="logistic-regression-baseline" class="level1">
-<h1>5. Logistic Regression Baseline</h1>
-<section id="fit-a-logistic-regression-model" class="level3">
-<h3 class="anchored" data-anchor-id="fit-a-logistic-regression-model">5.1 Fit a logistic regression model</h3>
-<p>Use the cleaned, scaled training data.</p>
-</section>
-<section id="evaluate-performance" class="level3">
-<h3 class="anchored" data-anchor-id="evaluate-performance">5.2 Evaluate performance</h3>
-<p>Produce:</p>
+<section id="prepare-dataloaders" class="level2">
+<h2 class="anchored" data-anchor-id="prepare-dataloaders">3. Prepare DataLoaders</h2>
+<p>Create PyTorch DataLoaders with:</p>
 <ul>
-<li>accuracy<br>
-</li>
-<li>precision<br>
-</li>
-<li>recall<br>
-</li>
-<li>F1 score<br>
-</li>
-<li>AUC<br>
-</li>
-<li>confusion matrix</li>
+<li>batch size = 32</li>
+<li>shuffling for training only</li>
 </ul>
+<p><strong>Task 3</strong> Build the loaders and print the shape of one batch.</p>
 </section>
-<section id="interpret-the-results" class="level3">
-<h3 class="anchored" data-anchor-id="interpret-the-results">5.3 Interpret the results</h3>
-<p>Discuss at least one strength and one limitation of logistic regression in the context of this dataset.</p>
-<hr>
+<section id="baseline-model-zero-shot" class="level2">
+<h2 class="anchored" data-anchor-id="baseline-model-zero-shot">4. Baseline Model (Zero-Shot)</h2>
+<p>Load BertForSequenceClassification with num_labels = 3. Freeze all encoder layers so no supervised learning occurs.</p>
+<p><strong>Task 4</strong> 1. Freeze the layers. 2. Evaluate the model on the validation set. 3. Explain why this model is considered zero-shot.</p>
 </section>
+<section id="partial-fine-tuning" class="level2">
+<h2 class="anchored" data-anchor-id="partial-fine-tuning">5. Partial Fine-Tuning</h2>
+<p>Load a fresh model. Freeze layers 0–7 and train only layers 8–11 + the classifier for one epoch using AdamW with lr = 2e-5.</p>
+<p><strong>Task 5</strong> 1. Identify all trainable layers. 2. Train for one epoch. 3. Evaluate validation accuracy. 4. Explain what partial fine-tuning means.</p>
 </section>
-<section id="single-layer-neural-network" class="level1">
-<h1>6. Single-Layer Neural Network</h1>
-<p>You will now build a shallow neural network with one hidden layer.</p>
-<section id="define-the-architecture" class="level3">
-<h3 class="anchored" data-anchor-id="define-the-architecture">6.1 Define the architecture</h3>
-<p>Use: - one hidden layer with a small number of units<br>
-- ReLU activation in the hidden layer<br>
-- sigmoid activation in the output layer</p>
+<section id="full-fine-tuning" class="level2">
+<h2 class="anchored" data-anchor-id="full-fine-tuning">6. Full Fine-Tuning</h2>
+<p>Load a new model. Unfreeze all layers and train for one epoch with the same optimizer.</p>
+<p><strong>Task 6</strong> 1. Train the fully fine-tuned model. 2. Evaluate validation accuracy. 3. Compare the three accuracies: baseline, partial, full.</p>
 </section>
-<section id="compile-the-model" class="level3">
-<h3 class="anchored" data-anchor-id="compile-the-model">6.2 Compile the model</h3>
-<p>Use binary cross-entropy loss, the Adam optimizer, and accuracy/AUC.</p>
-</section>
-<section id="train-the-model" class="level3">
-<h3 class="anchored" data-anchor-id="train-the-model">6.3 Train the model</h3>
-<p>Train for about 20 epochs with a validation split.<br>
-Plot the training and validation curves and look for signs of overfitting.</p>
-</section>
-<section id="evaluate" class="level3">
-<h3 class="anchored" data-anchor-id="evaluate">6.4 Evaluate</h3>
-<p>Compare performance to logistic regression using the same metrics.</p>
-<hr>
-</section>
-</section>
-<section id="optional-multi-layer-neural-network" class="level1">
-<h1>7. Optional: Multi-Layer Neural Network</h1>
-<p>This section is for students who want to explore deeper models.</p>
-<section id="build-a-deeper-architecture" class="level3">
-<h3 class="anchored" data-anchor-id="build-a-deeper-architecture">7.1 Build a deeper architecture</h3>
-<p>Use two or more hidden layers (e.g.&nbsp;32 → 16 → 1).</p>
-</section>
-<section id="consider-regularization" class="level3">
-<h3 class="anchored" data-anchor-id="consider-regularization">7.2 Consider regularization</h3>
-<p>Try dropout or L2 regularization to reduce overfitting.</p>
-</section>
-<section id="train-and-compare" class="level3">
-<h3 class="anchored" data-anchor-id="train-and-compare">7.3 Train and compare</h3>
-<p>Evaluate your deep model and compare it with: - logistic regression<br>
-- single-layer network</p>
-</section>
-<section id="discuss-findings" class="level3">
-<h3 class="anchored" data-anchor-id="discuss-findings">7.4 Discuss findings</h3>
-<p>Explain whether depth helped or harmed performance and why.</p>
-<hr>
-</section>
-</section>
-<section id="summary-questions" class="level1">
-<h1>8. Summary Questions</h1>
-<p>Answer the following:</p>
+<section id="qualitative-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="qualitative-comparison">7. Qualitative Comparison</h2>
+<p>Select 10 random validation tweets. For each tweet, show:</p>
+<ul>
+<li>the text</li>
+<li>the true label</li>
+<li>predictions from the baseline model</li>
+<li>predictions from the partial model</li>
+<li>predictions from the full model</li>
+</ul>
+<p><strong>Task 7</strong> Discuss:</p>
 <ol type="1">
-<li>Which model achieved the highest AUC?<br>
-</li>
-<li>Which model showed signs of overfitting?<br>
-</li>
-<li>If you had to deploy one model, which would you choose and why?<br>
-</li>
-<li>What additional preprocessing or feature engineering steps could improve model performance?</li>
+<li>Where does the baseline fail?</li>
+<li>How does partial fine-tuning improve predictions?</li>
+<li>How does full fine-tuning behave on noisy, sarcastic, or emoji-heavy tweets?</li>
 </ol>
-<hr>
 </section>
-<section id="end-of-exercise-set" class="level1">
-<h1>End of Exercise Set</h1>
-<p>Work through the tasks in order, verifying each step before moving to the next. This workflow mirrors a real-world modeling pipeline and prepares you for more advanced neural network structures.</p>
+<section id="reflection-questions" class="level2">
+<h2 class="anchored" data-anchor-id="reflection-questions">8. Reflection Questions</h2>
+<ol type="1">
+<li>What does this exercise reveal about transfer learning in NLP?</li>
+<li>Why does the classification head require supervised labels to learn the task?</li>
+<li>Which model would you choose for deployment, and why?</li>
+<li>How does the level of fine-tuning affect BERT’s ability to adapt to Twitter-style language?</li>
+</ol>
+<p>Return all results and explanations in one markdown-formatted document.</p>
 
 
 </section>

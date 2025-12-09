@@ -36,7 +36,6 @@ website:
         text: Financial data
       - href: topics/rnn/rnn_cpi.qmd
         text: Seasonal data
-        
   - id: exercises
     title: "Exercise sets"
     style: docked
@@ -47,6 +46,8 @@ website:
         text: CNN
       - href: topics/exercises/rnn_exercise.qmd
         text: RNN
+      - href: topics/exercises/bert_exercise.qmd
+        text: Transformers
         
 
 format:
