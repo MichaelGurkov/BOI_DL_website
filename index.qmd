@@ -29,6 +29,10 @@ page-layout: full
   <img src="images/recurrent.png" alt="Conv">
 </a>
 
+<a class="icon-card" href="topics/gnn/gnn.qmd">
+  <img src="images/graph.png" alt="Conv">
+</a>
+
 <a class="icon-card" href="topics/transformers/fine_tuning.qmd">
   <img src="images/transformers.png" alt="Conv">
 </a>

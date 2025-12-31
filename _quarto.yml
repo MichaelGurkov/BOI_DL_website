@@ -36,6 +36,12 @@ website:
         text: Financial data
       - href: topics/rnn/rnn_cpi.qmd
         text: Seasonal data
+  - id: gnn
+    title: "Graph Neural Networks"
+    style: docked
+    contents:
+      - href: topics/gnn/gnn.qmd
+        text: Financial data
   - id: exercises
     title: "Exercise sets"
     style: docked

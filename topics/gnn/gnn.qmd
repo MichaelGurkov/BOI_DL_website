@@ -1,9 +1,12 @@
 ---
 title: "Graph Neural Network"
+engine: knitr
 
 execute:
   message: false
   warning: false
+  eval: true
+
   
 format:
   html:
@@ -28,6 +31,7 @@ if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
 reticulate::use_python(python_path, required = TRUE)
 
 ```
+
 
 
 ```{python setup_and_load_libraries}
@@ -249,28 +253,116 @@ class GraphSAGE(nn.Module):
 
 
 
-## Overview
+# Overview
 
-This notebook uses the **Elliptic Bitcoin Dataset**, a benchmark dataset for **anti–money laundering (AML)** research.  
-The dataset is built around a **transaction graph**:
+This notebook uses the **Elliptic Bitcoin Dataset**, a widely used benchmark for **anti–money laundering (AML)** research on blockchain transaction networks.  
+The dataset was constructed to support **graph-based, semi-supervised learning**, and is commonly used to evaluate **Graph Neural Networks (GNNs)** and other relational models.
 
-- **Nodes** represent individual **Bitcoin transactions**.
-- **Directed edges** represent **flows of funds** between transactions (an output of one transaction is spent as an input to another).
-- Each node has a feature vector describing properties of the transaction and its local context.
-- Some nodes are labeled as:
-  - **Illicit** (e.g., scams, malware, ransomware, Ponzi schemes, etc.)
-  - **Licit** (e.g., exchanges, wallet providers, miners, services, etc.)
-  - **Unknown** (unlabeled)
+## Graph Structure
+
+The data is organized as a **directed transaction graph**:
+
+- **Nodes** represent individual **Bitcoin transactions** (not users or wallets).
+- **Directed edges** represent **flows of funds** between transactions:  
+  an edge from transaction *A* to transaction *B* means that an output of *A* is used as an input to *B*.
+- The graph is **acyclic** and **time-ordered**, reflecting the causal structure of Bitcoin transactions.
+
+Each transaction belongs to a **discrete time step**.  
+Edges always point **forward in time**, and transactions from future time steps never influence past ones.  
+This temporal structure is critical to avoid **information leakage** when training models.
+
+## Labels
+
+A subset of transactions is labeled by Elliptic’s analysts:
+
+- **Illicit (label = 1)**  
+  Transactions associated with known illegal activity, such as scams, ransomware, darknet markets, Ponzi schemes, and malware-related operations.
+- **Licit (label = 2)**  
+  Transactions associated with legitimate services, such as exchanges, wallet providers, miners, payment services, and other lawful entities.
+- **Unknown (unlabeled)**  
+  Transactions for which no reliable classification was available.
+
+Only a minority of nodes are labeled, making the task **semi-supervised** by nature.  
+In most experiments, models are trained only on labeled nodes while leveraging the full graph structure.
+
+## Feature Representation
+
+Each node is associated with a **fixed-length feature vector** (166 features in total) that describes properties of the transaction and its local network context.  
+All features are **hand-engineered**, **anonymized**, and **numerical**.
+
+The features fall into three main groups:
+
+### 1. Local Transaction Features
+These features describe intrinsic properties of the transaction itself, without reference to neighboring transactions.  
+
+They include statistics such as:
+
+  - Number of inputs and outputs
+
+  - Transaction value aggregates
+
+  - Fee-related measures
+
+  - Simple structural characteristics of the transaction
+
+These features capture **how the transaction is constructed** on the Bitcoin protocol level.
+
+### 2. Aggregated Neighborhood Features
+These features summarize information about the **immediate transaction neighborhood**, computed over transactions connected by incoming and outgoing edges.  
+They include statistical aggregates (e.g., sums, means, counts, variances) over:
+
+  - Neighbor transaction values
+  
+  - Neighbor degrees
+  
+  - Flow patterns into and out of the transaction
+
+Importantly, these aggregations are **direction-aware** (incoming vs. outgoing flows), reflecting how funds enter and leave the transaction.
+
+### 3. Temporal Aggregation Features
+The dataset incorporates **time-aware aggregation**, where neighborhood statistics are computed over **previous time steps only**.  
+This ensures that each transaction’s features are based solely on information that would have been available **at the time the transaction occurred**.
+
+This design choice is crucial:
+
+  - It preserves **causality**
+
+  - It prevents models from exploiting future information
+
+  - It makes the dataset suitable for realistic AML scenarios
+
+## Learning Task
+
+The standard task is **binary node classification**:
+> Predict whether a transaction is **licit** or **illicit**, using node features and the transaction graph.
+
+Key characteristics of the task:
+
+
+  - **Severe class imbalance** (illicit transactions are rare)
+
+  - **Partial labeling** (many nodes are unlabeled)
+
+  - **Strong relational signal** (labels are correlated along transaction flows)
+
+Because of this, performance is typically evaluated using metrics such as **ROC-AUC** or **PR-AUC**, rather than raw accuracy.
+
+Overall, the Elliptic dataset provides a realistic and challenging setting for studying **graph-based fraud detection**, combining rich feature engineering, temporal constraints, and real-world noise.
+
 
 ### Why this is a graph learning problem
 
 A transaction’s risk is often not determined only by its own attributes, but also by its **neighborhood** in the flow-of-funds network:
 
-- The same transaction features can mean different things depending on who paid whom.
-- Illicit behavior can appear as **patterns over multiple hops** (e.g., fan-in/fan-out, chains, mixing-like structures).
-- **Graph Neural Networks (GNNs)** learn from both:
-  - **Node features** (attributes), and
-  - **Graph structure** (who is connected to whom)
+  - The same transaction features can mean different things depending on who paid whom.
+
+  - Illicit behavior can appear as **patterns over multiple hops** (e.g., fan-in/fan-out, chains, mixing-like structures).
+
+  - **Graph Neural Networks (GNNs)** learn from both:
+    
+    - **Node features** (attributes), and
+    
+    - **Graph structure** (who is connected to whom)
 
 In this exercise, the core task is **node classification**:
 > Predict whether a transaction node is **illicit** or **licit**.
@@ -290,7 +382,7 @@ You should have three CSV files available:
 
 ---
 
-## Step 1 — Load data and verify the schema
+## Load data
 
 
 ```{python load_data}
@@ -399,89 +491,15 @@ else:
 
 G = nx.from_pandas_edgelist(edges, source=src_col, target=dst_col, create_using=nx.DiGraph())
 
-print("Graph summary")
-print("Nodes:", G.number_of_nodes())
-print("Edges:", G.number_of_edges())
-
 
 ```
 
-# Visualisation
-
-```{python plot_network}
-
-# Labels (often: "1" illicit, "2" licit, others = unknown)
-
-classes.columns = [c.strip() for c in classes.columns]
-tx_col = "txId" if "txId" in classes.columns else classes.columns[0]
-cls_col = "class" if "class" in classes.columns else classes.columns[-1]
-
-label_map = dict(zip(classes[tx_col].values, classes[cls_col].astype(str).values))
-
-# Pick a seed that exists in the graph (prefer labeled if possible)
-
-candidates = classes[classes[tx_col].isin(G.nodes)]
-seed = None
-
-for desired in ["1", "2"]:
-  tmp = candidates[candidates[cls_col].astype(str) == desired]
-  
-  if len(tmp) > 0:
-    seed = tmp.sample(1, random_state=7)[tx_col].iloc[0]
-    break
-  
-  if seed is None:
-    seed = candidates.sample(1, random_state=7)[tx_col].iloc[0]
-  
-  print("Seed:", seed, "class:", label_map.get(seed, "unknown"))
-
-# k-hop neighborhood
-
-k_hops = 6
-nodes_k = {seed}
-frontier = {seed}
-
-for _ in range(k_hops):
-  nxt = set()
-  for n in frontier:
-    nxt |= set(G.predecessors(n))
-    nxt |= set(G.successors(n))
-    nxt -= nodes_k
-    nodes_k |= nxt
-    frontier = nxt
-
-nodes_k = list(nodes_k)
-max_nodes = 300
-
-if len(nodes_k) > max_nodes:
-  nodes_k = pd.Series(nodes_k).sample(max_nodes, random_state=7).tolist()
-
-H = G.subgraph(nodes_k).copy()
-
-print("Subgraph nodes:", H.number_of_nodes(), "edges:", H.number_of_edges())
-
-def node_color(n):
-  c = label_map.get(n, "unknown")
-  if c == "1":
-    return "red"        # illicit
-  if c == "2":
-    return "green"      # licit
-  return "lightgray"      # unknown
-
-node_colors = [node_color(n) for n in H.nodes()]
-
-plt.figure(figsize=(12, 9))
-pos = nx.spring_layout(H, seed=7, k=0.15)
-nx.draw_networkx_edges(H, pos, arrows=False, alpha=0.25, width=0.8)
-nx.draw_networkx_nodes(H, pos, node_size=40, node_color=node_colors, linewidths=0)
-plt.title(f"Elliptic subgraph (seed={seed}, {k_hops}-hop, n={H.number_of_nodes()})")
-plt.axis("off")
-plt.show()
 
 
-```
 
-## Build the learning dataset (X, y, edge_index)
+
+
+## Build the learning dataset
 
 For GNN training we need:
 
@@ -494,7 +512,6 @@ For GNN training we need:
 # === Build PyG Data object ===
 
 device = get_device()
-print("device:", device)
 
 data = Data(
     x=torch.tensor(X, dtype=torch.float32),
@@ -515,10 +532,10 @@ y_t = data.y
 ```
 
 
+# Baseline model: MLP
 
-# Baseline model: MLP (features only)
+The baseline model used in this notebook is a standard feed-forward neural network that operates solely on the transaction feature vectors, without using any information about the transaction graph. Each transaction is treated as an independent sample, and its features are passed through several fully connected layers with nonlinear activations to produce a probability estimate of whether the transaction is illicit or licit. This model captures relationships and interactions among the numerical attributes of a transaction, but it is entirely blind to how transactions are connected to one another through the flow of funds. As such, it represents the strongest reasonable **non-graph** baseline: a model that can learn complex nonlinear decision boundaries from features alone, yet cannot exploit network structure. Comparing graph-based models against this baseline makes it possible to isolate the added value of graph information. If a graph neural network outperforms this model, the improvement can be attributed to learning from the connectivity and neighborhood patterns rather than from features alone.
 
-This baseline ignores the graph and uses only the transaction feature vector.
 
 ```{python train_mlp}
 
@@ -546,15 +563,11 @@ mlp_best_val_pr, mlp_test_roc, mlp_test_pr = train_binary_classifier(
 
 ```
 
-```{python print_mlp_result}
-
-print("\nMLP results")
-print("Best val PR-AUC:", round(mlp_best_val_pr, 4))
-print("Test ROC-AUC:", round(mlp_test_roc, 4), "| Test PR-AUC:", round(mlp_test_pr, 4))
-
-```
 
 # SAGE
+
+The graph-based model used in this notebook is a neighborhood-aggregation neural network designed to explicitly exploit the transaction graph structure. Instead of treating each transaction in isolation, the model updates a transaction’s representation by combining its own feature vector with information propagated from directly connected transactions in the graph. At each layer, a transaction aggregates representations from its neighbors along the flow-of-funds edges and transforms the result through a learnable function, allowing information to travel across multiple hops as layers are stacked. This mechanism enables the model to capture relational patterns such as chains, fan-in/fan-out structures, and clusters of related activity that are characteristic of illicit behavior but are invisible to feature-only models. By learning jointly from node attributes and graph connectivity, the model can assign risk scores that reflect both local transaction properties and their broader network context. In this notebook, this approach is implemented using the GraphSAGE architecture, which serves as a representative and scalable example of a Graph Neural Network for node classification in transaction graphs.
+
 
 
 ```{python train_sage}
@@ -584,40 +597,128 @@ sage_best_val_pr, sage_test_roc, sage_test_pr = train_binary_classifier(
 ```
 
 
-```{python print_sage_result}
-
-print("\nGraphSAGE results")
-print("Best val PR-AUC:", round(sage_best_val_pr, 4))
-print("Test ROC-AUC:", round(sage_test_roc, 4), "| Test PR-AUC:", round(sage_test_pr, 4))
-
-```
-
-
-
 
 # Evaluation
 
 
 ```{python results_table}
-
+#| output: true
+#| include: true
+#| echo: true
 
 results = pd.DataFrame([
     {
         "model": "MLP (features only)",
-        "best_val_PR_AUC": mlp_best_val_pr,
         "test_ROC_AUC": mlp_test_roc,
         "test_PR_AUC": mlp_test_pr,
     },
     {
         "model": "GraphSAGE (GNN)",
-        "best_val_PR_AUC": sage_best_val_pr,
         "test_ROC_AUC": sage_test_roc,
         "test_PR_AUC": sage_test_pr,
     },
 ])
 
-results
+
+print(results)
 ```
 
+# Visualisation
 
+```{python }
+#| eval: true
+
+classes.columns = [c.strip() for c in classes.columns]
+tx_col          = "txId" if "txId" in classes.columns else classes.columns[0]
+cls_col         = "class" if "class" in classes.columns else classes.columns[-1]
+
+label_map = dict(
+    zip(
+        classes[tx_col].values,
+        classes[cls_col].astype(str).values,
+    )
+)
+
+candidates = classes[classes[tx_col].isin(G.nodes)]
+seed       = None
+
+for desired in ["1", "2"]:
+    tmp = candidates[candidates[cls_col].astype(str) == desired]
+    if len(tmp) > 0:
+        seed = tmp.sample(1, random_state=7)[tx_col].iloc[0]
+        break
+
+if seed is None:
+    seed = candidates.sample(1, random_state=7)[tx_col].iloc[0]
+
+
+k_hops   = 6
+nodes_k = {seed}
+frontier = {seed}
+
+for _ in range(k_hops):
+    nxt = set()
+    for n in frontier:
+        nxt |= set(G.predecessors(n))
+        nxt |= set(G.successors(n))
+    nxt       -= nodes_k
+    nodes_k   |= nxt
+    frontier   = nxt
+
+nodes_k   = list(nodes_k)
+max_nodes = 300
+
+if len(nodes_k) > max_nodes:
+    nodes_k = (
+        pd.Series(nodes_k)
+        .sample(max_nodes, random_state=7)
+        .tolist()
+    )
+
+H = G.subgraph(nodes_k).copy()
+
+def node_color(n):
+    c = label_map.get(n, "unknown")
+    if c == "1":
+        return "red"
+    if c == "2":
+        return "green"
+    return "lightgray"
+
+node_colors = [node_color(n) for n in H.nodes()]
+
+fig, ax = plt.subplots(figsize=(12, 9))
+
+pos = nx.spring_layout(
+    H,
+    seed=7,
+    k=0.15,
+)
+
+_ = nx.draw_networkx_edges(
+    H,
+    pos,
+    arrows=False,
+    alpha=0.25,
+    width=0.8,
+    ax=ax,
+)
+
+_ = nx.draw_networkx_nodes(
+    H,
+    pos,
+    node_size=40,
+    node_color=node_colors,
+    linewidths=0,
+    ax=ax,
+)
+
+_ = ax.set_title(
+    f"Elliptic subgraph (seed={seed}, {k_hops}-hop, n={H.number_of_nodes()})"
+)
+
+ax.set_axis_off()
+plt.show()
+
+```
 

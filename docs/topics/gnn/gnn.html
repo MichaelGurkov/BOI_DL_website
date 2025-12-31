@@ -107,7 +107,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link rel="stylesheet" href="../../styles.css">
 </head>
 
-<body class="nav-fixed quarto-light">
+<body class="nav-sidebar docked nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -129,10 +129,33 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
       </div> <!-- /container-fluid -->
     </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../topics/gnn/gnn.html">Financial data</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../topics/gnn/gnn.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Financial data</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
@@ -141,17 +164,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a>
   <ul class="collapse">
+  <li><a href="#graph-structure" id="toc-graph-structure" class="nav-link" data-scroll-target="#graph-structure">Graph Structure</a></li>
+  <li><a href="#labels" id="toc-labels" class="nav-link" data-scroll-target="#labels">Labels</a></li>
+  <li><a href="#feature-representation" id="toc-feature-representation" class="nav-link" data-scroll-target="#feature-representation">Feature Representation</a>
+  <ul class="collapse">
+  <li><a href="#local-transaction-features" id="toc-local-transaction-features" class="nav-link" data-scroll-target="#local-transaction-features">1. Local Transaction Features</a></li>
+  <li><a href="#aggregated-neighborhood-features" id="toc-aggregated-neighborhood-features" class="nav-link" data-scroll-target="#aggregated-neighborhood-features">2. Aggregated Neighborhood Features</a></li>
+  <li><a href="#temporal-aggregation-features" id="toc-temporal-aggregation-features" class="nav-link" data-scroll-target="#temporal-aggregation-features">3. Temporal Aggregation Features</a></li>
+  </ul></li>
+  <li><a href="#learning-task" id="toc-learning-task" class="nav-link" data-scroll-target="#learning-task">Learning Task</a>
+  <ul class="collapse">
   <li><a href="#why-this-is-a-graph-learning-problem" id="toc-why-this-is-a-graph-learning-problem" class="nav-link" data-scroll-target="#why-this-is-a-graph-learning-problem">Why this is a graph learning problem</a></li>
   </ul></li>
   <li><a href="#files-used-in-this-notebook" id="toc-files-used-in-this-notebook" class="nav-link" data-scroll-target="#files-used-in-this-notebook">Files used in this notebook</a></li>
-  <li><a href="#step-1-load-data-and-verify-the-schema" id="toc-step-1-load-data-and-verify-the-schema" class="nav-link" data-scroll-target="#step-1-load-data-and-verify-the-schema">Step 1 — Load data and verify the schema</a></li>
-  <li><a href="#visualisation" id="toc-visualisation" class="nav-link" data-scroll-target="#visualisation">Visualisation</a>
-  <ul class="collapse">
-  <li><a href="#build-the-learning-dataset-x-y-edge_index" id="toc-build-the-learning-dataset-x-y-edge_index" class="nav-link" data-scroll-target="#build-the-learning-dataset-x-y-edge_index">Build the learning dataset (X, y, edge_index)</a></li>
+  <li><a href="#load-data" id="toc-load-data" class="nav-link" data-scroll-target="#load-data">Load data</a></li>
+  <li><a href="#build-the-learning-dataset" id="toc-build-the-learning-dataset" class="nav-link" data-scroll-target="#build-the-learning-dataset">Build the learning dataset</a></li>
   </ul></li>
-  <li><a href="#baseline-model-mlp-features-only" id="toc-baseline-model-mlp-features-only" class="nav-link" data-scroll-target="#baseline-model-mlp-features-only">Baseline model: MLP (features only)</a></li>
+  <li><a href="#baseline-model-mlp" id="toc-baseline-model-mlp" class="nav-link" data-scroll-target="#baseline-model-mlp">Baseline model: MLP</a></li>
   <li><a href="#sage" id="toc-sage" class="nav-link" data-scroll-target="#sage">SAGE</a></li>
   <li><a href="#evaluation" id="toc-evaluation" class="nav-link" data-scroll-target="#evaluation">Evaluation</a></li>
+  <li><a href="#visualisation" id="toc-visualisation" class="nav-link" data-scroll-target="#visualisation">Visualisation</a></li>
   </ul>
 </nav>
     </div>
@@ -394,31 +426,98 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>      </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<section id="overview" class="level2">
-<h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>This notebook uses the <strong>Elliptic Bitcoin Dataset</strong>, a benchmark dataset for <strong>anti–money laundering (AML)</strong> research.<br>
-The dataset is built around a <strong>transaction graph</strong>:</p>
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<p>This notebook uses the <strong>Elliptic Bitcoin Dataset</strong>, a widely used benchmark for <strong>anti–money laundering (AML)</strong> research on blockchain transaction networks.<br>
+The dataset was constructed to support <strong>graph-based, semi-supervised learning</strong>, and is commonly used to evaluate <strong>Graph Neural Networks (GNNs)</strong> and other relational models.</p>
+<section id="graph-structure" class="level2">
+<h2 class="anchored" data-anchor-id="graph-structure">Graph Structure</h2>
+<p>The data is organized as a <strong>directed transaction graph</strong>:</p>
 <ul>
-<li><strong>Nodes</strong> represent individual <strong>Bitcoin transactions</strong>.</li>
-<li><strong>Directed edges</strong> represent <strong>flows of funds</strong> between transactions (an output of one transaction is spent as an input to another).</li>
-<li>Each node has a feature vector describing properties of the transaction and its local context.</li>
-<li>Some nodes are labeled as:
-<ul>
-<li><strong>Illicit</strong> (e.g., scams, malware, ransomware, Ponzi schemes, etc.)</li>
-<li><strong>Licit</strong> (e.g., exchanges, wallet providers, miners, services, etc.)</li>
-<li><strong>Unknown</strong> (unlabeled)</li>
-</ul></li>
+<li><strong>Nodes</strong> represent individual <strong>Bitcoin transactions</strong> (not users or wallets).</li>
+<li><strong>Directed edges</strong> represent <strong>flows of funds</strong> between transactions:<br>
+an edge from transaction <em>A</em> to transaction <em>B</em> means that an output of <em>A</em> is used as an input to <em>B</em>.</li>
+<li>The graph is <strong>acyclic</strong> and <strong>time-ordered</strong>, reflecting the causal structure of Bitcoin transactions.</li>
 </ul>
+<p>Each transaction belongs to a <strong>discrete time step</strong>.<br>
+Edges always point <strong>forward in time</strong>, and transactions from future time steps never influence past ones.<br>
+This temporal structure is critical to avoid <strong>information leakage</strong> when training models.</p>
+</section>
+<section id="labels" class="level2">
+<h2 class="anchored" data-anchor-id="labels">Labels</h2>
+<p>A subset of transactions is labeled by Elliptic’s analysts:</p>
+<ul>
+<li><strong>Illicit (label = 1)</strong><br>
+Transactions associated with known illegal activity, such as scams, ransomware, darknet markets, Ponzi schemes, and malware-related operations.</li>
+<li><strong>Licit (label = 2)</strong><br>
+Transactions associated with legitimate services, such as exchanges, wallet providers, miners, payment services, and other lawful entities.</li>
+<li><strong>Unknown (unlabeled)</strong><br>
+Transactions for which no reliable classification was available.</li>
+</ul>
+<p>Only a minority of nodes are labeled, making the task <strong>semi-supervised</strong> by nature.<br>
+In most experiments, models are trained only on labeled nodes while leveraging the full graph structure.</p>
+</section>
+<section id="feature-representation" class="level2">
+<h2 class="anchored" data-anchor-id="feature-representation">Feature Representation</h2>
+<p>Each node is associated with a <strong>fixed-length feature vector</strong> (166 features in total) that describes properties of the transaction and its local network context.<br>
+All features are <strong>hand-engineered</strong>, <strong>anonymized</strong>, and <strong>numerical</strong>.</p>
+<p>The features fall into three main groups:</p>
+<section id="local-transaction-features" class="level3">
+<h3 class="anchored" data-anchor-id="local-transaction-features">1. Local Transaction Features</h3>
+<p>These features describe intrinsic properties of the transaction itself, without reference to neighboring transactions.</p>
+<p>They include statistics such as:</p>
+<ul>
+<li><p>Number of inputs and outputs</p></li>
+<li><p>Transaction value aggregates</p></li>
+<li><p>Fee-related measures</p></li>
+<li><p>Simple structural characteristics of the transaction</p></li>
+</ul>
+<p>These features capture <strong>how the transaction is constructed</strong> on the Bitcoin protocol level.</p>
+</section>
+<section id="aggregated-neighborhood-features" class="level3">
+<h3 class="anchored" data-anchor-id="aggregated-neighborhood-features">2. Aggregated Neighborhood Features</h3>
+<p>These features summarize information about the <strong>immediate transaction neighborhood</strong>, computed over transactions connected by incoming and outgoing edges.<br>
+They include statistical aggregates (e.g., sums, means, counts, variances) over:</p>
+<ul>
+<li><p>Neighbor transaction values</p></li>
+<li><p>Neighbor degrees</p></li>
+<li><p>Flow patterns into and out of the transaction</p></li>
+</ul>
+<p>Importantly, these aggregations are <strong>direction-aware</strong> (incoming vs.&nbsp;outgoing flows), reflecting how funds enter and leave the transaction.</p>
+</section>
+<section id="temporal-aggregation-features" class="level3">
+<h3 class="anchored" data-anchor-id="temporal-aggregation-features">3. Temporal Aggregation Features</h3>
+<p>The dataset incorporates <strong>time-aware aggregation</strong>, where neighborhood statistics are computed over <strong>previous time steps only</strong>.<br>
+This ensures that each transaction’s features are based solely on information that would have been available <strong>at the time the transaction occurred</strong>.</p>
+<p>This design choice is crucial:</p>
+<ul>
+<li><p>It preserves <strong>causality</strong></p></li>
+<li><p>It prevents models from exploiting future information</p></li>
+<li><p>It makes the dataset suitable for realistic AML scenarios</p></li>
+</ul>
+</section>
+</section>
+<section id="learning-task" class="level2">
+<h2 class="anchored" data-anchor-id="learning-task">Learning Task</h2>
+<p>The standard task is <strong>binary node classification</strong>: &gt; Predict whether a transaction is <strong>licit</strong> or <strong>illicit</strong>, using node features and the transaction graph.</p>
+<p>Key characteristics of the task:</p>
+<ul>
+<li><p><strong>Severe class imbalance</strong> (illicit transactions are rare)</p></li>
+<li><p><strong>Partial labeling</strong> (many nodes are unlabeled)</p></li>
+<li><p><strong>Strong relational signal</strong> (labels are correlated along transaction flows)</p></li>
+</ul>
+<p>Because of this, performance is typically evaluated using metrics such as <strong>ROC-AUC</strong> or <strong>PR-AUC</strong>, rather than raw accuracy.</p>
+<p>Overall, the Elliptic dataset provides a realistic and challenging setting for studying <strong>graph-based fraud detection</strong>, combining rich feature engineering, temporal constraints, and real-world noise.</p>
 <section id="why-this-is-a-graph-learning-problem" class="level3">
 <h3 class="anchored" data-anchor-id="why-this-is-a-graph-learning-problem">Why this is a graph learning problem</h3>
 <p>A transaction’s risk is often not determined only by its own attributes, but also by its <strong>neighborhood</strong> in the flow-of-funds network:</p>
 <ul>
-<li>The same transaction features can mean different things depending on who paid whom.</li>
-<li>Illicit behavior can appear as <strong>patterns over multiple hops</strong> (e.g., fan-in/fan-out, chains, mixing-like structures).</li>
-<li><strong>Graph Neural Networks (GNNs)</strong> learn from both:
+<li><p>The same transaction features can mean different things depending on who paid whom.</p></li>
+<li><p>Illicit behavior can appear as <strong>patterns over multiple hops</strong> (e.g., fan-in/fan-out, chains, mixing-like structures).</p></li>
+<li><p><strong>Graph Neural Networks (GNNs)</strong> learn from both:</p>
 <ul>
-<li><strong>Node features</strong> (attributes), and</li>
-<li><strong>Graph structure</strong> (who is connected to whom)</li>
+<li><p><strong>Node features</strong> (attributes), and</p></li>
+<li><p><strong>Graph structure</strong> (who is connected to whom)</p></li>
 </ul></li>
 </ul>
 <p>In this exercise, the core task is <strong>node classification</strong>: &gt; Predict whether a transaction node is <strong>illicit</strong> or <strong>licit</strong>.</p>
@@ -438,8 +537,8 @@ Contains <code>txId</code> and the label (<code>class</code>). Some versions inc
 </ul>
 <hr>
 </section>
-<section id="step-1-load-data-and-verify-the-schema" class="level2">
-<h2 class="anchored" data-anchor-id="step-1-load-data-and-verify-the-schema">Step 1 — Load data and verify the schema</h2>
+<section id="load-data" class="level2">
+<h2 class="anchored" data-anchor-id="load-data">Load data</h2>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
@@ -532,158 +631,26 @@ Contains <code>txId</code> and the label (<code>class</code>). Some versions inc
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>edges.columns <span class="op">=</span> [c.strip() <span class="cf">for</span> c <span class="kw">in</span> edges.columns]</span>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Robustly detect edge endpoints</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">set</span>([<span class="st">"txId1"</span>, <span class="st">"txId2"</span>]).issubset(edges.columns):</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  src_col, dst_col <span class="op">=</span> <span class="st">"txId1"</span>, <span class="st">"txId2"</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> <span class="bu">set</span>([<span class="st">"source"</span>, <span class="st">"target"</span>]).issubset(edges.columns):</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  src_col, dst_col <span class="op">=</span> <span class="st">"source"</span>, <span class="st">"target"</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  src_col, dst_col <span class="op">=</span> edges.columns[:<span class="dv">2</span>]</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>G <span class="op">=</span> nx.from_pandas_edgelist(edges, source<span class="op">=</span>src_col, target<span class="op">=</span>dst_col, create_using<span class="op">=</span>nx.DiGraph())</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Graph summary"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>edges.columns <span class="op">=</span> [c.strip() <span class="cf">for</span> c <span class="kw">in</span> edges.columns]</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Robustly detect edge endpoints</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">set</span>([<span class="st">"txId1"</span>, <span class="st">"txId2"</span>]).issubset(edges.columns):</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  src_col, dst_col <span class="op">=</span> <span class="st">"txId1"</span>, <span class="st">"txId2"</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> <span class="bu">set</span>([<span class="st">"source"</span>, <span class="st">"target"</span>]).issubset(edges.columns):</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  src_col, dst_col <span class="op">=</span> <span class="st">"source"</span>, <span class="st">"target"</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  src_col, dst_col <span class="op">=</span> edges.columns[:<span class="dv">2</span>]</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>G <span class="op">=</span> nx.from_pandas_edgelist(edges, source<span class="op">=</span>src_col, target<span class="op">=</span>dst_col, create_using<span class="op">=</span>nx.DiGraph())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Graph summary</code></pre>
-</div>
-<details class="code-fold">
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Nodes:"</span>, G.number_of_nodes())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Nodes: 203769</code></pre>
-</div>
-<details class="code-fold">
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Edges:"</span>, G.number_of_edges())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Edges: 234355</code></pre>
-</div>
 </div>
 </section>
-<section id="visualisation" class="level1">
-<h1>Visualisation</h1>
-<div class="cell">
-<details class="code-fold">
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Labels (often: "1" illicit, "2" licit, others = unknown)</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>classes.columns <span class="op">=</span> [c.strip() <span class="cf">for</span> c <span class="kw">in</span> classes.columns]</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>tx_col <span class="op">=</span> <span class="st">"txId"</span> <span class="cf">if</span> <span class="st">"txId"</span> <span class="kw">in</span> classes.columns <span class="cf">else</span> classes.columns[<span class="dv">0</span>]</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>cls_col <span class="op">=</span> <span class="st">"class"</span> <span class="cf">if</span> <span class="st">"class"</span> <span class="kw">in</span> classes.columns <span class="cf">else</span> classes.columns[<span class="op">-</span><span class="dv">1</span>]</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>label_map <span class="op">=</span> <span class="bu">dict</span>(<span class="bu">zip</span>(classes[tx_col].values, classes[cls_col].astype(<span class="bu">str</span>).values))</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Pick a seed that exists in the graph (prefer labeled if possible)</span></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>candidates <span class="op">=</span> classes[classes[tx_col].isin(G.nodes)]</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>seed <span class="op">=</span> <span class="va">None</span></span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> desired <span class="kw">in</span> [<span class="st">"1"</span>, <span class="st">"2"</span>]:</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  tmp <span class="op">=</span> candidates[candidates[cls_col].astype(<span class="bu">str</span>) <span class="op">==</span> desired]</span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="bu">len</span>(tmp) <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    seed <span class="op">=</span> tmp.sample(<span class="dv">1</span>, random_state<span class="op">=</span><span class="dv">7</span>)[tx_col].iloc[<span class="dv">0</span>]</span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">break</span></span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> seed <span class="kw">is</span> <span class="va">None</span>:</span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    seed <span class="op">=</span> candidates.sample(<span class="dv">1</span>, random_state<span class="op">=</span><span class="dv">7</span>)[tx_col].iloc[<span class="dv">0</span>]</span>
-<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(<span class="st">"Seed:"</span>, seed, <span class="st">"class:"</span>, label_map.get(seed, <span class="st">"unknown"</span>))</span>
-<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="co"># k-hop neighborhood</span></span>
-<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>k_hops <span class="op">=</span> <span class="dv">6</span></span>
-<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>nodes_k <span class="op">=</span> {seed}</span>
-<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>frontier <span class="op">=</span> {seed}</span>
-<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(k_hops):</span>
-<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>  nxt <span class="op">=</span> <span class="bu">set</span>()</span>
-<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> n <span class="kw">in</span> frontier:</span>
-<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>    nxt <span class="op">|=</span> <span class="bu">set</span>(G.predecessors(n))</span>
-<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>    nxt <span class="op">|=</span> <span class="bu">set</span>(G.successors(n))</span>
-<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>    nxt <span class="op">-=</span> nodes_k</span>
-<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>    nodes_k <span class="op">|=</span> nxt</span>
-<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>    frontier <span class="op">=</span> nxt</span>
-<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>nodes_k <span class="op">=</span> <span class="bu">list</span>(nodes_k)</span>
-<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>max_nodes <span class="op">=</span> <span class="dv">300</span></span>
-<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">len</span>(nodes_k) <span class="op">&gt;</span> max_nodes:</span>
-<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>  nodes_k <span class="op">=</span> pd.Series(nodes_k).sample(max_nodes, random_state<span class="op">=</span><span class="dv">7</span>).tolist()</span>
-<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>H <span class="op">=</span> G.subgraph(nodes_k).copy()</span>
-<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Subgraph nodes:"</span>, H.number_of_nodes(), <span class="st">"edges:"</span>, H.number_of_edges())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Subgraph nodes: 15 edges: 14</code></pre>
-</div>
-<details class="code-fold">
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> node_color(n):</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  c <span class="op">=</span> label_map.get(n, <span class="st">"unknown"</span>)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> c <span class="op">==</span> <span class="st">"1"</span>:</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"red"</span>        <span class="co"># illicit</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> c <span class="op">==</span> <span class="st">"2"</span>:</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"green"</span>      <span class="co"># licit</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="st">"lightgray"</span>      <span class="co"># unknown</span></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>node_colors <span class="op">=</span> [node_color(n) <span class="cf">for</span> n <span class="kw">in</span> H.nodes()]</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">9</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>&lt;Figure size 1200x900 with 0 Axes&gt;</code></pre>
-</div>
-<details class="code-fold">
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> nx.spring_layout(H, seed<span class="op">=</span><span class="dv">7</span>, k<span class="op">=</span><span class="fl">0.15</span>)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>nx.draw_networkx_edges(H, pos, arrows<span class="op">=</span><span class="va">False</span>, alpha<span class="op">=</span><span class="fl">0.25</span>, width<span class="op">=</span><span class="fl">0.8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>&lt;matplotlib.collections.LineCollection object at 0x000001CD57BA1090&gt;</code></pre>
-</div>
-<details class="code-fold">
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>nx.draw_networkx_nodes(H, pos, node_size<span class="op">=</span><span class="dv">40</span>, node_color<span class="op">=</span>node_colors, linewidths<span class="op">=</span><span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>&lt;matplotlib.collections.PathCollection object at 0x000001CD5C12A510&gt;</code></pre>
-</div>
-<details class="code-fold">
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f"Elliptic subgraph (seed=</span><span class="sc">{</span>seed<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>k_hops<span class="sc">}</span><span class="ss">-hop, n=</span><span class="sc">{</span>H<span class="sc">.</span>number_of_nodes()<span class="sc">}</span><span class="ss">)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Text(0.5, 1.0, 'Elliptic subgraph (seed=64581186, 6-hop, n=15)')</code></pre>
-</div>
-<details class="code-fold">
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>plt.axis(<span class="st">"off"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>(np.float64(-1.1472773751786363), np.float64(0.9859259902642007), np.float64(-1.0383195789230228), np.float64(1.1936864758252645))</code></pre>
-</div>
-<details class="code-fold">
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="gnn_files/figure-html/plot_network-1.png" class="img-fluid figure-img" width="1152"></p>
-</figure>
-</div>
-</div>
-</div>
-<section id="build-the-learning-dataset-x-y-edge_index" class="level2">
-<h2 class="anchored" data-anchor-id="build-the-learning-dataset-x-y-edge_index">Build the learning dataset (X, y, edge_index)</h2>
+<section id="build-the-learning-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="build-the-learning-dataset">Build the learning dataset</h2>
 <p>For GNN training we need:</p>
 <ul>
 <li><code>X</code>: feature matrix (one row per node / transaction)</li>
@@ -693,61 +660,54 @@ Contains <code>txId</code> and the label (<code>class</code>). Some versions inc
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># === Build PyG Data object ===</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> get_device()</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"device:"</span>, device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>device: cpu</code></pre>
-</div>
-<details class="code-fold">
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> Data(</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>torch.tensor(X, dtype<span class="op">=</span>torch.float32),</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    edge_index<span class="op">=</span>torch.tensor(edge_index, dtype<span class="op">=</span>torch.<span class="bu">long</span>),</span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>torch.tensor(y, dtype<span class="op">=</span>torch.<span class="bu">long</span>),</span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>data.train_mask <span class="op">=</span> torch.tensor(train_mask, dtype<span class="op">=</span>torch.<span class="bu">bool</span>)</span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>data.val_mask   <span class="op">=</span> torch.tensor(val_mask, dtype<span class="op">=</span>torch.<span class="bu">bool</span>)</span>
-<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>data.test_mask  <span class="op">=</span> torch.tensor(test_mask, dtype<span class="op">=</span>torch.<span class="bu">bool</span>)</span>
-<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> data.to(device)</span>
-<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Also keep feature tensor + label tensor for the MLP baseline (same device)</span></span>
-<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>X_t <span class="op">=</span> data.x</span>
-<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>y_t <span class="op">=</span> data.y</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># === Build PyG Data object ===</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> get_device()</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> Data(</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>torch.tensor(X, dtype<span class="op">=</span>torch.float32),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    edge_index<span class="op">=</span>torch.tensor(edge_index, dtype<span class="op">=</span>torch.<span class="bu">long</span>),</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>torch.tensor(y, dtype<span class="op">=</span>torch.<span class="bu">long</span>),</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>data.train_mask <span class="op">=</span> torch.tensor(train_mask, dtype<span class="op">=</span>torch.<span class="bu">bool</span>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>data.val_mask   <span class="op">=</span> torch.tensor(val_mask, dtype<span class="op">=</span>torch.<span class="bu">bool</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>data.test_mask  <span class="op">=</span> torch.tensor(test_mask, dtype<span class="op">=</span>torch.<span class="bu">bool</span>)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> data.to(device)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Also keep feature tensor + label tensor for the MLP baseline (same device)</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>X_t <span class="op">=</span> data.x</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>y_t <span class="op">=</span> data.y</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
 </section>
-<section id="baseline-model-mlp-features-only" class="level1">
-<h1>Baseline model: MLP (features only)</h1>
-<p>This baseline ignores the graph and uses only the transaction feature vector.</p>
+<section id="baseline-model-mlp" class="level1">
+<h1>Baseline model: MLP</h1>
+<p>The baseline model used in this notebook is a standard feed-forward neural network that operates solely on the transaction feature vectors, without using any information about the transaction graph. Each transaction is treated as an independent sample, and its features are passed through several fully connected layers with nonlinear activations to produce a probability estimate of whether the transaction is illicit or licit. This model captures relationships and interactions among the numerical attributes of a transaction, but it is entirely blind to how transactions are connected to one another through the flow of funds. As such, it represents the strongest reasonable <strong>non-graph</strong> baseline: a model that can learn complex nonlinear decision boundaries from features alone, yet cannot exploit network structure. Comparing graph-based models against this baseline makes it possible to isolate the added value of graph information. If a graph neural network outperforms this model, the improvement can be attributed to learning from the connectivity and neighborhood patterns rather than from features alone.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>seed_everything(<span class="dv">7</span>)</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>mlp <span class="op">=</span> MLP(in_dim<span class="op">=</span>X_t.size(<span class="dv">1</span>)).to(device)</span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mlp_forward(m):</span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m(X_t)  <span class="co"># logits for all nodes</span></span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>mlp_best_val_pr, mlp_test_roc, mlp_test_pr <span class="op">=</span> train_binary_classifier(</span>
-<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>mlp,</span>
-<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    forward_fn<span class="op">=</span>mlp_forward,</span>
-<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>y_t,</span>
-<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>    train_mask<span class="op">=</span>data.train_mask,</span>
-<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>    val_mask<span class="op">=</span>data.val_mask,</span>
-<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>    test_mask<span class="op">=</span>data.test_mask,</span>
-<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span><span class="dv">30</span>,</span>
-<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>    lr<span class="op">=</span><span class="fl">1e-3</span>,</span>
-<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>    weight_decay<span class="op">=</span><span class="fl">1e-4</span>,</span>
-<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>    log_every<span class="op">=</span><span class="dv">5</span>,</span>
-<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>seed_everything(<span class="dv">7</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>mlp <span class="op">=</span> MLP(in_dim<span class="op">=</span>X_t.size(<span class="dv">1</span>)).to(device)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mlp_forward(m):</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m(X_t)  <span class="co"># logits for all nodes</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>mlp_best_val_pr, mlp_test_roc, mlp_test_pr <span class="op">=</span> train_binary_classifier(</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>mlp,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    forward_fn<span class="op">=</span>mlp_forward,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>y_t,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    train_mask<span class="op">=</span>data.train_mask,</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    val_mask<span class="op">=</span>data.val_mask,</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    test_mask<span class="op">=</span>data.test_mask,</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span><span class="dv">30</span>,</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    lr<span class="op">=</span><span class="fl">1e-3</span>,</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    weight_decay<span class="op">=</span><span class="fl">1e-4</span>,</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    log_every<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Epoch 001 | loss 1.2524 | val ROC-AUC 0.7708 | val PR-AUC 0.2014
@@ -759,55 +719,32 @@ Epoch 025 | loss 0.5861 | val ROC-AUC 0.9188 | val PR-AUC 0.6815
 Epoch 030 | loss 0.5155 | val ROC-AUC 0.9254 | val PR-AUC 0.7308</code></pre>
 </div>
 </div>
-<div class="cell">
-<details class="code-fold">
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">MLP results"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-MLP results</code></pre>
-</div>
-<details class="code-fold">
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Best val PR-AUC:"</span>, <span class="bu">round</span>(mlp_best_val_pr, <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Best val PR-AUC: 0.7826</code></pre>
-</div>
-<details class="code-fold">
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Test ROC-AUC:"</span>, <span class="bu">round</span>(mlp_test_roc, <span class="dv">4</span>), <span class="st">"| Test PR-AUC:"</span>, <span class="bu">round</span>(mlp_test_pr, <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Test ROC-AUC: 0.6384 | Test PR-AUC: 0.1004</code></pre>
-</div>
-</div>
 </section>
 <section id="sage" class="level1">
 <h1>SAGE</h1>
+<p>The graph-based model used in this notebook is a neighborhood-aggregation neural network designed to explicitly exploit the transaction graph structure. Instead of treating each transaction in isolation, the model updates a transaction’s representation by combining its own feature vector with information propagated from directly connected transactions in the graph. At each layer, a transaction aggregates representations from its neighbors along the flow-of-funds edges and transforms the result through a learnable function, allowing information to travel across multiple hops as layers are stacked. This mechanism enables the model to capture relational patterns such as chains, fan-in/fan-out structures, and clusters of related activity that are characteristic of illicit behavior but are invisible to feature-only models. By learning jointly from node attributes and graph connectivity, the model can assign risk scores that reflect both local transaction properties and their broader network context. In this notebook, this approach is implemented using the GraphSAGE architecture, which serves as a representative and scalable example of a Graph Neural Network for node classification in transaction graphs.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>seed_everything(<span class="dv">7</span>)</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>sage <span class="op">=</span> GraphSAGE(in_dim<span class="op">=</span>data.x.size(<span class="dv">1</span>)).to(device)</span>
-<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sage_forward(m):</span>
-<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m(data.x, data.edge_index)  <span class="co"># logits for all nodes</span></span>
-<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>sage_best_val_pr, sage_test_roc, sage_test_pr <span class="op">=</span> train_binary_classifier(</span>
-<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>sage,</span>
-<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>    forward_fn<span class="op">=</span>sage_forward,</span>
-<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>data.y,</span>
-<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>    train_mask<span class="op">=</span>data.train_mask,</span>
-<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>    val_mask<span class="op">=</span>data.val_mask,</span>
-<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>    test_mask<span class="op">=</span>data.test_mask,</span>
-<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span><span class="dv">30</span>,</span>
-<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>    lr<span class="op">=</span><span class="fl">1e-3</span>,</span>
-<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a>    weight_decay<span class="op">=</span><span class="fl">1e-4</span>,</span>
-<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a>    log_every<span class="op">=</span><span class="dv">5</span>,</span>
-<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>seed_everything(<span class="dv">7</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>sage <span class="op">=</span> GraphSAGE(in_dim<span class="op">=</span>data.x.size(<span class="dv">1</span>)).to(device)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sage_forward(m):</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m(data.x, data.edge_index)  <span class="co"># logits for all nodes</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>sage_best_val_pr, sage_test_roc, sage_test_pr <span class="op">=</span> train_binary_classifier(</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>sage,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    forward_fn<span class="op">=</span>sage_forward,</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>data.y,</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    train_mask<span class="op">=</span>data.train_mask,</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    val_mask<span class="op">=</span>data.val_mask,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    test_mask<span class="op">=</span>data.test_mask,</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span><span class="dv">30</span>,</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    lr<span class="op">=</span><span class="fl">1e-3</span>,</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    weight_decay<span class="op">=</span><span class="fl">1e-4</span>,</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    log_every<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Epoch 001 | loss 1.4277 | val ROC-AUC 0.5543 | val PR-AUC 0.1024
@@ -819,57 +756,138 @@ Epoch 025 | loss 0.6449 | val ROC-AUC 0.8737 | val PR-AUC 0.5130
 Epoch 030 | loss 0.6044 | val ROC-AUC 0.8810 | val PR-AUC 0.5440</code></pre>
 </div>
 </div>
-<div class="cell">
-<details class="code-fold">
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">GraphSAGE results"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-GraphSAGE results</code></pre>
-</div>
-<details class="code-fold">
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Best val PR-AUC:"</span>, <span class="bu">round</span>(sage_best_val_pr, <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Best val PR-AUC: 0.544</code></pre>
-</div>
-<details class="code-fold">
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Test ROC-AUC:"</span>, <span class="bu">round</span>(sage_test_roc, <span class="dv">4</span>), <span class="st">"| Test PR-AUC:"</span>, <span class="bu">round</span>(sage_test_pr, <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Test ROC-AUC: 0.642 | Test PR-AUC: 0.0356</code></pre>
-</div>
-</div>
 </section>
 <section id="evaluation" class="level1">
 <h1>Evaluation</h1>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> pd.DataFrame([</span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"model"</span>: <span class="st">"MLP (features only)"</span>,</span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"best_val_PR_AUC"</span>: mlp_best_val_pr,</span>
-<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"test_ROC_AUC"</span>: mlp_test_roc,</span>
-<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"test_PR_AUC"</span>: mlp_test_pr,</span>
-<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"model"</span>: <span class="st">"GraphSAGE (GNN)"</span>,</span>
-<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"best_val_PR_AUC"</span>: sage_best_val_pr,</span>
-<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"test_ROC_AUC"</span>: sage_test_roc,</span>
-<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"test_PR_AUC"</span>: sage_test_pr,</span>
-<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>])</span>
-<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>results</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> pd.DataFrame([</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"model"</span>: <span class="st">"MLP (features only)"</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"test_ROC_AUC"</span>: mlp_test_roc,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"test_PR_AUC"</span>: mlp_test_pr,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"model"</span>: <span class="st">"GraphSAGE (GNN)"</span>,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"test_ROC_AUC"</span>: sage_test_roc,</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"test_PR_AUC"</span>: sage_test_pr,</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>                 model  best_val_PR_AUC  test_ROC_AUC  test_PR_AUC
-0  MLP (features only)         0.782570      0.638406     0.100350
-1      GraphSAGE (GNN)         0.544017      0.642030     0.035601</code></pre>
+<pre><code>                 model  test_ROC_AUC  test_PR_AUC
+0  MLP (features only)      0.638406     0.100350
+1      GraphSAGE (GNN)      0.642030     0.035601</code></pre>
+</div>
+</div>
+</section>
+<section id="visualisation" class="level1">
+<h1>Visualisation</h1>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>classes.columns <span class="op">=</span> [c.strip() <span class="cf">for</span> c <span class="kw">in</span> classes.columns]</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>tx_col          <span class="op">=</span> <span class="st">"txId"</span> <span class="cf">if</span> <span class="st">"txId"</span> <span class="kw">in</span> classes.columns <span class="cf">else</span> classes.columns[<span class="dv">0</span>]</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>cls_col         <span class="op">=</span> <span class="st">"class"</span> <span class="cf">if</span> <span class="st">"class"</span> <span class="kw">in</span> classes.columns <span class="cf">else</span> classes.columns[<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>label_map <span class="op">=</span> <span class="bu">dict</span>(</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">zip</span>(</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>        classes[tx_col].values,</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>        classes[cls_col].astype(<span class="bu">str</span>).values,</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>candidates <span class="op">=</span> classes[classes[tx_col].isin(G.nodes)]</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>seed       <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> desired <span class="kw">in</span> [<span class="st">"1"</span>, <span class="st">"2"</span>]:</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    tmp <span class="op">=</span> candidates[candidates[cls_col].astype(<span class="bu">str</span>) <span class="op">==</span> desired]</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(tmp) <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>        seed <span class="op">=</span> tmp.sample(<span class="dv">1</span>, random_state<span class="op">=</span><span class="dv">7</span>)[tx_col].iloc[<span class="dv">0</span>]</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> seed <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>    seed <span class="op">=</span> candidates.sample(<span class="dv">1</span>, random_state<span class="op">=</span><span class="dv">7</span>)[tx_col].iloc[<span class="dv">0</span>]</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>k_hops   <span class="op">=</span> <span class="dv">6</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>nodes_k <span class="op">=</span> {seed}</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>frontier <span class="op">=</span> {seed}</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(k_hops):</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>    nxt <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> n <span class="kw">in</span> frontier:</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>        nxt <span class="op">|=</span> <span class="bu">set</span>(G.predecessors(n))</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>        nxt <span class="op">|=</span> <span class="bu">set</span>(G.successors(n))</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>    nxt       <span class="op">-=</span> nodes_k</span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>    nodes_k   <span class="op">|=</span> nxt</span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>    frontier   <span class="op">=</span> nxt</span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>nodes_k   <span class="op">=</span> <span class="bu">list</span>(nodes_k)</span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>max_nodes <span class="op">=</span> <span class="dv">300</span></span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">len</span>(nodes_k) <span class="op">&gt;</span> max_nodes:</span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a>    nodes_k <span class="op">=</span> (</span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a>        pd.Series(nodes_k)</span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a>        .sample(max_nodes, random_state<span class="op">=</span><span class="dv">7</span>)</span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a>        .tolist()</span>
+<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a>H <span class="op">=</span> G.subgraph(nodes_k).copy()</span>
+<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> node_color(n):</span>
+<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a>    c <span class="op">=</span> label_map.get(n, <span class="st">"unknown"</span>)</span>
+<span id="cb16-52"><a href="#cb16-52" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> c <span class="op">==</span> <span class="st">"1"</span>:</span>
+<span id="cb16-53"><a href="#cb16-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"red"</span></span>
+<span id="cb16-54"><a href="#cb16-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> c <span class="op">==</span> <span class="st">"2"</span>:</span>
+<span id="cb16-55"><a href="#cb16-55" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"green"</span></span>
+<span id="cb16-56"><a href="#cb16-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"lightgray"</span></span>
+<span id="cb16-57"><a href="#cb16-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-58"><a href="#cb16-58" aria-hidden="true" tabindex="-1"></a>node_colors <span class="op">=</span> [node_color(n) <span class="cf">for</span> n <span class="kw">in</span> H.nodes()]</span>
+<span id="cb16-59"><a href="#cb16-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-60"><a href="#cb16-60" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">9</span>))</span>
+<span id="cb16-61"><a href="#cb16-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-62"><a href="#cb16-62" aria-hidden="true" tabindex="-1"></a>pos <span class="op">=</span> nx.spring_layout(</span>
+<span id="cb16-63"><a href="#cb16-63" aria-hidden="true" tabindex="-1"></a>    H,</span>
+<span id="cb16-64"><a href="#cb16-64" aria-hidden="true" tabindex="-1"></a>    seed<span class="op">=</span><span class="dv">7</span>,</span>
+<span id="cb16-65"><a href="#cb16-65" aria-hidden="true" tabindex="-1"></a>    k<span class="op">=</span><span class="fl">0.15</span>,</span>
+<span id="cb16-66"><a href="#cb16-66" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-67"><a href="#cb16-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-68"><a href="#cb16-68" aria-hidden="true" tabindex="-1"></a>_ <span class="op">=</span> nx.draw_networkx_edges(</span>
+<span id="cb16-69"><a href="#cb16-69" aria-hidden="true" tabindex="-1"></a>    H,</span>
+<span id="cb16-70"><a href="#cb16-70" aria-hidden="true" tabindex="-1"></a>    pos,</span>
+<span id="cb16-71"><a href="#cb16-71" aria-hidden="true" tabindex="-1"></a>    arrows<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb16-72"><a href="#cb16-72" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.25</span>,</span>
+<span id="cb16-73"><a href="#cb16-73" aria-hidden="true" tabindex="-1"></a>    width<span class="op">=</span><span class="fl">0.8</span>,</span>
+<span id="cb16-74"><a href="#cb16-74" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span>ax,</span>
+<span id="cb16-75"><a href="#cb16-75" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-76"><a href="#cb16-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-77"><a href="#cb16-77" aria-hidden="true" tabindex="-1"></a>_ <span class="op">=</span> nx.draw_networkx_nodes(</span>
+<span id="cb16-78"><a href="#cb16-78" aria-hidden="true" tabindex="-1"></a>    H,</span>
+<span id="cb16-79"><a href="#cb16-79" aria-hidden="true" tabindex="-1"></a>    pos,</span>
+<span id="cb16-80"><a href="#cb16-80" aria-hidden="true" tabindex="-1"></a>    node_size<span class="op">=</span><span class="dv">40</span>,</span>
+<span id="cb16-81"><a href="#cb16-81" aria-hidden="true" tabindex="-1"></a>    node_color<span class="op">=</span>node_colors,</span>
+<span id="cb16-82"><a href="#cb16-82" aria-hidden="true" tabindex="-1"></a>    linewidths<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb16-83"><a href="#cb16-83" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span>ax,</span>
+<span id="cb16-84"><a href="#cb16-84" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-85"><a href="#cb16-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-86"><a href="#cb16-86" aria-hidden="true" tabindex="-1"></a>_ <span class="op">=</span> ax.set_title(</span>
+<span id="cb16-87"><a href="#cb16-87" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"Elliptic subgraph (seed=</span><span class="sc">{</span>seed<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>k_hops<span class="sc">}</span><span class="ss">-hop, n=</span><span class="sc">{</span>H<span class="sc">.</span>number_of_nodes()<span class="sc">}</span><span class="ss">)"</span></span>
+<span id="cb16-88"><a href="#cb16-88" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-89"><a href="#cb16-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-90"><a href="#cb16-90" aria-hidden="true" tabindex="-1"></a>ax.set_axis_off()</span>
+<span id="cb16-91"><a href="#cb16-91" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="gnn_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
 </div>
 </div>
 
