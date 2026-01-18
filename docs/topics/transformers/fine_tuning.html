@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -67,14 +67,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="../../">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-bce83624dd429190d13db9bf62533269.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-43081d808c96cc46af55a3a816ae9eed.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -113,6 +114,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+  </div>
             <div id="quarto-search" class="" title="Search"></div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
@@ -196,7 +201,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!pip install -q transformers datasets accelerate</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!pip install -q transformers datasets accelerate</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> BertTokenizerFast</span>
@@ -211,7 +216,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>dataset[<span class="st">"validation"</span>] <span class="op">=</span> dataset[<span class="st">"validation"</span>].select(<span class="bu">range</span>(N_val))</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> BertTokenizerFast.from_pretrained(<span class="st">"bert-base-uncased"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> BertTokenizerFast.from_pretrained(<span class="st">"bert-base-uncased"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <section id="dataset-tweeteval-sentiment" class="level2">
@@ -265,7 +270,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> tokenize_batch(batch):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> tokenize_batch(batch):</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> tokenizer(</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        batch[<span class="st">"text"</span>],</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        padding<span class="op">=</span><span class="st">"max_length"</span>,</span>
@@ -279,7 +284,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>tokenized_dataset.set_format(</span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">type</span><span class="op">=</span><span class="st">"torch"</span>,</span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    columns<span class="op">=</span>[<span class="st">"input_ids"</span>, <span class="st">"attention_mask"</span>, <span class="st">"label"</span>]</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -304,7 +309,7 @@ Does not shuffle the data and is used to evaluate model performance after traini
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Creating DataLoaders for training and validation</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Creating DataLoaders for training and validation</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -320,7 +325,7 @@ Does not shuffle the data and is used to evaluate model performance after traini
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    tokenized_dataset[<span class="st">"validation"</span>],</span>
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    batch_size<span class="op">=</span>batch_size,</span>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    shuffle<span class="op">=</span><span class="va">False</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -345,7 +350,7 @@ Does not shuffle the data and is used to evaluate model performance after traini
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Baseline Model (No Fine-Tuning)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Baseline Model (No Fine-Tuning)</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> BertForSequenceClassification</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
@@ -380,7 +385,7 @@ Does not shuffle the data and is used to evaluate model performance after traini
 <span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>            correct <span class="op">+=</span> (preds <span class="op">==</span> y).<span class="bu">sum</span>().item()</span>
 <span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> y.size(<span class="dv">0</span>)</span>
 <span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> correct <span class="op">/</span> total</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> correct <span class="op">/</span> total</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -425,7 +430,7 @@ Does not shuffle the data and is used to evaluate model performance after traini
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Partial Fine-Tuning (train upper layers only)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Partial Fine-Tuning (train upper layers only)</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> BertForSequenceClassification</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.optim <span class="im">import</span> AdamW</span>
@@ -451,11 +456,11 @@ Does not shuffle the data and is used to evaluate model performance after traini
 <span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> AdamW(trainable_params, lr<span class="op">=</span><span class="fl">2e-5</span>)</span>
 <span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="co"># One training epoch</span></span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>partial_model.train()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>partial_model.train()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> batch <span class="kw">in</span> train_loader:</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> batch <span class="kw">in</span> train_loader:</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    optimizer.zero_grad()</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    ids <span class="op">=</span> batch[<span class="st">"input_ids"</span>].to(device)</span>
@@ -465,7 +470,7 @@ Does not shuffle the data and is used to evaluate model performance after traini
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    outputs <span class="op">=</span> partial_model(ids, attention_mask<span class="op">=</span>mask, labels<span class="op">=</span>y)</span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> outputs.loss</span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    loss.backward()</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    optimizer.step()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    optimizer.step()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -515,7 +520,7 @@ Does not shuffle the data and is used to evaluate model performance after traini
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Full Fine-Tuning (train ALL layers)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Full Fine-Tuning (train ALL layers)</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> BertForSequenceClassification</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.optim <span class="im">import</span> AdamW</span>
@@ -541,11 +546,11 @@ Does not shuffle the data and is used to evaluate model performance after traini
 <span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> AdamW(trainable_params, lr<span class="op">=</span><span class="fl">2e-5</span>)</span>
 <span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="co"># One training epoch</span></span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>full_model.train()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>full_model.train()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> batch <span class="kw">in</span> train_loader:</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> batch <span class="kw">in</span> train_loader:</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    optimizer.zero_grad()</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    ids <span class="op">=</span> batch[<span class="st">"input_ids"</span>].to(device)</span>
@@ -555,7 +560,7 @@ Does not shuffle the data and is used to evaluate model performance after traini
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    outputs <span class="op">=</span> full_model(ids, attention_mask<span class="op">=</span>mask, labels<span class="op">=</span>y)</span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> outputs.loss</span>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    loss.backward()</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    optimizer.step()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    optimizer.step()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -628,7 +633,7 @@ Updating all layers gives the model maximal flexibility to adapt to the tweet do
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>baseline_acc <span class="op">=</span> evaluate(baseline_model, val_loader)</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -650,13 +655,13 @@ Updating all layers gives the model maximal flexibility to adapt to the tweet do
 <span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    ]</span>
 <span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>})</span>
 <span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results_df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>                       Model  Accuracy
-0  Baseline (no fine-tuning)     0.358
-1        Partial fine-tuning     0.570
-2           Full fine-tuning     0.568</code></pre>
+0  Baseline (no fine-tuning)     0.220
+1        Partial fine-tuning     0.578
+2           Full fine-tuning     0.596</code></pre>
 </div>
 </div>
 </section>
@@ -704,7 +709,7 @@ Updating all layers gives the model maximal flexibility to adapt to the tweet do
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Qualitative Comparison: Predictions on Sample Tweets</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Qualitative Comparison: Predictions on Sample Tweets</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
@@ -714,7 +719,7 @@ Updating all layers gives the model maximal flexibility to adapt to the tweet do
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Select 10 random validation examples</span></span>
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>indices <span class="op">=</span> random.sample(<span class="bu">range</span>(<span class="bu">len</span>(dataset[<span class="st">"validation"</span>])), <span class="dv">10</span>)</span>
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">=== QUALITATIVE MODEL COMPARISON ===</span><span class="ch">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">=== QUALITATIVE MODEL COMPARISON ===</span><span class="ch">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -722,7 +727,7 @@ Updating all layers gives the model maximal flexibility to adapt to the tweet do
 </div>
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx <span class="kw">in</span> indices:</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx <span class="kw">in</span> indices:</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> dataset[<span class="st">"validation"</span>][idx][<span class="st">"text"</span>]</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    true_label <span class="op">=</span> label_names[dataset[<span class="st">"validation"</span>][idx][<span class="st">"label"</span>]]</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -745,67 +750,67 @@ Updating all layers gives the model maximal flexibility to adapt to the tweet do
 <span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Baseline:         </span><span class="sc">{</span>baseline_pred<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Partial-tuned:    </span><span class="sc">{</span>partial_pred<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Full-tuned:       </span><span class="sc">{</span>full_pred<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"-"</span> <span class="op">*</span> <span class="dv">80</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"-"</span> <span class="op">*</span> <span class="dv">80</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Tweet: @user @user @user enjoy the vibes with Moto G (3rd Gen.) #MotoBffRevealed
-True label:       positive
+<pre><code>Tweet: Purples and Football at Baby A's with my Aunt and Cousin. ready to see my JETS play on monday ;)
+True label:       neutral
 Baseline:         negative
 Partial-tuned:    positive
 Full-tuned:       positive
 --------------------------------------------------------------------------------
-Tweet: or just start watching Game of Thrones and be like, "i'll finish it tomorrow before 2"
+Tweet: #AnDy_x9 Revised Expectations for Arsenal After 1st Month of Season: At the outset of the 2015/16 sea... #AnDy_x9
 True label:       positive
-Baseline:         positive
-Partial-tuned:    neutral
-Full-tuned:       positive
---------------------------------------------------------------------------------
-Tweet: Pose of TRIUMPH!! Jogged over the Brooklyn Bridge with my mom and sis @user this morning. I'm SO lucky.
-True label:       positive
-Baseline:         positive
-Partial-tuned:    positive
-Full-tuned:       positive
---------------------------------------------------------------------------------
-Tweet: Look dot au may have Cate Blanchett who can tell anyone to get fucked but NZ has Lucy Lawless. So who's really winning the #cricket here?
-True label:       neutral
-Baseline:         positive
+Baseline:         negative
 Partial-tuned:    neutral
 Full-tuned:       neutral
 --------------------------------------------------------------------------------
-Tweet: I think I may have spent too much on Carmelo Anthony. I only hope that his thick-framed black glasses will console me in the post-season.
+Tweet: On Tuesday\u002c the theatres open at ten o\u2019clock in the morning\u002c  as Lent begins after eight at night. On Tuesday\u002c all those who through  want
+True label:       neutral
+Baseline:         negative
+Partial-tuned:    neutral
+Full-tuned:       neutral
+--------------------------------------------------------------------------------
+Tweet: Jealous of everyone going to Jason Aldean tomorrow night
 True label:       negative
-Baseline:         positive
-Partial-tuned:    positive
-Full-tuned:       positive
---------------------------------------------------------------------------------
-Tweet: @user seriously! itunes puts like an entire minute as a preview so 20 seconds is nothing. AND I KNOW! it needs to be monday ASAP!
-True label:       neutral
-Baseline:         positive
-Partial-tuned:    positive
-Full-tuned:       positive
---------------------------------------------------------------------------------
-Tweet: "Paul Dunne shares 3rd-round lead at the Open. ... Wait, who?!?!
-True label:       neutral
-Baseline:         positive
-Partial-tuned:    neutral
-Full-tuned:       positive
---------------------------------------------------------------------------------
-Tweet: @user Yeah, I know. She's supposed to be on the School roof Mon, Tue, Thurs, and Sat. but aint. Is it cause Yukiko hasn't recovered?"
-True label:       neutral
-Baseline:         positive
+Baseline:         neutral
 Partial-tuned:    neutral
 Full-tuned:       neutral
 --------------------------------------------------------------------------------
-Tweet: Can we just talk about this Black Friday freestyle from Kendrick Lamar and J. Cole who had the harder freestyle?
+Tweet: "'Wanna go to the first freshers party?' 'Na I've just started watching Naruto for the 7th time, email me pics'"
 True label:       neutral
-Baseline:         positive
+Baseline:         neutral
+Partial-tuned:    positive
+Full-tuned:       positive
+--------------------------------------------------------------------------------
+Tweet: that time they were all wasted at the brits and louis sat in zayn's lms if u agree
+True label:       neutral
+Baseline:         negative
+Partial-tuned:    positive
+Full-tuned:       neutral
+--------------------------------------------------------------------------------
+Tweet: To be continued in: Rise of the John Cena stans coming to theatres near you October 3rd 2015
+True label:       neutral
+Baseline:         negative
+Partial-tuned:    positive
+Full-tuned:       neutral
+--------------------------------------------------------------------------------
+Tweet: the boys really like to see the sun... have you listened to UAN and LWWY?
+True label:       positive
+Baseline:         negative
 Partial-tuned:    neutral
 Full-tuned:       positive
 --------------------------------------------------------------------------------
-Tweet: "If Viz Media had licensed One Piece, Luffy may have been voiced by Maile Flanagan, who does Naruto. That's just me."
+Tweet: "20th bday on Thurs, no class/ XC season opener on Fri, Ed Sheeran concert on Sat, parents visit on Sun, &amp;amp; day off on Mon! #labordayweekend"
 True label:       neutral
-Baseline:         positive
-Partial-tuned:    neutral
+Baseline:         negative
+Partial-tuned:    positive
+Full-tuned:       positive
+--------------------------------------------------------------------------------
+Tweet: The sun had now completely risen\u002c and the whole facade of Granite House became illuminated by its rays; but in the interior as well as on t
+True label:       neutral
+Baseline:         neutral
+Partial-tuned:    positive
 Full-tuned:       neutral
 --------------------------------------------------------------------------------</code></pre>
 </div>
@@ -900,13 +905,14 @@ Full-tuned:       neutral
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

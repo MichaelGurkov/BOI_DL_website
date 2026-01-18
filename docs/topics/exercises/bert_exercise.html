@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>index</title>
+<title>Practice Exercise: Fine-Tuning BERT for Tweet Sentiment Classification</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,24 +23,24 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-43081d808c96cc46af55a3a816ae9eed.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-43081d808c96cc46af55a3a816ae9eed.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -70,17 +70,17 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../../styles.css">
 </head>
 
-<body class="nav-fixed quarto-light">
+<body class="nav-sidebar docked nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -90,7 +90,7 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link active" href="../../index.html" aria-current="page"> 
 <span class="menu-text">Home</span></a>
   </li>  
 </ul>
@@ -99,33 +99,184 @@ ul.task-list li input[type="checkbox"] {
 </div>
       </div> <!-- /container-fluid -->
     </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../topics/exercises/bert_exercise.html">Transformers</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../../index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../topics/exercises/exercise_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Logistic</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../topics/exercises/cnn_exercise.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CNN</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../topics/exercises/rnn_exercise.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RNN</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../topics/exercises/bert_exercise.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Transformers</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#practice-exercise-fine-tuning-bert-for-tweet-sentiment-classification" id="toc-practice-exercise-fine-tuning-bert-for-tweet-sentiment-classification" class="nav-link active" data-scroll-target="#practice-exercise-fine-tuning-bert-for-tweet-sentiment-classification">Practice Exercise: Fine-Tuning BERT for Tweet Sentiment Classification</a></li>
+  <li><a href="#load-the-tweeteval-dataset" id="toc-load-the-tweeteval-dataset" class="nav-link" data-scroll-target="#load-the-tweeteval-dataset">1. Load the TweetEval Dataset</a></li>
+  <li><a href="#tokenize-the-dataset" id="toc-tokenize-the-dataset" class="nav-link" data-scroll-target="#tokenize-the-dataset">2. Tokenize the Dataset</a></li>
+  <li><a href="#prepare-dataloaders" id="toc-prepare-dataloaders" class="nav-link" data-scroll-target="#prepare-dataloaders">3. Prepare DataLoaders</a></li>
+  <li><a href="#baseline-model-zero-shot" id="toc-baseline-model-zero-shot" class="nav-link" data-scroll-target="#baseline-model-zero-shot">4. Baseline Model (Zero-Shot)</a></li>
+  <li><a href="#partial-fine-tuning" id="toc-partial-fine-tuning" class="nav-link" data-scroll-target="#partial-fine-tuning">5. Partial Fine-Tuning</a></li>
+  <li><a href="#full-fine-tuning" id="toc-full-fine-tuning" class="nav-link" data-scroll-target="#full-fine-tuning">6. Full Fine-Tuning</a></li>
+  <li><a href="#qualitative-comparison" id="toc-qualitative-comparison" class="nav-link" data-scroll-target="#qualitative-comparison">7. Qualitative Comparison</a></li>
+  <li><a href="#reflection-questions" id="toc-reflection-questions" class="nav-link" data-scroll-target="#reflection-questions">8. Reflection Questions</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content" id="quarto-document-content">
 
-
-
-
-<div class="icon-grid center">
-<p><a class="icon-card" href="./topics/python_workshop/python_workshop.html"> <img src="images/python_workshop.png" alt="Python Workshop"> </a></p>
-<p><a class="icon-card" href="./topics/intro.html"> <img src="images/intro.png" alt="Intro"> </a></p>
-<p><a class="icon-card" href="./topics/single_layer/regression.html"> <img src="images/single_icon.png" alt="Single Layer Neural Networks"> </a></p>
-<p><a class="icon-card" href="./topics/multi_layer/optim_methods.html"> <img src="images/multi_icon.png" alt="Multi Layer Neural Networks"> </a></p>
-<p><a class="icon-card" href="./topics/cnn/convolution.html"> <img src="images/conv.png" alt="Conv"> </a></p>
-<p><a class="icon-card" href="./topics/rnn/rnn.html"> <img src="images/recurrent.png" alt="Conv"> </a></p>
-<p><a class="icon-card" href="./topics/gnn/gnn.html"> <img src="images/graph.png" alt="Conv"> </a></p>
-<p><a class="icon-card" href="./topics/transformers/fine_tuning.html"> <img src="images/transformers.png" alt="Conv"> </a></p>
-<p><a class="icon-card" href="./topics/exercises/exercise_1.html"> <img src="images/exercise.png" alt="Exercise Set"> </a></p>
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Practice Exercise: Fine-Tuning BERT for Tweet Sentiment Classification</h1>
 </div>
 
 
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="practice-exercise-fine-tuning-bert-for-tweet-sentiment-classification" class="level2">
+<h2 class="anchored" data-anchor-id="practice-exercise-fine-tuning-bert-for-tweet-sentiment-classification">Practice Exercise: Fine-Tuning BERT for Tweet Sentiment Classification</h2>
+<p>This exercise guides you through training and evaluating three versions of BERT on the TweetEval Sentiment dataset:</p>
+<ul>
+<li>A baseline zero-shot model (no fine-tuning)</li>
+<li>A partially fine-tuned model</li>
+<li>A fully fine-tuned model</li>
+</ul>
+<p>You will repeat the workflow demonstrated in class, but with different downsampling values.</p>
+</section>
+<section id="load-the-tweeteval-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="load-the-tweeteval-dataset">1. Load the TweetEval Dataset</h2>
+<p>Load the dataset using the HuggingFace Datasets library.</p>
+<p>Downsample using:</p>
+<ul>
+<li>Training set: first 3,000 examples</li>
+<li>Validation set: first 1,000 examples</li>
+</ul>
+<p><strong>Task 1</strong> Create:</p>
+<ul>
+<li>dataset_train</li>
+<li>dataset_val</li>
+</ul>
+<p>Report the number of examples in each.</p>
+</section>
+<section id="tokenize-the-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="tokenize-the-dataset">2. Tokenize the Dataset</h2>
+<p>Use the BERT tokenizer (bert-base-uncased) with:</p>
+<ul>
+<li>padding to length 64</li>
+<li>truncation</li>
+<li>attention masks</li>
+</ul>
+<p>Convert the tokenized output to PyTorch tensors.</p>
+<p><strong>Task 2</strong> Implement a tokenize_batch function and display the first tokenized example. Explain why BERT requires padding and attention masks.</p>
+</section>
+<section id="prepare-dataloaders" class="level2">
+<h2 class="anchored" data-anchor-id="prepare-dataloaders">3. Prepare DataLoaders</h2>
+<p>Create PyTorch DataLoaders with:</p>
+<ul>
+<li>batch size = 32</li>
+<li>shuffling for training only</li>
+</ul>
+<p><strong>Task 3</strong> Build the loaders and print the shape of one batch.</p>
+</section>
+<section id="baseline-model-zero-shot" class="level2">
+<h2 class="anchored" data-anchor-id="baseline-model-zero-shot">4. Baseline Model (Zero-Shot)</h2>
+<p>Load BertForSequenceClassification with num_labels = 3. Freeze all encoder layers so no supervised learning occurs.</p>
+<p><strong>Task 4</strong> 1. Freeze the layers. 2. Evaluate the model on the validation set. 3. Explain why this model is considered zero-shot.</p>
+</section>
+<section id="partial-fine-tuning" class="level2">
+<h2 class="anchored" data-anchor-id="partial-fine-tuning">5. Partial Fine-Tuning</h2>
+<p>Load a fresh model. Freeze layers 0–7 and train only layers 8–11 + the classifier for one epoch using AdamW with lr = 2e-5.</p>
+<p><strong>Task 5</strong> 1. Identify all trainable layers. 2. Train for one epoch. 3. Evaluate validation accuracy. 4. Explain what partial fine-tuning means.</p>
+</section>
+<section id="full-fine-tuning" class="level2">
+<h2 class="anchored" data-anchor-id="full-fine-tuning">6. Full Fine-Tuning</h2>
+<p>Load a new model. Unfreeze all layers and train for one epoch with the same optimizer.</p>
+<p><strong>Task 6</strong> 1. Train the fully fine-tuned model. 2. Evaluate validation accuracy. 3. Compare the three accuracies: baseline, partial, full.</p>
+</section>
+<section id="qualitative-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="qualitative-comparison">7. Qualitative Comparison</h2>
+<p>Select 10 random validation tweets. For each tweet, show:</p>
+<ul>
+<li>the text</li>
+<li>the true label</li>
+<li>predictions from the baseline model</li>
+<li>predictions from the partial model</li>
+<li>predictions from the full model</li>
+</ul>
+<p><strong>Task 7</strong> Discuss:</p>
+<ol type="1">
+<li>Where does the baseline fail?</li>
+<li>How does partial fine-tuning improve predictions?</li>
+<li>How does full fine-tuning behave on noisy, sarcastic, or emoji-heavy tweets?</li>
+</ol>
+</section>
+<section id="reflection-questions" class="level2">
+<h2 class="anchored" data-anchor-id="reflection-questions">8. Reflection Questions</h2>
+<ol type="1">
+<li>What does this exercise reveal about transfer learning in NLP?</li>
+<li>Why does the classification head require supervised labels to learn the task?</li>
+<li>Which model would you choose for deployment, and why?</li>
+<li>How does the level of fine-tuning affect BERT’s ability to adapt to Twitter-style language?</li>
+</ol>
+<p>Return all results and explanations in one markdown-formatted document.</p>
+
+
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

@@ -26,7 +26,9 @@ if (Sys.getenv("USERPROFILE") == "C:\\Users\\internet"){
 } else {
   
   python_path = "C:\\Users\\Home\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"
+  
 }
+
 
 reticulate::use_python(python_path, required = TRUE)
 
@@ -388,7 +390,7 @@ You should have three CSV files available:
 ```{python load_data}
 # === Data loading ===
 
-data_path = "C:\\Users\\Home\\Desktop\\elliptic_bitcoin_dataset\\"
+data_path = "C:\\Users\\internet\\Desktop\\elliptic_bitcoin_dataset\\"
 
 classes = pd.read_csv(data_path + "elliptic_txs_classes.csv")
 edges   = pd.read_csv(data_path + "elliptic_txs_edgelist.csv")
